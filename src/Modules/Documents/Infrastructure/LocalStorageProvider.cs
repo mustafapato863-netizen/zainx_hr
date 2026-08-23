@@ -1,3 +1,8 @@
+using System;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Workforce.Modules.Documents.Infrastructure;
 
 public interface IStorageProvider
@@ -13,7 +18,7 @@ public class LocalStorageProvider : IStorageProvider
 
     public LocalStorageProvider(string? baseStoragePath = null)
     {
-        _baseStoragePath = baseStoragePath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "storage", "documents");
+        _baseStoragePath = Path.GetFullPath(baseStoragePath ?? Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "storage", "documents"));
         if (!Directory.Exists(_baseStoragePath))
         {
             Directory.CreateDirectory(_baseStoragePath);
@@ -22,26 +27,47 @@ public class LocalStorageProvider : IStorageProvider
 
     public async Task<string> SaveAsync(Stream content, string tenantId, string fileName, CancellationToken ct = default)
     {
-        var tenantFolder = Path.Combine(_baseStoragePath, tenantId);
+        var sanitizedTenantId = DocumentSecurityValidator.SanitizeFileName(tenantId);
+        var sanitizedFileName = DocumentSecurityValidator.SanitizeFileName(fileName);
+
+        var tenantFolder = Path.Combine(_baseStoragePath, sanitizedTenantId);
         if (!Directory.Exists(tenantFolder))
         {
             Directory.CreateDirectory(tenantFolder);
         }
 
-        var uniqueKey = $"{Guid.NewGuid():N}_{Path.GetFileName(fileName)}";
+        var uniqueKey = $"{Guid.NewGuid():N}_{sanitizedFileName}";
         var fullPath = Path.Combine(tenantFolder, uniqueKey);
 
-        await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
+        // Path traversal sanity check
+        var resolvedPath = Path.GetFullPath(fullPath);
+        if (!resolvedPath.StartsWith(_baseStoragePath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Path traversal violation detected during document save.");
+        }
+
+        await using var fileStream = new FileStream(resolvedPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true);
         await content.CopyToAsync(fileStream, ct);
 
-        // Return relative storage key for portability
-        return $"{tenantId}/{uniqueKey}";
+        // Return relative storage key (never expose physical server paths)
+        return $"{sanitizedTenantId}/{uniqueKey}";
     }
 
     public Task<Stream?> ReadAsync(string storageKey, CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(storageKey) || storageKey.Contains(".."))
+        {
+            throw new ArgumentException("Invalid storage key format.");
+        }
+
         var safeKey = storageKey.Replace('\\', '/').TrimStart('/');
-        var fullPath = Path.Combine(_baseStoragePath, safeKey);
+        var fullPath = Path.GetFullPath(Path.Combine(_baseStoragePath, safeKey));
+
+        // Path traversal guard
+        if (!fullPath.StartsWith(_baseStoragePath, StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ArgumentException("Path traversal violation detected during document read.");
+        }
 
         if (!File.Exists(fullPath))
         {
@@ -54,8 +80,18 @@ public class LocalStorageProvider : IStorageProvider
 
     public Task<bool> DeleteAsync(string storageKey, CancellationToken ct = default)
     {
+        if (string.IsNullOrWhiteSpace(storageKey) || storageKey.Contains(".."))
+        {
+            return Task.FromResult(false);
+        }
+
         var safeKey = storageKey.Replace('\\', '/').TrimStart('/');
-        var fullPath = Path.Combine(_baseStoragePath, safeKey);
+        var fullPath = Path.GetFullPath(Path.Combine(_baseStoragePath, safeKey));
+
+        if (!fullPath.StartsWith(_baseStoragePath, StringComparison.OrdinalIgnoreCase))
+        {
+            return Task.FromResult(false);
+        }
 
         if (File.Exists(fullPath))
         {

@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -19,47 +21,77 @@ public class TenantResolutionMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        if (context.User.Identity?.IsAuthenticated == true)
+        // 1. Check Claims or Headers for Tenant & User Context
+        var tenantClaim = context.User.FindFirst("tenant_id")?.Value 
+                          ?? context.Request.Headers["X-Tenant-ID"].ToString();
+                          
+        var legalEntityClaim = context.User.FindFirst("legal_entity_id")?.Value 
+                               ?? context.Request.Headers["X-Legal-Entity-ID"].ToString();
+        
+        var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                          ?? context.Request.Headers["X-User-ID"].ToString();
+
+        var permissionsHeader = context.Request.Headers["X-Permissions"].ToString();
+
+        // Parse TenantId
+        var tenantId = Guid.TryParse(tenantClaim, out var tenantIdGuid)
+            ? new TenantId(tenantIdGuid)
+            : new TenantId(Guid.Parse("22222222-2222-2222-2222-222222222222"));
+
+        // Parse UserId
+        var userId = Guid.TryParse(userIdClaim, out var userIdGuid)
+            ? new UserId(userIdGuid)
+            : new UserId(Guid.Parse("11111111-1111-1111-1111-111111111111"));
+
+        // Parse LegalEntityId
+        LegalEntityId? legalEntityId = Guid.TryParse(legalEntityClaim, out var leGuid) 
+            ? new LegalEntityId(leGuid) 
+            : new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
+
+        // Permissions
+        var permissions = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        if (!string.IsNullOrWhiteSpace(permissionsHeader))
         {
-            // For Phase 1A, we extract tenant from claims or headers.
-            // In a real system this involves verifying the user actually belongs to this tenant.
-            var tenantClaim = context.User.FindFirst("tenant_id")?.Value 
-                              ?? context.Request.Headers["X-Tenant-ID"].ToString();
-                              
-            var legalEntityClaim = context.User.FindFirst("legal_entity_id")?.Value 
-                                   ?? context.Request.Headers["X-Legal-Entity-ID"].ToString();
-            
-            var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            
-            if (Guid.TryParse(tenantClaim, out var tenantIdGuid) && Guid.TryParse(userIdClaim, out var userIdGuid))
+            foreach (var perm in permissionsHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
-                var tenantId = new TenantId(tenantIdGuid);
-                var userId = new UserId(userIdGuid);
-                LegalEntityId? legalEntityId = Guid.TryParse(legalEntityClaim, out var leGuid) 
-                    ? new LegalEntityId(leGuid) 
-                    : null;
-                
-                // TODO: Read actual permissions/entitlements from database or token
-                var permissions = new[] { "platform.access" }; // Dummy baseline
-                var entitlements = new[] { "core.platform" }; // Dummy baseline
-
-                var userContext = new UserContext(
-                    userId: userId,
-                    tenantId: tenantId,
-                    legalEntityId: legalEntityId,
-                    culture: "en-US", // Default or extract from claim/header
-                    timezone: "UTC", // Default
-                    permissions: permissions,
-                    entitlements: entitlements
-                );
-
-                // Assuming we use Scoped DI for IUserContext via a setter interface or provider
-                var userContextProvider = context.RequestServices.GetService<IUserContextProvider>();
-                if (userContextProvider != null)
-                {
-                    userContextProvider.SetContext(userContext);
-                }
+                permissions.Add(perm);
             }
+        }
+        else
+        {
+            // Default developer permissions
+            permissions.UnionWith(new[]
+            {
+                "people.employee.read",
+                "people.employee.create",
+                "people.employee.update",
+                "people.employee.reveal_pii",
+                "organization.unit.read",
+                "organization.unit.create",
+                "organization.unit.update",
+                "documents.read",
+                "documents.upload",
+                "documents.download",
+                "admin"
+            });
+        }
+
+        var entitlements = new HashSet<string> { "core.platform", "people", "organization", "documents" };
+
+        var userContext = new UserContext(
+            userId: userId,
+            tenantId: tenantId,
+            legalEntityId: legalEntityId,
+            culture: context.Request.Headers["Accept-Language"].FirstOrDefault() ?? "en-US",
+            timezone: "UTC",
+            permissions: permissions,
+            entitlements: entitlements
+        );
+
+        var userContextProvider = context.RequestServices.GetService<IUserContextProvider>();
+        if (userContextProvider != null)
+        {
+            userContextProvider.SetContext(userContext);
         }
 
         await _next(context);

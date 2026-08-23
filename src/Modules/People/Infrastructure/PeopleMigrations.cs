@@ -43,7 +43,9 @@ public static class PeopleMigrations
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 row_version INT NOT NULL DEFAULT 1,
-                CONSTRAINT uq_employment_emp_no UNIQUE (tenant_id, legal_entity_id, employee_number)
+                CONSTRAINT uq_employment_emp_no UNIQUE (tenant_id, legal_entity_id, employee_number),
+                CONSTRAINT chk_employment_probation CHECK (probation_end_date IS NULL OR probation_end_date >= hire_date),
+                CONSTRAINT chk_employment_termination CHECK (termination_date IS NULL OR termination_date >= hire_date)
             );
 
             CREATE TABLE IF NOT EXISTS people.employment_assignments (
@@ -58,7 +60,8 @@ public static class PeopleMigrations
                 effective_from DATE NOT NULL,
                 effective_to DATE NULL,
                 is_current BOOLEAN NOT NULL DEFAULT TRUE,
-                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                CONSTRAINT chk_assignment_dates CHECK (effective_to IS NULL OR effective_to >= effective_from)
             );
 
             CREATE TABLE IF NOT EXISTS people.sensitive_pii_audit (
@@ -72,9 +75,27 @@ public static class PeopleMigrations
                 timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
 
+            CREATE TABLE IF NOT EXISTS people.outbox_messages (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                event_type VARCHAR(100) NOT NULL,
+                aggregate_type VARCHAR(100) NOT NULL,
+                aggregate_id UUID NOT NULL,
+                payload JSONB NOT NULL,
+                occurred_at TIMESTAMPTZ NOT NULL,
+                processed_at TIMESTAMPTZ NULL
+            );
+
+            -- Performance Indexes
             CREATE INDEX IF NOT EXISTS ix_employments_tenant_person ON people.employments(tenant_id, person_id);
+            CREATE INDEX IF NOT EXISTS ix_employments_tenant_legal ON people.employments(tenant_id, legal_entity_id, status);
             CREATE INDEX IF NOT EXISTS ix_assignments_emp_current ON people.employment_assignments(employment_id, is_current);
             CREATE INDEX IF NOT EXISTS ix_persons_names ON people.persons(tenant_id, last_name_en, first_name_en);
+            CREATE INDEX IF NOT EXISTS ix_sensitive_audit_tenant ON people.sensitive_pii_audit(tenant_id, employment_id, timestamp);
+            CREATE INDEX IF NOT EXISTS ix_outbox_unprocessed ON people.outbox_messages(tenant_id, processed_at) WHERE processed_at IS NULL;
+
+            -- Database Integrity: Partial Unique Index to guarantee only 1 current assignment
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_assignments_single_current ON people.employment_assignments (employment_id) WHERE is_current = TRUE;
         ";
 
         await using var cmd = new NpgsqlCommand(sql, conn);

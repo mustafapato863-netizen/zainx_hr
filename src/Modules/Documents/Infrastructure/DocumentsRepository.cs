@@ -49,12 +49,13 @@ public class DocumentsRepository
         TenantId tenantId,
         string ownerType,
         Guid ownerId,
+        LegalEntityId? legalEntityId = null,
         CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        const string sql = @"
+        var sql = @"
             SELECT 
                 d.id, d.tenant_id, d.legal_entity_id, d.owner_type, d.owner_id, d.document_type_id,
                 dt.code, dt.name_en, dt.name_ar, d.title, d.status, d.expiry_date, d.created_at,
@@ -69,13 +70,20 @@ public class DocumentsRepository
                 LIMIT 1
             ) v ON TRUE
             WHERE d.tenant_id = @tenantId AND d.owner_type = @ownerType AND d.owner_id = @ownerId
-            ORDER BY d.created_at DESC;
         ";
+
+        if (legalEntityId.HasValue)
+        {
+            sql += " AND d.legal_entity_id = @legalEntityId";
+        }
+
+        sql += " ORDER BY d.created_at DESC;";
 
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
         cmd.Parameters.AddWithValue("ownerType", ownerType);
         cmd.Parameters.AddWithValue("ownerId", ownerId);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
         var list = new List<DocumentSummaryDto>();
         await using var reader = await cmd.ExecuteReaderAsync(ct);
@@ -105,23 +113,33 @@ public class DocumentsRepository
         return list;
     }
 
-    public async Task<DocumentDetailDto?> GetDocumentDetailsAsync(Guid documentId, TenantId tenantId, CancellationToken ct = default)
+    public async Task<DocumentDetailDto?> GetDocumentDetailsAsync(
+        Guid documentId,
+        TenantId tenantId,
+        LegalEntityId? legalEntityId = null,
+        CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        const string docSql = @"
+        var docSql = @"
             SELECT 
                 d.id, d.tenant_id, d.legal_entity_id, d.owner_type, d.owner_id, d.document_type_id,
                 dt.code, dt.name_en, dt.name_ar, d.title, d.status, d.expiry_date, d.created_at
             FROM documents.documents d
             INNER JOIN documents.document_types dt ON d.document_type_id = dt.id
-            WHERE d.id = @id AND d.tenant_id = @tenantId;
+            WHERE d.id = @id AND d.tenant_id = @tenantId
         ";
+
+        if (legalEntityId.HasValue)
+        {
+            docSql += " AND d.legal_entity_id = @legalEntityId";
+        }
 
         await using var docCmd = new NpgsqlCommand(docSql, conn);
         docCmd.Parameters.AddWithValue("id", documentId);
         docCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) docCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
         DocumentDetailDto? detail = null;
         await using (var reader = await docCmd.ExecuteReaderAsync(ct))
@@ -149,11 +167,12 @@ public class DocumentsRepository
 
         if (detail == null) return null;
 
+        // Fetch all versions history
         const string verSql = @"
-            SELECT id, document_id, version_number, file_name, file_size, content_type, sha256_checksum, uploaded_at, uploaded_by
+            SELECT id, version_number, file_name, file_size, content_type, sha256_checksum, uploaded_at, uploaded_by
             FROM documents.document_versions
             WHERE document_id = @docId
-            ORDER BY version_number DESC;
+            ORDER BY version_number ASC;
         ";
 
         await using var verCmd = new NpgsqlCommand(verSql, conn);
@@ -163,34 +182,35 @@ public class DocumentsRepository
         {
             while (await verReader.ReadAsync(ct))
             {
-                detail.Versions.Add(new DocumentVersionDto
+                var ver = new DocumentVersionDto
                 {
                     Id = verReader.GetGuid(0),
-                    DocumentId = verReader.GetGuid(1),
-                    VersionNumber = verReader.GetInt32(2),
-                    FileName = verReader.GetString(3),
-                    FileSize = verReader.GetInt64(4),
-                    ContentType = verReader.GetString(5),
-                    Sha256Checksum = verReader.GetString(6),
-                    UploadedAt = verReader.GetDateTime(7).ToString("o"),
-                    UploadedBy = verReader.GetGuid(8)
-                });
+                    DocumentId = documentId,
+                    VersionNumber = verReader.GetInt32(1),
+                    FileName = verReader.GetString(2),
+                    FileSize = verReader.GetInt64(3),
+                    ContentType = verReader.GetString(4),
+                    Sha256Checksum = verReader.GetString(5),
+                    UploadedAt = verReader.GetDateTime(6).ToString("o"),
+                    UploadedBy = verReader.GetGuid(7)
+                };
+                detail.Versions.Add(ver);
+                detail.LatestVersionNumber = ver.VersionNumber;
+                detail.LatestFileName = ver.FileName;
+                detail.LatestFileSize = ver.FileSize;
+                detail.LatestContentType = ver.ContentType;
             }
-        }
-
-        if (detail.Versions.Count > 0)
-        {
-            var latest = detail.Versions[0];
-            detail.LatestVersionNumber = latest.VersionNumber;
-            detail.LatestFileName = latest.FileName;
-            detail.LatestFileSize = latest.FileSize;
-            detail.LatestContentType = latest.ContentType;
         }
 
         return detail;
     }
 
-    public async Task<string?> GetStorageKeyForDownloadAsync(Guid documentId, TenantId tenantId, int? versionNumber = null, CancellationToken ct = default)
+    public async Task<string?> GetStorageKeyForDownloadAsync(
+        Guid documentId,
+        TenantId tenantId,
+        LegalEntityId? legalEntityId = null,
+        int? versionNumber = null,
+        CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
@@ -201,6 +221,11 @@ public class DocumentsRepository
             INNER JOIN documents.document_versions v ON d.id = v.document_id
             WHERE d.id = @id AND d.tenant_id = @tenantId
         ";
+
+        if (legalEntityId.HasValue)
+        {
+            sql += " AND d.legal_entity_id = @legalEntityId";
+        }
 
         if (versionNumber.HasValue)
         {
@@ -214,6 +239,7 @@ public class DocumentsRepository
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("id", documentId);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
         if (versionNumber.HasValue) cmd.Parameters.AddWithValue("versionNumber", versionNumber.Value);
 
         var result = await cmd.ExecuteScalarAsync(ct);
@@ -270,6 +296,64 @@ public class DocumentsRepository
             await verCmd.ExecuteNonQueryAsync(ct);
 
             await tx.CommitAsync(ct);
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    public async Task<int> AddDocumentVersionAsync(Guid documentId, TenantId tenantId, DocumentVersion newVersion, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        try
+        {
+            // Verify document belongs to tenant and get current max version
+            const string verifySql = @"
+                SELECT MAX(version_number)
+                FROM documents.document_versions v
+                INNER JOIN documents.documents d ON v.document_id = d.id
+                WHERE d.id = @docId AND d.tenant_id = @tenantId;
+            ";
+            await using var verifyCmd = new NpgsqlCommand(verifySql, conn, tx);
+            verifyCmd.Parameters.AddWithValue("docId", documentId);
+            verifyCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+
+            var maxVerObj = await verifyCmd.ExecuteScalarAsync(ct);
+            if (maxVerObj == null || maxVerObj == DBNull.Value)
+            {
+                await tx.RollbackAsync(ct);
+                throw new InvalidOperationException($"Document '{documentId}' not found for tenant '{tenantId}'.");
+            }
+
+            var nextVersionNumber = Convert.ToInt32(maxVerObj) + 1;
+
+            const string insertVerSql = @"
+                INSERT INTO documents.document_versions (
+                    id, document_id, version_number, storage_key, file_name, file_size, content_type, sha256_checksum, uploaded_at, uploaded_by
+                ) VALUES (
+                    @id, @docId, @verNo, @storageKey, @fileName, @fileSize, @contentType, @sha, @uploadedAt, @uploadedBy
+                );
+            ";
+            await using var verCmd = new NpgsqlCommand(insertVerSql, conn, tx);
+            verCmd.Parameters.AddWithValue("id", newVersion.Id);
+            verCmd.Parameters.AddWithValue("docId", documentId);
+            verCmd.Parameters.AddWithValue("verNo", nextVersionNumber);
+            verCmd.Parameters.AddWithValue("storageKey", newVersion.StorageKey);
+            verCmd.Parameters.AddWithValue("fileName", newVersion.FileName);
+            verCmd.Parameters.AddWithValue("fileSize", newVersion.FileSize);
+            verCmd.Parameters.AddWithValue("contentType", newVersion.ContentType);
+            verCmd.Parameters.AddWithValue("sha", newVersion.Sha256Checksum);
+            verCmd.Parameters.AddWithValue("uploadedAt", newVersion.UploadedAt);
+            verCmd.Parameters.AddWithValue("uploadedBy", newVersion.UploadedBy);
+            await verCmd.ExecuteNonQueryAsync(ct);
+
+            await tx.CommitAsync(ct);
+            return nextVersionNumber;
         }
         catch
         {

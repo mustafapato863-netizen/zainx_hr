@@ -40,6 +40,7 @@ import type {
   LocationDto,
   OrganizationUnitDto,
   PagedResultOfEmployeeSummaryDto,
+  PostApiV1DocumentsIdVersionsBody,
   PostApiV1DocumentsUploadBody,
   ProblemDetails,
   RevealSensitiveFieldRequest,
@@ -905,6 +906,70 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1DocumentsUploadMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1DocumentsIdVersions = (
+    id: string,
+    postApiV1DocumentsIdVersionsBody: PostApiV1DocumentsIdVersionsBody,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      const formUrlEncoded = new URLSearchParams();
+if(postApiV1DocumentsIdVersionsBody.File !== undefined) {
+ formUrlEncoded.append(`File`, postApiV1DocumentsIdVersionsBody.File as any)
+ }
+
+      return customInstance<DocumentDetailDto>(
+      {url: `/api/v1/documents/${id}/versions`, method: 'POST',
+      headers: {'Content-Type': 'application/x-www-form-urlencoded', },
+       data: formUrlEncoded, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1DocumentsIdVersionsMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>, TError,{id: string;data: PostApiV1DocumentsIdVersionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>, TError,{id: string;data: PostApiV1DocumentsIdVersionsBody}, TContext> => {
+
+const mutationKey = ['postApiV1DocumentsIdVersions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>, {id: string;data: PostApiV1DocumentsIdVersionsBody}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1DocumentsIdVersions(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1DocumentsIdVersionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>>
+    export type PostApiV1DocumentsIdVersionsMutationBody = PostApiV1DocumentsIdVersionsBody
+    export type PostApiV1DocumentsIdVersionsMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1DocumentsIdVersions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>, TError,{id: string;data: PostApiV1DocumentsIdVersionsBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1DocumentsIdVersions>>,
+        TError,
+        {id: string;data: PostApiV1DocumentsIdVersionsBody},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1DocumentsIdVersionsMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

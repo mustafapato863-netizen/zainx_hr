@@ -78,12 +78,12 @@ describe('Phase 2 People Accessibility Verification (Axe WCAG AA)', () => {
         'aria-required-children': { enabled: false }
       }
     });
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
   });
 
   it('EmployeeWorkspace passes axe accessibility check with 0 critical/serious violations', async () => {
     const { container } = render(<EmployeeWorkspace profile={sampleProfile} documents={[]} />);
     const results = await axe(container);
-    expect(results).toHaveNoViolations();
+    expect(results.violations).toEqual([]);
   });
 });

@@ -481,6 +481,10 @@ export type PostApiV1DocumentsUploadBody = {
   File?: IFormFile;
 };
 
+export type PostApiV1DocumentsIdVersionsBody = {
+  File?: IFormFile;
+};
+
 export type GetApiV1OrganizationUnitsParams = {
 legalEntityId?: string;
 };
@@ -489,7 +493,6 @@ export type GetApiV1PeopleEmployeesParams = {
 search?: string;
 departmentId?: string;
 status?: string;
-legalEntityId?: string;
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */

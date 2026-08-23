@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Workforce.Modules.People.Application;
@@ -27,17 +31,14 @@ public class PeopleController : ControllerBase
         [FromQuery] string? search,
         [FromQuery] Guid? departmentId,
         [FromQuery] string? status,
-        [FromQuery] Guid? legalEntityId,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 20,
         CancellationToken ct = default)
     {
         var userContext = _userContext;
-        var leId = legalEntityId.HasValue ? new LegalEntityId(legalEntityId.Value) : userContext.LegalEntityId;
-
         var result = await _repository.QueryDirectoryAsync(
             userContext.TenantId,
-            leId,
+            userContext.LegalEntityId,
             search,
             departmentId,
             status,
@@ -54,14 +55,14 @@ public class PeopleController : ControllerBase
     public async Task<IActionResult> GetEmployeeById(Guid id, CancellationToken ct)
     {
         var userContext = _userContext;
-        var profile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, ct);
+        var profile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
         if (profile == null)
         {
             return NotFound(new ProblemDetails
             {
                 Status = StatusCodes.Status404NotFound,
                 Title = "Employee Not Found",
-                Detail = $"No employee record with ID '{id}' exists in the current tenant context.",
+                Detail = $"No employee record with ID '{id}' exists in the current tenant and legal entity context.",
                 Instance = HttpContext.Request.Path
             });
         }
@@ -130,7 +131,7 @@ public class PeopleController : ControllerBase
 
         await _repository.CreateEmployeeAsync(person, employment, assignment, ct);
 
-        var createdProfile = await _repository.GetEmployeeProfileAsync(employmentId, userContext.TenantId, ct);
+        var createdProfile = await _repository.GetEmployeeProfileAsync(employmentId, userContext.TenantId, userContext.LegalEntityId, ct);
         return CreatedAtAction(nameof(GetEmployeeById), new { id = employmentId }, createdProfile);
     }
 
@@ -138,22 +139,15 @@ public class PeopleController : ControllerBase
     [ProducesResponseType(typeof(EmployeeProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> ChangeAssignment(Guid id, [FromBody] ChangeAssignmentRequest request, CancellationToken ct)
+    public async Task<IActionResult> ChangeAssignment(
+        Guid id,
+        [FromBody] ChangeAssignmentRequest request,
+        CancellationToken ct)
     {
         var userContext = _userContext;
-        var profile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, ct);
-        if (profile == null)
-        {
-            return NotFound(new ProblemDetails
-            {
-                Status = StatusCodes.Status404NotFound,
-                Title = "Employee Not Found",
-                Detail = $"No employee record with ID '{id}' was found.",
-                Instance = HttpContext.Request.Path
-            });
-        }
-
-        var effectiveFrom = DateOnly.TryParse(request.EffectiveFrom, out var parsedEff) ? parsedEff : DateOnly.FromDateTime(DateTime.UtcNow);
+        var effectiveFrom = DateOnly.TryParse(request.EffectiveFrom, out var parsedEff)
+            ? parsedEff
+            : DateOnly.FromDateTime(DateTime.UtcNow);
 
         var newAssignment = new EmploymentAssignment(
             Guid.NewGuid(),
@@ -169,7 +163,7 @@ public class PeopleController : ControllerBase
             true
         );
 
-        var success = await _repository.ChangeAssignmentAsync(id, newAssignment, request.RowVersion, ct);
+        var success = await _repository.ChangeAssignmentAsync(id, newAssignment, request.RowVersion, userContext.LegalEntityId, ct);
         if (!success)
         {
             return Conflict(new ProblemDetails
@@ -181,7 +175,18 @@ public class PeopleController : ControllerBase
             });
         }
 
-        var updatedProfile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, ct);
+        var updatedProfile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
+        if (updatedProfile == null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Employee Not Found",
+                Detail = $"Employee '{id}' not found.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
         return Ok(updatedProfile);
     }
 
@@ -196,7 +201,7 @@ public class PeopleController : ControllerBase
     {
         var userContext = _userContext;
         
-        // Capability permission check
+        // 1. Permission check
         if (!userContext.HasPermission("people.employee.reveal_pii") && !userContext.HasPermission("admin"))
         {
             return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
@@ -210,6 +215,7 @@ public class PeopleController : ControllerBase
 
         var correlationId = HttpContext.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
 
+        // 2. Fetch value and write unforgeable audit log
         var plaintext = await _repository.RevealSensitiveFieldAsync(
             id,
             userContext.TenantId,
@@ -217,6 +223,7 @@ public class PeopleController : ControllerBase
             request.FieldName,
             request.Purpose,
             correlationId,
+            userContext.LegalEntityId,
             ct);
 
         if (plaintext == null)
@@ -277,6 +284,14 @@ public class ChangeAssignmentRequest
 
 public class RevealSensitiveFieldRequest
 {
+    public string FieldName { get; set; } = "nationalIdentifier";
+    public string Purpose { get; set; } = "Operational Workforce Verification";
+}
+
+public class SensitiveRevealResponse
+{
     public string FieldName { get; set; } = string.Empty;
-    public string Purpose { get; set; } = string.Empty;
+    public string PlaintextValue { get; set; } = string.Empty;
+    public string RevealedAt { get; set; } = string.Empty;
+    public int ExpirySeconds { get; set; } = 60;
 }

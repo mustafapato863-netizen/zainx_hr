@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using Npgsql;
 using Workforce.Modules.People.Application;
 using Workforce.Modules.People.Domain;
@@ -126,8 +129,8 @@ public class PeopleRepository
                 LastNameEn = reader.GetString(5),
                 FirstNameAr = reader.GetString(6),
                 LastNameAr = reader.GetString(7),
-                FullNameEn = $"{reader.GetString(4)} {reader.GetString(5)}".Trim(),
-                FullNameAr = $"{reader.GetString(6)} {reader.GetString(7)}".Trim(),
+                FullNameEn = $"{reader.GetString(4)} {reader.GetString(5)}",
+                FullNameAr = $"{reader.GetString(6)} {reader.GetString(7)}",
                 PrimaryEmail = reader.GetString(8),
                 PhoneNumber = reader.GetString(9),
                 MaskedNationalId = maskedId,
@@ -151,52 +154,63 @@ public class PeopleRepository
         };
     }
 
-    public async Task<EmployeeProfileDto?> GetEmployeeProfileAsync(Guid employmentId, TenantId tenantId, CancellationToken ct = default)
+    public async Task<EmployeeProfileDto?> GetEmployeeProfileAsync(
+        Guid employmentId,
+        TenantId tenantId,
+        LegalEntityId? legalEntityId = null,
+        CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        const string sql = @"
+        var empSql = @"
             SELECT 
-                e.id, e.person_id, e.tenant_id, e.legal_entity_id, e.employee_number,
+                e.id, e.tenant_id, e.person_id, e.legal_entity_id, e.employee_number,
                 p.first_name_en, p.last_name_en, p.first_name_ar, p.last_name_ar,
                 p.gender, p.nationality, p.date_of_birth, p.national_identifier,
                 p.primary_email, p.phone_number,
-                e.status, e.hire_date, e.probation_end_date, e.termination_date, e.termination_reason, e.row_version
+                e.status, e.hire_date, e.probation_end_date, e.termination_date, e.termination_reason,
+                e.row_version
             FROM people.employments e
             INNER JOIN people.persons p ON e.person_id = p.id
-            WHERE e.id = @id AND e.tenant_id = @tenantId;
+            WHERE e.id = @id AND e.tenant_id = @tenantId
         ";
 
-        await using var cmd = new NpgsqlCommand(sql, conn);
+        if (legalEntityId.HasValue)
+        {
+            empSql += " AND e.legal_entity_id = @legalEntityId";
+        }
+
+        await using var cmd = new NpgsqlCommand(empSql, conn);
         cmd.Parameters.AddWithValue("id", employmentId);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
         EmployeeProfileDto? profile = null;
         await using (var reader = await cmd.ExecuteReaderAsync(ct))
         {
             if (await reader.ReadAsync(ct))
             {
-                var dob = DateOnly.FromDateTime(reader.GetDateTime(11));
-                var rawId = reader.GetString(12);
+                var rawDob = DateOnly.FromDateTime(reader.GetDateTime(11));
+                var rawNatId = reader.GetString(12);
 
                 profile = new EmployeeProfileDto
                 {
                     Id = reader.GetGuid(0),
-                    PersonId = reader.GetGuid(1),
-                    TenantId = reader.GetGuid(2).ToString(),
+                    TenantId = reader.GetGuid(1).ToString(),
+                    PersonId = reader.GetGuid(2),
                     LegalEntityId = reader.GetGuid(3).ToString(),
                     EmployeeNumber = reader.GetString(4),
                     FirstNameEn = reader.GetString(5),
                     LastNameEn = reader.GetString(6),
                     FirstNameAr = reader.GetString(7),
                     LastNameAr = reader.GetString(8),
-                    FullNameEn = $"{reader.GetString(5)} {reader.GetString(6)}".Trim(),
-                    FullNameAr = $"{reader.GetString(7)} {reader.GetString(8)}".Trim(),
+                    FullNameEn = $"{reader.GetString(5)} {reader.GetString(6)}",
+                    FullNameAr = $"{reader.GetString(7)} {reader.GetString(8)}",
                     Gender = reader.GetString(9),
                     Nationality = reader.GetString(10),
-                    MaskedDateOfBirth = $"****-**-{dob.Day:D2}",
-                    MaskedNationalId = MaskNationalId(rawId),
+                    MaskedDateOfBirth = MaskDateOfBirth(rawDob),
+                    MaskedNationalId = MaskNationalId(rawNatId),
                     PrimaryEmail = reader.GetString(13),
                     PhoneNumber = reader.GetString(14),
                     Status = ((EmploymentStatus)reader.GetInt32(15)).ToString(),
@@ -350,6 +364,35 @@ public class PeopleRepository
             assignCmd.Parameters.AddWithValue("createdAt", assignment.CreatedAt);
             await assignCmd.ExecuteNonQueryAsync(ct);
 
+            // Insert Outbox Domain Event
+            var createdEvent = new EmployeeCreatedEvent(
+                Guid.NewGuid(),
+                employment.Id,
+                employment.TenantId,
+                employment.LegalEntityId,
+                employment.EmployeeNumber,
+                $"{person.FirstNameEn} {person.LastNameEn}",
+                $"{person.FirstNameAr} {person.LastNameAr}",
+                DateTime.UtcNow
+            );
+
+            const string outboxSql = @"
+                INSERT INTO people.outbox_messages (
+                    id, tenant_id, event_type, aggregate_type, aggregate_id, payload, occurred_at
+                ) VALUES (
+                    @id, @tenantId, @eventType, @aggType, @aggId, @payload::jsonb, @occurredAt
+                );
+            ";
+            await using var outboxCmd = new NpgsqlCommand(outboxSql, conn, tx);
+            outboxCmd.Parameters.AddWithValue("id", createdEvent.EventId);
+            outboxCmd.Parameters.AddWithValue("tenantId", employment.TenantId.Value);
+            outboxCmd.Parameters.AddWithValue("eventType", nameof(EmployeeCreatedEvent));
+            outboxCmd.Parameters.AddWithValue("aggType", "Employment");
+            outboxCmd.Parameters.AddWithValue("aggId", employment.Id);
+            outboxCmd.Parameters.AddWithValue("payload", JsonSerializer.Serialize(createdEvent));
+            outboxCmd.Parameters.AddWithValue("occurredAt", createdEvent.OccurredAt);
+            await outboxCmd.ExecuteNonQueryAsync(ct);
+
             await tx.CommitAsync(ct);
         }
         catch
@@ -363,6 +406,7 @@ public class PeopleRepository
         Guid employmentId,
         EmploymentAssignment newAssignment,
         uint expectedRowVersion,
+        LegalEntityId? legalEntityId = null,
         CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
@@ -371,21 +415,29 @@ public class PeopleRepository
 
         try
         {
-            // Verify and increment RowVersion on Employment
-            const string updateEmpSql = @"
+            // Verify optimistic concurrency and legal entity ownership
+            var updateEmpSql = @"
                 UPDATE people.employments
-                SET updated_at = NOW(),
-                    row_version = row_version + 1
-                WHERE id = @id AND row_version = @expectedVersion;
+                SET row_version = row_version + 1,
+                    updated_at = NOW()
+                WHERE id = @id AND row_version = @expectedVersion
             ";
+
+            if (legalEntityId.HasValue)
+            {
+                updateEmpSql += " AND legal_entity_id = @legalEntityId";
+            }
+
             await using var empCmd = new NpgsqlCommand(updateEmpSql, conn, tx);
             empCmd.Parameters.AddWithValue("id", employmentId);
             empCmd.Parameters.AddWithValue("expectedVersion", (int)expectedRowVersion);
+            if (legalEntityId.HasValue) empCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
+
             var affected = await empCmd.ExecuteNonQueryAsync(ct);
             if (affected == 0)
             {
                 await tx.RollbackAsync(ct);
-                return false; // Concurrency conflict
+                return false; // Concurrency conflict or unauthorized
             }
 
             // Close current assignment
@@ -423,6 +475,40 @@ public class PeopleRepository
             insertCmd.Parameters.AddWithValue("effTo", newAssignment.EffectiveTo.HasValue ? newAssignment.EffectiveTo.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
             await insertCmd.ExecuteNonQueryAsync(ct);
 
+            // Insert Outbox Domain Event
+            const string getTenantSql = "SELECT tenant_id FROM people.employments WHERE id = @id;";
+            await using var getTenantCmd = new NpgsqlCommand(getTenantSql, conn, tx);
+            getTenantCmd.Parameters.AddWithValue("id", employmentId);
+            var tenantGuid = (Guid)(await getTenantCmd.ExecuteScalarAsync(ct))!;
+
+            var assignEvent = new EmployeeAssignmentChangedEvent(
+                Guid.NewGuid(),
+                employmentId,
+                new TenantId(tenantGuid),
+                newAssignment.Id,
+                newAssignment.OrganizationUnitId,
+                newAssignment.JobTitleEn,
+                newAssignment.EffectiveFrom,
+                DateTime.UtcNow
+            );
+
+            const string outboxSql = @"
+                INSERT INTO people.outbox_messages (
+                    id, tenant_id, event_type, aggregate_type, aggregate_id, payload, occurred_at
+                ) VALUES (
+                    @id, @tenantId, @eventType, @aggType, @aggId, @payload::jsonb, @occurredAt
+                );
+            ";
+            await using var outboxCmd = new NpgsqlCommand(outboxSql, conn, tx);
+            outboxCmd.Parameters.AddWithValue("id", assignEvent.EventId);
+            outboxCmd.Parameters.AddWithValue("tenantId", tenantGuid);
+            outboxCmd.Parameters.AddWithValue("eventType", nameof(EmployeeAssignmentChangedEvent));
+            outboxCmd.Parameters.AddWithValue("aggType", "Employment");
+            outboxCmd.Parameters.AddWithValue("aggId", employmentId);
+            outboxCmd.Parameters.AddWithValue("payload", JsonSerializer.Serialize(assignEvent));
+            outboxCmd.Parameters.AddWithValue("occurredAt", assignEvent.OccurredAt);
+            await outboxCmd.ExecuteNonQueryAsync(ct);
+
             await tx.CommitAsync(ct);
             return true;
         }
@@ -440,58 +526,77 @@ public class PeopleRepository
         string fieldName,
         string purpose,
         string correlationId,
+        LegalEntityId? legalEntityId = null,
         CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        // Fetch plaintext value
+        // Fetch plaintext value only for supported field names
         string selectCol = fieldName.ToLowerInvariant() switch
         {
             "nationalid" or "nationalidentifier" => "p.national_identifier",
             "dateofbirth" or "dob" => "p.date_of_birth::text",
-            _ => throw new ArgumentException($"Unsupported sensitive field: '{fieldName}'.")
+            "phonenumber" or "phone" => "p.phone_number",
+            "primaryemail" or "email" => "p.primary_email",
+            _ => throw new ArgumentException($"Unsupported sensitive field name: '{fieldName}'.")
         };
 
         var sql = $@"
             SELECT {selectCol}
             FROM people.employments e
             INNER JOIN people.persons p ON e.person_id = p.id
-            WHERE e.id = @id AND e.tenant_id = @tenantId;
+            WHERE e.id = @id AND e.tenant_id = @tenantId
         ";
+
+        if (legalEntityId.HasValue)
+        {
+            sql += " AND e.legal_entity_id = @legalEntityId";
+        }
 
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("id", employmentId);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
-        var val = await cmd.ExecuteScalarAsync(ct);
-        if (val == null || val == DBNull.Value) return null;
+        var plaintextObj = await cmd.ExecuteScalarAsync(ct);
+        if (plaintextObj == null || plaintextObj == DBNull.Value)
+        {
+            return null; // Unauthorized or not found
+        }
 
-        // Log to immutable sensitive audit
+        var plaintext = plaintextObj.ToString();
+
+        // Application-managed audit history: Insert audit record (NEVER write plaintext to audit trail)
         const string auditSql = @"
             INSERT INTO people.sensitive_pii_audit (
                 id, tenant_id, actor_user_id, employment_id, field_name, purpose, correlation_id, timestamp
             ) VALUES (
-                @id, @tenantId, @actor, @empId, @field, @purpose, @correlation, NOW()
+                @id, @tenantId, @actorUserId, @empId, @fieldName, @purpose, @correlationId, NOW()
             );
         ";
         await using var auditCmd = new NpgsqlCommand(auditSql, conn);
         auditCmd.Parameters.AddWithValue("id", Guid.NewGuid());
         auditCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
-        auditCmd.Parameters.AddWithValue("actor", actorUserId);
+        auditCmd.Parameters.AddWithValue("actorUserId", actorUserId);
         auditCmd.Parameters.AddWithValue("empId", employmentId);
-        auditCmd.Parameters.AddWithValue("field", fieldName);
-        auditCmd.Parameters.AddWithValue("purpose", string.IsNullOrWhiteSpace(purpose) ? "Administrative verification" : purpose);
-        auditCmd.Parameters.AddWithValue("correlation", correlationId);
+        auditCmd.Parameters.AddWithValue("fieldName", fieldName);
+        auditCmd.Parameters.AddWithValue("purpose", string.IsNullOrWhiteSpace(purpose) ? "Operational Workforce Verification" : purpose);
+        auditCmd.Parameters.AddWithValue("correlationId", correlationId);
         await auditCmd.ExecuteNonQueryAsync(ct);
 
-        return val.ToString();
+        return plaintext;
     }
 
     private static string MaskNationalId(string raw)
     {
-        if (string.IsNullOrWhiteSpace(raw) || raw.Length < 4) return "****";
-        var prefix = raw.Substring(0, 3);
-        return $"{prefix}{new string('*', Math.Max(0, raw.Length - 3))}";
+        if (string.IsNullOrWhiteSpace(raw)) return "**********";
+        if (raw.Length <= 4) return new string('*', raw.Length);
+        return string.Concat(raw.AsSpan(0, 3), new string('*', raw.Length - 4), raw.AsSpan(raw.Length - 1, 1));
+    }
+
+    private static string MaskDateOfBirth(DateOnly dob)
+    {
+        return $"****-**-{dob.Day:D2}";
     }
 }

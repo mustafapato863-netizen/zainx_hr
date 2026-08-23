@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
-import { EmployeeDirectory } from '@zainx/people';
-import { EmployeeWorkspace } from '@zainx/people';
+import { EmployeeDirectory } from '../components/EmployeeDirectory/EmployeeDirectory';
+import { EmployeeWorkspace } from '../components/EmployeeProfile/EmployeeWorkspace';
 import { EmployeeSummaryDto, EmployeeProfileDto, DocumentSummaryDto } from '@zainx/contracts';
 
 const sampleEmployees: EmployeeSummaryDto[] = [
@@ -161,7 +161,7 @@ const sampleDocs: DocumentSummaryDto[] = [
 ];
 
 const meta: Meta = {
-  title: 'Phase 2 / People & Workspace',
+  title: 'People / Employee Workspace',
   parameters: {
     layout: 'fullscreen'
   }

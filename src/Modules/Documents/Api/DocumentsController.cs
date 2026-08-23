@@ -43,7 +43,12 @@ public class DocumentsController : ControllerBase
         CancellationToken ct)
     {
         var userContext = _userContext;
-        var docs = await _repository.ListDocumentsAsync(userContext.TenantId, ownerType ?? "Employee", ownerId, ct);
+        var docs = await _repository.ListDocumentsAsync(
+            userContext.TenantId,
+            ownerType ?? "Employee",
+            ownerId,
+            userContext.LegalEntityId,
+            ct);
         return Ok(docs);
     }
 
@@ -53,7 +58,7 @@ public class DocumentsController : ControllerBase
     public async Task<IActionResult> GetDocument(Guid id, CancellationToken ct)
     {
         var userContext = _userContext;
-        var doc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, ct);
+        var doc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
         if (doc == null)
         {
             return NotFound(new ProblemDetails
@@ -73,7 +78,7 @@ public class DocumentsController : ControllerBase
     public async Task<IActionResult> DownloadDocument(Guid id, [FromQuery] int? version, CancellationToken ct)
     {
         var userContext = _userContext;
-        var doc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, ct);
+        var doc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
         if (doc == null)
         {
             return NotFound(new ProblemDetails
@@ -85,7 +90,7 @@ public class DocumentsController : ControllerBase
             });
         }
 
-        var storageKey = await _repository.GetStorageKeyForDownloadAsync(id, userContext.TenantId, version, ct);
+        var storageKey = await _repository.GetStorageKeyForDownloadAsync(id, userContext.TenantId, userContext.LegalEntityId, version, ct);
         if (string.IsNullOrEmpty(storageKey))
         {
             return NotFound(new ProblemDetails
@@ -109,7 +114,7 @@ public class DocumentsController : ControllerBase
             });
         }
 
-        var fileName = doc.LatestFileName;
+        var fileName = DocumentSecurityValidator.SanitizeFileName(doc.LatestFileName);
         var contentType = string.IsNullOrEmpty(doc.LatestContentType) ? "application/octet-stream" : doc.LatestContentType;
 
         return File(stream, contentType, fileName);
@@ -132,11 +137,27 @@ public class DocumentsController : ControllerBase
             });
         }
 
+        try
+        {
+            DocumentSecurityValidator.ValidateFileName(form.File.FileName);
+            await using var validationStream = form.File.OpenReadStream();
+            await DocumentSecurityValidator.ValidateContentSignatureAsync(validationStream, form.File.FileName, ct);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Invalid Document Payload",
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path
+            });
+        }
+
         var legalEntity = userContext.LegalEntityId ?? LegalEntityId.New();
         var docId = Guid.NewGuid();
         var versionId = Guid.NewGuid();
 
-        // Calculate SHA-256 Checksum and save to Storage Provider
         string sha256;
         string storageKey;
         await using (var stream = form.File.OpenReadStream())
@@ -177,8 +198,85 @@ public class DocumentsController : ControllerBase
 
         await _repository.CreateDocumentWithInitialVersionAsync(doc, version, ct);
 
-        var detail = await _repository.GetDocumentDetailsAsync(docId, userContext.TenantId, ct);
+        var detail = await _repository.GetDocumentDetailsAsync(docId, userContext.TenantId, userContext.LegalEntityId, ct);
         return CreatedAtAction(nameof(GetDocument), new { id = docId }, detail);
+    }
+
+    [HttpPost("{id:guid}/versions")]
+    [ProducesResponseType(typeof(DocumentDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> AddDocumentVersion(Guid id, [FromForm] AddVersionFormRequest form, CancellationToken ct)
+    {
+        var userContext = _userContext;
+        var doc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
+        if (doc == null)
+        {
+            return NotFound(new ProblemDetails
+            {
+                Status = StatusCodes.Status404NotFound,
+                Title = "Document Not Found",
+                Detail = $"No document with ID '{id}' was found for this tenant.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        if (form.File == null || form.File.Length == 0)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Missing File",
+                Detail = "A valid replacement file is required.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        try
+        {
+            DocumentSecurityValidator.ValidateFileName(form.File.FileName);
+            await using var validationStream = form.File.OpenReadStream();
+            await DocumentSecurityValidator.ValidateContentSignatureAsync(validationStream, form.File.FileName, ct);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Invalid Document Payload",
+                Detail = ex.Message,
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        string sha256;
+        string storageKey;
+        await using (var stream = form.File.OpenReadStream())
+        {
+            using var sha = SHA256.Create();
+            var hashBytes = await sha.ComputeHashAsync(stream, ct);
+            sha256 = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+            stream.Position = 0;
+            storageKey = await _storageProvider.SaveAsync(stream, userContext.TenantId.Value.ToString(), form.File.FileName, ct);
+        }
+
+        var newVer = new DocumentVersion(
+            Guid.NewGuid(),
+            id,
+            doc.LatestVersionNumber + 1,
+            storageKey,
+            form.File.FileName,
+            form.File.Length,
+            form.File.ContentType,
+            sha256,
+            userContext.UserId.Value
+        );
+
+        await _repository.AddDocumentVersionAsync(id, userContext.TenantId, newVer, ct);
+
+        var updatedDoc = await _repository.GetDocumentDetailsAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
+        return Ok(updatedDoc);
     }
 }
 
@@ -189,5 +287,10 @@ public class UploadDocumentFormRequest
     public Guid DocumentTypeId { get; set; }
     public string Title { get; set; } = string.Empty;
     public string? ExpiryDate { get; set; }
+    public IFormFile? File { get; set; }
+}
+
+public class AddVersionFormRequest
+{
     public IFormFile? File { get; set; }
 }
