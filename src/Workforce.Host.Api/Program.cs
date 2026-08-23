@@ -1,10 +1,17 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using OpenTelemetry.Trace;
+using Workforce.BuildingBlocks.Database;
+using Workforce.Host.Api.Middleware;
+using Workforce.Modules.Documents.Infrastructure;
+using Workforce.Modules.Organization.Infrastructure;
+using Workforce.Modules.People.Infrastructure;
+using Workforce.SharedKernel.Primitives;
+using Workforce.SharedKernel.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Phase-0 OpenTelemetry Instrumentation
+// OpenTelemetry Instrumentation
 var activitySource = new ActivitySource("Workforce.Platform", "1.0.0");
 
 builder.Services.AddOpenTelemetry()
@@ -27,7 +34,67 @@ var dbName = Environment.GetEnvironmentVariable("ZAINX_DB_NAME") ?? "zainx_workf
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass}";
 
+// Security & User Context Resolution
+builder.Services.AddScoped<IUserContextProvider, DefaultUserContextProvider>();
+builder.Services.AddScoped<IUserContext>(sp =>
+{
+    var provider = sp.GetRequiredService<IUserContextProvider>();
+    if (provider.Current != null) return provider.Current;
+
+    // Fallback default context for development / testing
+    return new UserContext(
+        new UserId(Guid.Parse("11111111-1111-1111-1111-111111111111")),
+        new TenantId(Guid.Parse("22222222-2222-2222-2222-222222222222")),
+        new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333")),
+        "en-US",
+        "UTC",
+        new HashSet<string> { "people.employee.read", "people.employee.create", "people.employee.update", "people.employee.reveal_pii", "organization.unit.read", "organization.unit.create", "organization.unit.update", "documents.read", "documents.upload", "documents.download", "admin" },
+        new HashSet<string> { "core.platform", "people", "organization", "documents" }
+    );
+});
+
+// Storage Provider for Documents
+builder.Services.AddSingleton<IStorageProvider, LocalStorageProvider>();
+
+// Module Repositories
+builder.Services.AddScoped<OrganizationRepository>(_ => new OrganizationRepository(connectionString));
+builder.Services.AddScoped<PeopleRepository>(_ => new PeopleRepository(connectionString));
+builder.Services.AddScoped<DocumentsRepository>(_ => new DocumentsRepository(connectionString));
+
+// Controllers with cross-assembly discovery
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(Workforce.Modules.Organization.Api.OrganizationController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.People.Api.PeopleController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Documents.Api.DocumentsController).Assembly);
+
+// CORS for local web dev
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+// Auto-run schema migrations
+try
+{
+    await MigrationRunner.EnsureMigrationHistoryTableAsync(connectionString);
+    await OrganizationMigrations.ApplyMigrationsAsync(connectionString);
+    await PeopleMigrations.ApplyMigrationsAsync(connectionString);
+    await DocumentsMigrations.ApplyMigrationsAsync(connectionString);
+    Console.WriteLine("[MIGRATIONS] Database schemas initialized successfully.");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[MIGRATIONS] Migration notice/warning: {ex.Message}");
+}
+
+app.UseCors();
 
 // Correlation ID & Trace ID Middleware
 app.Use(async (context, next) =>
@@ -43,10 +110,14 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// Configure OpenAPI
-app.MapOpenApi();
+// Platform Context Resolution
+app.UseMiddleware<TenantResolutionMiddleware>();
 
-// Phase-0 Health (Liveness) Probe
+// Configure OpenAPI & Controllers
+app.MapOpenApi();
+app.MapControllers();
+
+// Health (Liveness) Probe
 app.MapGet("/health", (HttpContext http) =>
 {
     var correlationId = http.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
@@ -67,7 +138,7 @@ app.MapGet("/health", (HttpContext http) =>
 .WithName("GetHealth")
 .WithSummary("System health and liveness probe");
 
-// Phase-0 Readiness Probe (Verifies PostgreSQL 18 live connectivity)
+// Readiness Probe (Verifies PostgreSQL connectivity)
 app.MapGet("/health/ready", async (HttpContext http) =>
 {
     var correlationId = http.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
@@ -113,28 +184,5 @@ app.MapGet("/health/ready", async (HttpContext http) =>
 })
 .WithName("GetReadiness")
 .WithSummary("System readiness probe verifying database connectivity");
-
-// Standardized RFC 7807 ProblemDetails Error Endpoint for Testing
-app.MapGet("/test-error", (HttpContext http) =>
-{
-    var correlationId = http.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
-    var traceId = http.Items["TraceId"]?.ToString() ?? Guid.NewGuid().ToString("N");
-
-    var problemDetails = new ProblemDetails
-    {
-        Status = StatusCodes.Status500InternalServerError,
-        Type = "https://zainx.com/errors/internal-error",
-        Title = "Test Internal Server Error",
-        Detail = "A controlled simulation of an application fault adhering to RFC 7807 Problem Details.",
-        Instance = http.Request.Path
-    };
-
-    problemDetails.Extensions["correlationId"] = correlationId;
-    problemDetails.Extensions["traceId"] = traceId;
-
-    return Results.Problem(problemDetails);
-})
-.WithName("GetTestError")
-.WithSummary("Simulated failure returning RFC 7807 ProblemDetails");
 
 app.Run();

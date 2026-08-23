@@ -5,6 +5,8 @@ dist/
 **/bin/
 **/obj/
 **/dist/
+**/storybook-static/
+storybook-static/
 **/node_modules/
 **/.nx/
 **/tmp/

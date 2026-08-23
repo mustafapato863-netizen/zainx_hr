@@ -15,4 +15,12 @@
     <PackageReference Include="OpenTelemetry.Instrumentation.Http" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Workforce.SharedKernel\Workforce.SharedKernel.csproj" />
+    <ProjectReference Include="..\Workforce.BuildingBlocks\Workforce.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\Modules\Organization\Workforce.Modules.Organization.csproj" />
+    <ProjectReference Include="..\Modules\People\Workforce.Modules.People.csproj" />
+    <ProjectReference Include="..\Modules\Documents\Workforce.Modules.Documents.csproj" />
+  </ItemGroup>
+
 </Project>

@@ -1,5 +1,2 @@
-export interface HealthResponse {
-  status: string;
-  timestamp: string;
-  version: string;
-}
+export * from './api/generated';
+export * from './api/generated.schemas';

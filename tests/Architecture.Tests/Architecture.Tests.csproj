@@ -17,6 +17,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\Workforce.SharedKernel\Workforce.SharedKernel.csproj" />
     <ProjectReference Include="..\..\src\Workforce.BuildingBlocks\Workforce.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Organization\Workforce.Modules.Organization.csproj" />
+    <ProjectReference Include="..\..\src\Modules\People\Workforce.Modules.People.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Documents\Workforce.Modules.Documents.csproj" />
   </ItemGroup>
 
 </Project>

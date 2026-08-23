@@ -8,7 +8,7 @@ public class BoundaryTests
     [Fact]
     public void SharedKernel_ShouldNotReference_ModulesOrHost()
     {
-        var sharedKernelAssembly = typeof(Workforce.SharedKernel.Class1).Assembly;
+        var sharedKernelAssembly = typeof(Workforce.SharedKernel.Primitives.TenantId).Assembly;
         var referencedAssemblies = sharedKernelAssembly.GetReferencedAssemblies();
 
         foreach (var assemblyName in referencedAssemblies)
