@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Feedback & Skeletons — ZainX Design System</title>
+  <link rel="icon" type="image/png" href="../brand/zainx-mark.png">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../foundations.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../patterns.css">
+  <link rel="stylesheet" href="../signature.css">
+</head>
+<body>
+
+<div class="ds-app" id="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="ds-sidebar" id="dsSidebar" aria-label="Design system navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="../brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Design System v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav" aria-label="Design system sections">
+      <p class="ds-nav-group">OVERVIEW</p>
+      <a class="ds-nav-link" href="../index.html" data-page="index">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Overview
+      </a>
+
+      <p class="ds-nav-group">FOUNDATIONS</p>
+      <a class="ds-nav-link" href="foundations.html" data-page="foundations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Colors · Typography · Spacing
+      </a>
+
+      <p class="ds-nav-group">COMPONENTS</p>
+      <a class="ds-nav-link" href="controls.html" data-page="controls">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Buttons · Inputs · Forms
+      </a>
+      <a class="ds-nav-link" href="navigation.html" data-page="navigation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Navigation · Sidebar · Tabs
+      </a>
+      <a class="ds-nav-link" href="data.html" data-page="data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="14" y="6" width="3" height="12" rx="1"/></svg>
+        Data Grid · Filters · Charts
+      </a>
+      <a class="ds-nav-link active" href="feedback.html" data-page="feedback">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts · Loading · Errors
+      </a>
+      <a class="ds-nav-link" href="overlays.html" data-page="overlays">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dialogs · Drawers · Menus
+      </a>
+
+      <p class="ds-nav-group">PRODUCT</p>
+      <a class="ds-nav-link" href="product.html" data-page="product">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        People · Payroll · Recruitment · AI
+      </a>
+
+      <p class="ds-nav-group">SIGNATURE</p>
+      <a class="ds-nav-link" href="signature.html" data-page="signature">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Motion · Spotlight · Access Gate
+      </a>
+
+      <p class="ds-nav-group">SCREENS</p>
+      <a class="ds-nav-link" href="../screens/01-employee-directory.html" data-page="screen-01">Employee Directory</a>
+      <a class="ds-nav-link" href="../screens/03-payroll-run.html" data-page="screen-03">Payroll Run</a>
+      <a class="ds-nav-link" href="../screens/05-recruitment-pipeline.html" data-page="screen-05">Recruitment Pipeline</a>
+      <a class="ds-nav-link" href="../screens/12-login.html" data-page="screen-12">Login</a>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="ds-main" id="dsMain">
+
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <button class="ds-sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="ds-breadcrumb">
+          <a href="../index.html">Design System</a>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Alerts & Feedback</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button" title="Toggle theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Theme</span>
+        </button>
+        <button class="ds-control-btn" id="rtlToggle" type="button" title="Toggle RTL">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+          <span>RTL</span>
+        </button>
+        <button class="ds-control-btn" id="densityToggle" type="button" title="Toggle density">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          <span>Density</span>
+        </button>
+        <button class="ds-control-btn" id="motionToggle" type="button" title="Toggle motion">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Motion</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="ds-content">
+
+      <div>
+        <span class="ds-hero-badge t-overline">FEEDBACK SYSTEM</span>
+        <h1 class="t-display-lg">Alerts, Skeletons & Access Gate</h1>
+        <p class="t-page-subtitle">Informational banners, structured loading states, and dignified permission denial.</p>
+      </div>
+
+      <!-- 1. ALERTS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">1. Alert System (Spec §36)</h2>
+
+        <div class="flex flex-col gap-4">
+          
+          <div class="zx-alert zx-alert-info">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            <div>
+              <strong>Payroll calculation complete</strong>
+              <p class="t-caption">All 482 employee calculations processed successfully against Egypt Labor Law 2026 rules.</p>
+            </div>
+          </div>
+
+          <div class="zx-alert zx-alert-warning">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <div>
+              <strong>12 Non-blocking exceptions detected</strong>
+              <p class="t-caption">3 attendance punches missing check-out times in Operations department.</p>
+            </div>
+          </div>
+
+          <div class="zx-alert zx-alert-danger">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <div>
+              <strong>Blocking error — Finalization halted</strong>
+              <p class="t-caption">Employee EMP-0402 is missing mandatory National Tax ID. Finalization is locked until resolved.</p>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. STRUCTURAL SKELETONS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">2. Skeletons Matching Layout (Spec §46)</h2>
+        <p class="t-body-sm t-muted">Never use generic spinners for full pages. Skeletons must mirror actual table rows.</p>
+
+        <div class="ds-card ds-card-utility" style="gap: var(--zx-space-4);">
+          <div class="zx-skeleton" style="height: 16px; width: 30%;"></div>
+          <div class="zx-skeleton" style="height: 32px; width: 100%;"></div>
+          <div class="zx-skeleton" style="height: 32px; width: 100%;"></div>
+          <div class="zx-skeleton" style="height: 32px; width: 100%;"></div>
+        </div>
+      </section>
+
+      <!-- 3. ACCESS GATE (Spec §44) -->
+      <section class="ds-section">
+        <h2 class="t-section-title">3. Branded Access Gate (403 Permission Denial)</h2>
+        <p class="t-body-sm t-muted">Dignified access control without cartoon locks. Features a single boundary scan and recovery path.</p>
+
+        <div class="zx-access-gate scanning" id="gateDemo">
+          <div class="flex items-center gap-4">
+            <div class="zx-access-icon">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div>
+              <strong class="t-section-title">Access Restricted</strong>
+              <p class="t-body-sm t-muted">You do not have permission to view employee compensation data.</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 t-metadata" style="margin-top: var(--zx-space-2);">
+            <span>Required scope:</span>
+            <code style="background: rgba(196, 61, 77, 0.15); padding: 2px 6px; border-radius: 4px; color: var(--zx-danger-text);">people.compensation.read</code>
+          </div>
+
+          <div class="flex items-center gap-3" style="margin-top: var(--zx-space-3);">
+            <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">Go Back</button>
+            <button class="zx-btn zx-btn-danger zx-btn-sm" type="button">Request Access</button>
+            <button class="zx-btn zx-btn-ghost zx-btn-xs" type="button" data-action="replay-scan" data-target="#gateDemo">Replay Scan</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="ds-footer">
+        <p class="t-metadata t-faint">ZainX Workforce Design System · Feedback Reference</p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+</body>
+</html>

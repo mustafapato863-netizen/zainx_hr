@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/attendance",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/attendance/src",
+  "projectType": "library",
+  "tags": ["scope:attendance", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

@@ -1,0 +1,19 @@
+services:
+  db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: zainx
+      POSTGRES_PASSWORD: ${ZAINX_DB_PASSWORD}
+      POSTGRES_DB: zainx_workforce
+    ports:
+      - "${ZAINX_DB_PORT:-5432}:5432"
+    volumes:
+      - zainx_pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zainx"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  zainx_pgdata:

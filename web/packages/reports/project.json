@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/reports",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/reports/src",
+  "projectType": "library",
+  "tags": ["scope:reports", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

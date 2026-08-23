@@ -1,0 +1,41 @@
+{
+  "name": "ZainX Workforce Canonical Reference",
+  "version": "4.1",
+  "date": "2026-08-23",
+  "supersedes": [
+    "Ref.zip execution layer",
+    "AI_Missions v1",
+    "MASTER_PROJECT_PLAN_AND_ARCHITECTURE_REFERENCE.md as executable authority"
+  ],
+  "executionDecision": {
+    "phase0": "GO",
+    "phase1A": "GO_AFTER_PHASE0",
+    "phase1B": "GO_AFTER_FOUNDATION",
+    "phase1C": "GO_SPIKES",
+    "phase2Plus": "GO_ONLY_AFTER_MODULE_AND_DS_GATES"
+  },
+  "canonicalDocuments": {
+    "engineering": "01_ARCHITECTURE/workforce_platform_engineering_blueprint_v2.0.md",
+    "frontendUx": "01_ARCHITECTURE/workforce_platform_frontend_ux_blueprint_v1.0.md",
+    "frontendEngineering": "02_FRONTEND/ZAINX_FRONTEND_ENGINEERING_GUIDELINE_v3.1.md",
+    "designSystem": "03_DESIGN_SYSTEM/guides/01_MASTER_BUILD_PROMPT_v3.md",
+    "roadmap": "04_EXECUTION/EXECUTION_ROADMAP_v4.1.md"
+  },
+  "removedConflicts": [
+    "old AI missions",
+    "old master execution plan",
+    "standalone-root frontend repo interpretation",
+    "frontend payroll engine requirement",
+    "hard-coded statutory rate prompts",
+    "fabricated AI thinking-progress requirement"
+  ],
+  "addedIn4_1": [
+    "Integrated backend+database+contracts+frontend+DS+QA roadmap",
+    "Long-running operation contract",
+    "Expanded Design System P0 gate",
+    "Module Start Gate",
+    "AI split into 7A Read/Analyze/Explain and 7B Proposed Actions",
+    "Expanded Phase 0 backend/database/deployment foundation",
+    "Cleaned stale paths/version references"
+  ]
+}

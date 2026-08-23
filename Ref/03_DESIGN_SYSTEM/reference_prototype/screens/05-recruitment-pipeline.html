@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recruitment Pipeline — ZainX Workforce</title>
+  <link rel="icon" type="image/png" href="../brand/zainx-mark.png">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../foundations.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../patterns.css">
+  <link rel="stylesheet" href="../product.css">
+  <link rel="stylesheet" href="../signature.css">
+</head>
+<body>
+
+<div class="ds-app">
+
+  <!-- Application Shell Sidebar -->
+  <aside class="ds-sidebar" aria-label="Main Navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="../brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Workforce OS</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav">
+      <p class="ds-nav-group">WORKSPACE</p>
+      <a class="ds-nav-link" href="../index.html">Home</a>
+      <a class="ds-nav-link" href="01-employee-directory.html">People Directory</a>
+      <a class="ds-nav-link" href="03-payroll-run.html">Payroll Run</a>
+      <a class="ds-nav-link active" href="05-recruitment-pipeline.html">Recruitment Pipeline</a>
+      <a class="ds-nav-link" href="12-login.html">Sign Out / Login</a>
+    </nav>
+  </aside>
+
+  <!-- Main View -->
+  <main class="ds-main">
+    
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <span class="ds-breadcrumb">
+          <span>Recruitment</span>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Senior Frontend Engineer (32 Candidates)</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button">Theme</button>
+        <button class="ds-control-btn" id="rtlToggle" type="button">RTL</button>
+        <button class="ds-control-btn" id="densityToggle" type="button">Density</button>
+        <button class="zx-btn zx-btn-primary zx-btn-xs" type="button">＋ Add Candidate</button>
+      </div>
+    </header>
+
+    <div class="ds-content">
+
+      <!-- Kanban Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="t-page-title">Candidate Pipeline · مسار التوظيف</h1>
+          <p class="t-page-subtitle">Job: Senior Frontend Engineer · Engineering · Full-time · Cairo</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="zx-segmented">
+            <button class="zx-segmented-item active" type="button">Kanban</button>
+            <button class="zx-segmented-item" type="button">Table</button>
+            <button class="zx-segmented-item" type="button">Analytics</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanban Columns -->
+      <div class="zx-kanban-board">
+
+        <!-- Stage 1: Sourced / Applied -->
+        <div class="zx-kanban-column">
+          <div class="zx-kanban-column-header">
+            <span>Applied</span>
+            <span class="ds-badge ds-badge-neutral">14</span>
+          </div>
+          <div class="zx-kanban-cards">
+            
+            <div class="zx-candidate-card">
+              <div class="flex justify-between items-start">
+                <strong class="t-label">Nour El-Din Samy</strong>
+                <span class="t-caption t-faint">2d ago</span>
+              </div>
+              <span class="t-caption t-muted">Ex-Vodafone · 6 yrs exp</span>
+              <div class="flex items-center gap-2" style="margin-top: var(--zx-space-2);">
+                <span class="ds-badge ds-badge-info">LinkedIn</span>
+                <span class="ds-badge ds-badge-ai">✦ 94% Match</span>
+              </div>
+            </div>
+
+            <div class="zx-candidate-card">
+              <div class="flex justify-between items-start">
+                <strong class="t-label">Karim Mostafa</strong>
+                <span class="t-caption t-faint">4d ago</span>
+              </div>
+              <span class="t-caption t-muted">Lead React Engineer · 8 yrs exp</span>
+              <div class="flex items-center gap-2" style="margin-top: var(--zx-space-2);">
+                <span class="ds-badge ds-badge-neutral">Direct</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Stage 2: Screening -->
+        <div class="zx-kanban-column">
+          <div class="zx-kanban-column-header">
+            <span>Screening</span>
+            <span class="ds-badge ds-badge-info">6</span>
+          </div>
+          <div class="zx-kanban-cards">
+            
+            <div class="zx-candidate-card">
+              <div class="flex justify-between items-start">
+                <strong class="t-label">Heba Tarek</strong>
+                <span class="t-caption t-faint">Yesterday</span>
+              </div>
+              <span class="t-caption t-muted">Senior UI/UX & Frontend</span>
+              <div class="flex items-center gap-2" style="margin-top: var(--zx-space-2);">
+                <span class="ds-badge ds-badge-warning">Async Video Done</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Stage 3: Technical Interview -->
+        <div class="zx-kanban-column">
+          <div class="zx-kanban-column-header">
+            <span>Technical Interview</span>
+            <span class="ds-badge ds-badge-ai">4</span>
+          </div>
+          <div class="zx-kanban-cards">
+            
+            <div class="zx-candidate-card" style="border-inline-start: 3px solid var(--zx-accent);">
+              <div class="flex justify-between items-start">
+                <strong class="t-label">Youssef Mansour</strong>
+                <span class="t-caption t-faint">Today 2:00 PM</span>
+              </div>
+              <span class="t-caption t-muted">Design Systems Architect</span>
+              <div class="flex items-center gap-2" style="margin-top: var(--zx-space-2);">
+                <span class="ds-badge ds-badge-success">Score 4.8/5</span>
+                <span class="zx-avatar zx-avatar-20">AH</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Stage 4: Offer -->
+        <div class="zx-kanban-column">
+          <div class="zx-kanban-column-header">
+            <span>Offer Stage</span>
+            <span class="ds-badge ds-badge-warning">2</span>
+          </div>
+          <div class="zx-kanban-cards">
+            
+            <div class="zx-candidate-card" style="border-inline-start: 3px solid var(--zx-warning-icon);">
+              <div class="flex justify-between items-start">
+                <strong class="t-label">Dina Gamal</strong>
+                <span class="t-caption t-faint">Pending Sign</span>
+              </div>
+              <span class="t-caption t-muted">Senior Frontend Engineer</span>
+              <div class="flex items-center gap-2" style="margin-top: var(--zx-space-2);">
+                <span class="ds-badge ds-badge-warning">EGP 42K / mo</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Stage 5: Hired -->
+        <div class="zx-kanban-column">
+          <div class="zx-kanban-column-header">
+            <span>Hired</span>
+            <span class="ds-badge ds-badge-success">1</span>
+          </div>
+          <div class="zx-kanban-cards">
+            
+            <div class="zx-candidate-card" style="background: var(--zx-success-surface); border-color: var(--zx-success-border);">
+              <div class="flex justify-between items-start">
+                <strong class="t-label t-success">Tarek Zaki</strong>
+                <span class="ds-badge ds-badge-success">Signed</span>
+              </div>
+              <span class="t-caption t-muted">Starts 01 Sep 2026</span>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+</body>
+</html>

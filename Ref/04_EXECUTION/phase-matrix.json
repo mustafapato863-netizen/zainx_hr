@@ -1,0 +1,65 @@
+{
+  "version": "4.1",
+  "phases": [
+    {
+      "id": "0",
+      "name": "Full Product Foundation",
+      "gate": "CI builds/runs backend+frontend+Postgres+OpenAPI generation"
+    },
+    {
+      "id": "1A",
+      "name": "Platform Kernel & Contracts",
+      "gate": "Authenticated permission-scoped bilingual shell"
+    },
+    {
+      "id": "1B",
+      "name": "Design System P0",
+      "gate": "Storybook/a11y/RTL P0 passes"
+    },
+    {
+      "id": "1C",
+      "name": "Enterprise Engine Spikes",
+      "gate": "Technical + license decisions"
+    },
+    {
+      "id": "2",
+      "name": "Workforce Core",
+      "gate": "End-to-end employee history/permissions"
+    },
+    {
+      "id": "3",
+      "name": "Time, Leave & Approvals",
+      "gate": "Auditable corrections/approvals"
+    },
+    {
+      "id": "4",
+      "name": "Payroll, Compliance & Settlement",
+      "gate": "Immutable reproducible explainable finalized run"
+    },
+    {
+      "id": "5",
+      "name": "Recruitment",
+      "gate": "Audited pipeline + controlled hire conversion"
+    },
+    {
+      "id": "6",
+      "name": "Reports/Admin/Integrations/Audit",
+      "gate": "Operators can diagnose/configure without DB"
+    },
+    {
+      "id": "7A",
+      "name": "AI Read/Analyze/Explain",
+      "gate": "Source-grounded read-only AI"
+    },
+    {
+      "id": "7B",
+      "name": "AI Proposed/Confirmed Actions",
+      "gate": "Authorized confirmed command equivalence"
+    },
+    {
+      "id": "8",
+      "name": "Production RC",
+      "gate": "On-premise/UAT/security/performance release gate"
+    }
+  ]
+}

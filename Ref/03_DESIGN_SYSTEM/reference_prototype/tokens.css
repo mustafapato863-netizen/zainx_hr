@@ -1,0 +1,488 @@
+/* =============================================================================
+   ZAINX WORKFORCE DESIGN SYSTEM — TOKEN SYSTEM v2.0
+   "The system is quiet. Important things glow."
+   
+   Token architecture:
+     Primitive  → raw color/size values
+     Semantic   → meaning-based aliases
+     Component  → component-specific overrides
+   
+   All tokens use --zx- prefix.
+   Light theme is :root default. Dark theme via [data-theme="dark"].
+   ============================================================================= */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   1. PRIMITIVE COLOR SCALES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  color-scheme: light dark;
+
+  /* ── Official ZainX Brand Primitives (Brand Identity System) ── */
+  --zx-brand-obsidian:   #0A0F23;
+  --zx-brand-navy:       #0D1B3D;
+  --zx-brand-blue:       #2563EB;
+  --zx-brand-sky:        #00B2FF;
+  --zx-brand-cyan:       #00E0C6;
+  --zx-brand-slate:      #64748B;
+  --zx-brand-light-gray: #E5E7EB;
+
+  /* ── Official Signature Gradients ── */
+  --zx-gradient-brand:     linear-gradient(135deg, #2563EB 0%, #00B2FF 50%, #00E0C6 100%);
+  --zx-gradient-signature: linear-gradient(90deg, #2563EB 0%, #00E0C6 100%);
+  --zx-gradient-glow:      linear-gradient(135deg, rgba(37, 99, 235, 0.4) 0%, rgba(0, 224, 198, 0.4) 100%);
+
+  /* ── Neutral Scale (16 steps) ── */
+  --zx-neutral-0:    #FFFFFF;
+  --zx-neutral-25:   #FAFBFC;
+  --zx-neutral-50:   #F7F8FA;
+  --zx-neutral-100:  #F1F3F6;
+  --zx-neutral-150:  #E8ECF0;
+  --zx-neutral-200:  #E5E7EB;
+  --zx-neutral-300:  #CBD5E1;
+  --zx-neutral-400:  #94A3B8;
+  --zx-neutral-500:  #64748B;
+  --zx-neutral-600:  #475569;
+  --zx-neutral-700:  #334155;
+  --zx-neutral-800:  #1E293B;
+  --zx-neutral-850:  #131D33;
+  --zx-neutral-900:  #0D1B3D;
+  --zx-neutral-950:  #0A0F23;
+  --zx-neutral-1000: #050814;
+
+  /* ── Brand Blue Scale ── */
+  --zx-brand-50:  #EEF5FF;
+  --zx-brand-100: #DBEAFE;
+  --zx-brand-200: #BFDBFE;
+  --zx-brand-300: #93C5FD;
+  --zx-brand-400: #00B2FF;
+  --zx-brand-500: #2563EB;
+  --zx-brand-600: #1D4ED8;
+  --zx-brand-700: #1E40AF;
+  --zx-brand-800: #0D1B3D;
+  --zx-brand-900: #0A0F23;
+  --zx-brand-950: #050814;
+
+  /* ── Neon Cyan Accent Scale ── */
+  --zx-cyan-50:  #E6FCF9;
+  --zx-cyan-100: #C3F8F2;
+  --zx-cyan-200: #8EF3E6;
+  --zx-cyan-300: #4DE8D7;
+  --zx-cyan-400: #16DDCB;
+  --zx-cyan-500: #00E0C6;
+  --zx-cyan-600: #00B39E;
+  --zx-cyan-700: #008778;
+
+  /* ── Success Scale ── */
+  --zx-success-50:  #ECFDF5;
+  --zx-success-100: #D1FAE5;
+  --zx-success-200: #A7F3D0;
+  --zx-success-300: #6EE7B7;
+  --zx-success-400: #34D399;
+  --zx-success-500: #168A5B;
+  --zx-success-600: #117A4E;
+  --zx-success-700: #0E6B42;
+  --zx-success-800: #0B5C37;
+  --zx-success-900: #064E2E;
+
+  /* ── Warning Scale ── */
+  --zx-warning-50:  #FFFBEB;
+  --zx-warning-100: #FEF3C7;
+  --zx-warning-200: #FDE68A;
+  --zx-warning-300: #FCD34D;
+  --zx-warning-400: #FBBF24;
+  --zx-warning-500: #B87312;
+  --zx-warning-600: #A5670F;
+  --zx-warning-700: #925B0C;
+  --zx-warning-800: #7F4F0A;
+  --zx-warning-900: #6C4308;
+
+  /* ── Danger Scale ── */
+  --zx-danger-50:  #FFF1F2;
+  --zx-danger-100: #FFE4E6;
+  --zx-danger-200: #FECDD3;
+  --zx-danger-300: #FDA4AF;
+  --zx-danger-400: #F87171;
+  --zx-danger-500: #C43D4D;
+  --zx-danger-600: #B03545;
+  --zx-danger-700: #9C2D3D;
+  --zx-danger-800: #882535;
+  --zx-danger-900: #741D2D;
+
+  /* ── Info Scale ── */
+  --zx-info-50:  #EFF6FF;
+  --zx-info-100: #DBEAFE;
+  --zx-info-200: #BFDBFE;
+  --zx-info-300: #93C5FD;
+  --zx-info-400: #60A5FA;
+  --zx-info-500: #2F6FD8;
+  --zx-info-600: #2962C2;
+  --zx-info-700: #2355AC;
+  --zx-info-800: #1D4896;
+  --zx-info-900: #173B80;
+
+  /* ── AI / Intelligence Scale ── */
+  --zx-ai-50:  #F3F0FF;
+  --zx-ai-100: #E8E0FF;
+  --zx-ai-200: #D4C5FE;
+  --zx-ai-300: #B9A0FC;
+  --zx-ai-400: #9B7AFA;
+  --zx-ai-500: #7B5CFA;
+  --zx-ai-600: #6A4DE8;
+  --zx-ai-700: #5A3ED4;
+  --zx-ai-800: #4A30B0;
+  --zx-ai-900: #3B248C;
+  --zx-ai-secondary: #25B7CC;
+  --zx-ai-secondary-light: #E0F7FA;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   2. SEMANTIC TOKENS — LIGHT THEME (default)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Background & Surfaces ── */
+  --zx-bg:                var(--zx-neutral-50);
+  --zx-canvas:            var(--zx-neutral-0);
+  --zx-sidebar:           var(--zx-neutral-0);
+  --zx-topbar:            var(--zx-neutral-0);
+  --zx-surface-panel:     var(--zx-neutral-0);
+  --zx-surface-raised:    var(--zx-neutral-0);
+  --zx-surface-card:      var(--zx-neutral-0);
+  --zx-surface-card-hover:var(--zx-neutral-25);
+  --zx-surface-input:     var(--zx-neutral-0);
+  --zx-surface-selected:  var(--zx-brand-50);
+  --zx-surface-subtle:    var(--zx-neutral-100);
+  --zx-surface-floating:  var(--zx-neutral-0);
+  --zx-surface-overlay:   rgba(0, 0, 0, 0.5);
+  --zx-surface-tooltip:   var(--zx-neutral-900);
+  --zx-surface-spotlight: rgba(88, 108, 255, 0.04);
+
+  /* ── Text ── */
+  --zx-text:              var(--zx-neutral-900);
+  --zx-text-strong:       var(--zx-neutral-1000);
+  --zx-text-muted:        var(--zx-neutral-600);
+  --zx-text-faint:        var(--zx-neutral-500);
+  --zx-text-disabled:     var(--zx-neutral-400);
+  --zx-text-inverse:      var(--zx-neutral-0);
+  --zx-text-on-brand:     #FFFFFF;
+  --zx-text-tooltip:      var(--zx-neutral-0);
+
+  /* ── Borders ── */
+  --zx-border-subtle:     var(--zx-neutral-150);
+  --zx-border:            var(--zx-neutral-200);
+  --zx-border-strong:     var(--zx-neutral-300);
+  --zx-border-active:     var(--zx-brand-500);
+  --zx-border-selected:   var(--zx-brand-500);
+  --zx-border-focus:      var(--zx-brand-500);
+  --zx-border-danger:     var(--zx-danger-500);
+  --zx-border-success:    var(--zx-success-500);
+  --zx-border-luminous:   rgba(88, 108, 255, 0.45);
+
+  /* ── Semantic Status Families ── */
+  /* Success */
+  --zx-success-surface:        rgba(22, 138, 91, 0.08);
+  --zx-success-surface-strong: rgba(22, 138, 91, 0.15);
+  --zx-success-border:         rgba(22, 138, 91, 0.30);
+  --zx-success-icon:           var(--zx-success-500);
+  --zx-success-text:           var(--zx-success-700);
+  --zx-success-strong:         var(--zx-success-800);
+  --zx-success-glow:           0 0 0 1px rgba(22, 138, 91, 0.22), 0 12px 34px rgba(22, 138, 91, 0.12);
+
+  /* Warning */
+  --zx-warning-surface:        rgba(184, 115, 18, 0.08);
+  --zx-warning-surface-strong: rgba(184, 115, 18, 0.15);
+  --zx-warning-border:         rgba(184, 115, 18, 0.30);
+  --zx-warning-icon:           var(--zx-warning-500);
+  --zx-warning-text:           var(--zx-warning-700);
+  --zx-warning-strong:         var(--zx-warning-800);
+  --zx-warning-glow:           0 0 0 1px rgba(184, 115, 18, 0.22), 0 12px 34px rgba(184, 115, 18, 0.10);
+
+  /* Danger */
+  --zx-danger-surface:         rgba(196, 61, 77, 0.08);
+  --zx-danger-surface-strong:  rgba(196, 61, 77, 0.15);
+  --zx-danger-border:          rgba(196, 61, 77, 0.30);
+  --zx-danger-icon:            var(--zx-danger-500);
+  --zx-danger-text:            var(--zx-danger-700);
+  --zx-danger-strong:          var(--zx-danger-800);
+  --zx-danger-glow:            0 0 0 1px rgba(196, 61, 77, 0.22), 0 12px 34px rgba(196, 61, 77, 0.10);
+
+  /* Info */
+  --zx-info-surface:           rgba(47, 111, 216, 0.08);
+  --zx-info-surface-strong:    rgba(47, 111, 216, 0.15);
+  --zx-info-border:            rgba(47, 111, 216, 0.30);
+  --zx-info-icon:              var(--zx-info-500);
+  --zx-info-text:              var(--zx-info-700);
+  --zx-info-strong:            var(--zx-info-800);
+  --zx-info-glow:              0 0 0 1px rgba(47, 111, 216, 0.22), 0 12px 34px rgba(47, 111, 216, 0.10);
+
+  /* AI / Intelligence */
+  --zx-ai-surface:             rgba(123, 92, 250, 0.06);
+  --zx-ai-surface-strong:      rgba(123, 92, 250, 0.12);
+  --zx-ai-border:              rgba(123, 92, 250, 0.30);
+  --zx-ai-text:                var(--zx-ai-600);
+  --zx-ai-icon:                var(--zx-ai-500);
+  --zx-ai-glow:                0 0 0 1px rgba(123, 92, 250, 0.22), 0 12px 36px rgba(71, 89, 231, 0.16);
+
+  /* ── Brand / Accent ── */
+  --zx-accent:             var(--zx-brand-500);
+  --zx-accent-hover:       var(--zx-brand-600);
+  --zx-accent-active:      var(--zx-brand-700);
+  --zx-accent-surface:     var(--zx-brand-50);
+  --zx-accent-border:      rgba(88, 108, 255, 0.35);
+
+  /* ── Elevation / Shadows ── */
+  --zx-shadow-flat:        none;
+  --zx-shadow-raised:      0 1px 2px rgba(14, 20, 30, 0.06), 0 1px 3px rgba(14, 20, 30, 0.04);
+  --zx-shadow-floating:    0 4px 12px rgba(14, 20, 30, 0.08), 0 1px 3px rgba(14, 20, 30, 0.06);
+  --zx-shadow-overlay:     0 16px 48px rgba(14, 20, 30, 0.12), 0 4px 12px rgba(14, 20, 30, 0.08);
+  --zx-shadow-spotlight:   0 0 0 1px rgba(88, 108, 255, 0.15), 0 16px 48px rgba(88, 108, 255, 0.08);
+
+  /* ── Typography ── */
+  --zx-font-sans:   "Sora", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --zx-font-mono:   "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --zx-font-arabic: "IBM Plex Sans Arabic", "Sora", "Segoe UI", Tahoma, Arial, sans-serif;
+
+  /* Display */
+  --zx-display-lg-size:   36px;
+  --zx-display-lg-weight: 800;
+  --zx-display-lg-lh:     1.15;
+  --zx-display-lg-ls:     -0.6px;
+
+  --zx-display-md-size:   28px;
+  --zx-display-md-weight: 700;
+  --zx-display-md-lh:     1.2;
+  --zx-display-md-ls:     -0.4px;
+
+  /* Page */
+  --zx-page-title-size:   22px;
+  --zx-page-title-weight: 700;
+  --zx-page-title-lh:     1.25;
+  --zx-page-title-ls:     -0.3px;
+
+  --zx-page-subtitle-size:   16px;
+  --zx-page-subtitle-weight: 500;
+  --zx-page-subtitle-lh:     1.4;
+
+  /* Section */
+  --zx-section-title-size:    15px;
+  --zx-section-title-weight:  700;
+  --zx-section-title-lh:      1.3;
+
+  --zx-section-subtitle-size: 13px;
+  --zx-section-subtitle-weight: 500;
+  --zx-section-subtitle-lh:    1.4;
+
+  /* Body */
+  --zx-body-lg-size:   16px;
+  --zx-body-lg-weight: 400;
+  --zx-body-lg-lh:     1.5;
+
+  --zx-body-size:      14px;
+  --zx-body-weight:    400;
+  --zx-body-lh:        1.5;
+
+  --zx-body-sm-size:   13px;
+  --zx-body-sm-weight: 400;
+  --zx-body-sm-lh:     1.45;
+
+  /* Utility */
+  --zx-label-size:     13px;
+  --zx-label-weight:   600;
+  --zx-label-lh:       1.3;
+
+  --zx-label-sm-size:  11px;
+  --zx-label-sm-weight: 600;
+  --zx-label-sm-lh:    1.3;
+
+  --zx-overline-size:  10px;
+  --zx-overline-weight: 700;
+  --zx-overline-lh:    1.4;
+  --zx-overline-ls:    1px;
+
+  --zx-caption-size:   11px;
+  --zx-caption-weight: 400;
+  --zx-caption-lh:     1.4;
+
+  --zx-metadata-size:  10px;
+  --zx-metadata-weight: 500;
+  --zx-metadata-lh:    1.4;
+
+  --zx-mono-size:      13px;
+  --zx-mono-weight:    500;
+  --zx-mono-lh:        1.45;
+
+  /* ── Spacing Scale ── */
+  --zx-space-0:   0;
+  --zx-space-1:   2px;
+  --zx-space-2:   4px;
+  --zx-space-3:   6px;
+  --zx-space-4:   8px;
+  --zx-space-5:   10px;
+  --zx-space-6:   12px;
+  --zx-space-7:   16px;
+  --zx-space-8:   20px;
+  --zx-space-9:   24px;
+  --zx-space-10:  32px;
+  --zx-space-11:  40px;
+  --zx-space-12:  48px;
+  --zx-space-13:  64px;
+  --zx-space-14:  80px;
+
+  /* ── Radius ── */
+  --zx-radius-xs:   4px;
+  --zx-radius-sm:   6px;
+  --zx-radius-md:   8px;
+  --zx-radius-lg:   10px;
+  --zx-radius-xl:   12px;
+  --zx-radius-2xl:  16px;
+  --zx-radius-pill: 999px;
+
+  /* ── Row & Control Heights ── */
+  --zx-row-compact:     36px;
+  --zx-row-standard:    44px;
+  --zx-row-comfortable: 52px;
+  --zx-control-compact:     32px;
+  --zx-control-standard:    36px;
+  --zx-control-comfortable: 40px;
+
+  /* ── Motion ── */
+  --zx-motion-instant:    80ms;
+  --zx-motion-micro:      140ms;
+  --zx-motion-standard:   220ms;
+  --zx-motion-context:    320ms;
+  --zx-motion-expressive: 640ms;
+  --zx-motion-brand:      900ms;
+
+  --zx-ease-productive: cubic-bezier(0.2, 0, 0, 1);
+  --zx-ease-enter:      cubic-bezier(0.16, 1, 0.3, 1);
+  --zx-ease-exit:       cubic-bezier(0.4, 0, 1, 1);
+  --zx-ease-expressive: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  /* ── Focus ── */
+  --zx-focus-ring: 0 0 0 2px var(--zx-bg), 0 0 0 4px var(--zx-brand-500);
+  --zx-focus-ring-danger: 0 0 0 2px var(--zx-bg), 0 0 0 4px var(--zx-danger-500);
+
+  /* ── Z-Index Layers ── */
+  --zx-z-base:     0;
+  --zx-z-sticky:   100;
+  --zx-z-dropdown: 200;
+  --zx-z-overlay:  300;
+  --zx-z-modal:    400;
+  --zx-z-toast:    500;
+  --zx-z-tooltip:  600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3. DARK THEME OVERRIDES
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+[data-theme="dark"] {
+  /* Official ZainX Dark Palette: Obsidian #0A0F23 + Deep Navy #0D1B3D */
+  --zx-bg:                 #0A0F23;
+  --zx-canvas:             #0A0F23;
+  --zx-sidebar:            #080C1C;
+  --zx-topbar:             #0A0F23;
+  --zx-surface-panel:      #0D1B3D;
+  --zx-surface-raised:     #13234F;
+  --zx-surface-card:       #0D1B3D;
+  --zx-surface-card-hover: #13234F;
+  --zx-surface-input:      #080C1C;
+  --zx-surface-selected:   rgba(37, 99, 235, 0.16);
+  --zx-surface-subtle:     #101C38;
+  --zx-surface-floating:   #13234F;
+  --zx-surface-overlay:    rgba(5, 8, 20, 0.75);
+  --zx-surface-spotlight:  rgba(0, 224, 198, 0.04);
+
+  /* Neutrals */
+  --zx-neutral-0:    #0A0F23;
+  --zx-neutral-25:   #0D1B3D;
+  --zx-neutral-50:   #101C38;
+  --zx-neutral-100:  #13234F;
+  --zx-neutral-150:  #1A2D60;
+  --zx-neutral-200:  #253B78;
+  --zx-neutral-300:  #364F96;
+  --zx-neutral-400:  #64748B;
+  --zx-neutral-500:  #94A3B8;
+  --zx-neutral-600:  #CBD5E1;
+  --zx-neutral-700:  #E2E8F0;
+  --zx-neutral-800:  #F1F5F9;
+  --zx-neutral-850:  #F8FAFC;
+  --zx-neutral-900:  #FFFFFF;
+  --zx-neutral-950:  #FFFFFF;
+  --zx-neutral-1000: #FFFFFF;
+
+  /* Borders */
+  --zx-border-subtle:   rgba(255, 255, 255, 0.06);
+  --zx-border:          rgba(255, 255, 255, 0.10);
+  --zx-border-strong:   rgba(255, 255, 255, 0.18);
+  --zx-border-luminous: rgba(0, 224, 198, 0.45);
+
+  /* Text */
+  --zx-text:            #F8FAFC;
+  --zx-text-strong:     #FFFFFF;
+  --zx-text-muted:      #94A3B8;
+  --zx-text-faint:      #64748B;
+  --zx-text-disabled:   #475569;
+  --zx-text-inverse:    #0A0F23;
+
+  /* Shadows deepen with brand glow */
+  --zx-shadow-raised:   0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
+  --zx-shadow-floating: 0 4px 14px rgba(0, 0, 0, 0.45), 0 1px 4px rgba(0, 0, 0, 0.30);
+  --zx-shadow-overlay:  0 20px 60px rgba(0, 0, 0, 0.65), 0 4px 14px rgba(0, 0, 0, 0.40);
+  --zx-shadow-spotlight:0 0 0 1px rgba(0, 224, 198, 0.25), 0 16px 48px rgba(37, 99, 235, 0.18);
+
+  /* Semantic surfaces adjust for dark */
+  --zx-success-surface:        rgba(22, 138, 91, 0.12);
+  --zx-success-surface-strong: rgba(22, 138, 91, 0.20);
+  --zx-success-text:           #34D399;
+  --zx-success-strong:         #6EE7B7;
+
+  --zx-warning-surface:        rgba(184, 115, 18, 0.12);
+  --zx-warning-surface-strong: rgba(184, 115, 18, 0.20);
+  --zx-warning-text:           #FBBF24;
+  --zx-warning-strong:         #FDE68A;
+
+  --zx-danger-surface:         rgba(196, 61, 77, 0.12);
+  --zx-danger-surface-strong:  rgba(196, 61, 77, 0.20);
+  --zx-danger-text:            #F87171;
+  --zx-danger-strong:          #FECDD3;
+
+  --zx-info-surface:           rgba(0, 178, 255, 0.12);
+  --zx-info-surface-strong:    rgba(0, 178, 255, 0.20);
+  --zx-info-text:              #38BDF8;
+  --zx-info-strong:            #7DD3FC;
+
+  --zx-ai-surface:             rgba(0, 224, 198, 0.08);
+  --zx-ai-surface-strong:      rgba(0, 224, 198, 0.16);
+  --zx-ai-text:                #00E0C6;
+
+  /* Focus ring adapts */
+  --zx-focus-ring: 0 0 0 2px var(--zx-bg), 0 0 0 4px var(--zx-brand-cyan);
+  --zx-text-tooltip: #FFFFFF;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   4. REDUCED MOTION
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --zx-motion-instant:    0ms;
+    --zx-motion-micro:      0ms;
+    --zx-motion-standard:   0ms;
+    --zx-motion-context:    80ms;
+    --zx-motion-expressive: 120ms;
+    --zx-motion-brand:      120ms;
+  }
+}
+
+/* Simulated reduced motion via JS toggle */
+.reduced-motion-forced {
+  --zx-motion-instant:    0ms !important;
+  --zx-motion-micro:      0ms !important;
+  --zx-motion-standard:   0ms !important;
+  --zx-motion-context:    80ms !important;
+  --zx-motion-expressive: 120ms !important;
+  --zx-motion-brand:      120ms !important;
+}

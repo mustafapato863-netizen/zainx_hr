@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ZainX Workforce — Design System</title>
+  <link rel="icon" type="image/png" href="brand/zainx-mark.png">
+  <link rel="stylesheet" href="tokens.css">
+  <link rel="stylesheet" href="foundations.css">
+  <link rel="stylesheet" href="components.css">
+  <link rel="stylesheet" href="signature.css">
+</head>
+<body>
+
+<div class="ds-app" id="app">
+
+  <!-- ═══════════ DESIGN SYSTEM SIDEBAR ═══════════ -->
+  <aside class="ds-sidebar" id="dsSidebar" aria-label="Design system navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Design System v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav" aria-label="Design system sections">
+      <p class="ds-nav-group">OVERVIEW</p>
+      <a class="ds-nav-link active" href="index.html" data-page="index">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Overview
+      </a>
+
+      <p class="ds-nav-group">FOUNDATIONS</p>
+      <a class="ds-nav-link" href="pages/foundations.html" data-page="foundations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Colors · Typography · Spacing
+      </a>
+
+      <p class="ds-nav-group">COMPONENTS</p>
+      <a class="ds-nav-link" href="pages/controls.html" data-page="controls">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Buttons · Inputs · Forms
+      </a>
+      <a class="ds-nav-link" href="pages/navigation.html" data-page="navigation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Navigation · Sidebar · Tabs
+      </a>
+      <a class="ds-nav-link" href="pages/data.html" data-page="data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="14" y="6" width="3" height="12" rx="1"/></svg>
+        Data Grid · Filters · Charts
+      </a>
+      <a class="ds-nav-link" href="pages/feedback.html" data-page="feedback">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts · Loading · Errors
+      </a>
+      <a class="ds-nav-link" href="pages/overlays.html" data-page="overlays">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dialogs · Drawers · Menus
+      </a>
+
+      <p class="ds-nav-group">PRODUCT</p>
+      <a class="ds-nav-link" href="pages/product.html" data-page="product">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        People · Payroll · Recruitment · AI
+      </a>
+
+      <p class="ds-nav-group">SIGNATURE</p>
+      <a class="ds-nav-link" href="pages/signature.html" data-page="signature">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Motion · Spotlight · Access Gate
+      </a>
+
+      <p class="ds-nav-group">SCREENS</p>
+      <a class="ds-nav-link" href="screens/01-employee-directory.html" data-page="screen-01">Employee Directory</a>
+      <a class="ds-nav-link" href="screens/03-payroll-run.html" data-page="screen-03">Payroll Run</a>
+      <a class="ds-nav-link" href="screens/05-recruitment-pipeline.html" data-page="screen-05">Recruitment Pipeline</a>
+      <a class="ds-nav-link" href="screens/12-login.html" data-page="screen-12">Login</a>
+    </nav>
+
+    <div class="ds-sidebar-footer">
+      <span class="t-metadata">ZainX Workforce v2.0</span>
+      <span class="t-metadata t-faint">Ref · Design System</span>
+    </div>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="ds-main" id="dsMain">
+
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <button class="ds-sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="ds-breadcrumb">
+          <span>Design System</span>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Overview</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button" title="Toggle theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Theme</span>
+        </button>
+        <button class="ds-control-btn" id="rtlToggle" type="button" title="Toggle RTL">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+          <span>RTL</span>
+        </button>
+        <button class="ds-control-btn" id="densityToggle" type="button" title="Toggle density">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          <span>Density</span>
+        </button>
+        <button class="ds-control-btn" id="motionToggle" type="button" title="Toggle motion">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Motion</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="ds-content">
+
+      <!-- Hero -->
+      <section class="ds-hero">
+        <div class="flex justify-between items-start flex-wrap gap-4">
+          <div>
+            <div class="ds-hero-badge t-overline">OFFICIAL BRAND IDENTITY & DESIGN SYSTEM v2.1</div>
+            <h1 class="t-display-lg" style="display: flex; align-items: center; gap: 12px;">
+              <img src="brand/zainx-mark.png" alt="ZainX Logo" width="36" height="36" style="object-fit: contain;">
+              <span>ZainX Workforce</span>
+            </h1>
+            <p class="t-page-subtitle" style="color: var(--zx-brand-cyan); font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;">SMARTER BUSINESS. ONE SYSTEM.</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="ds-badge ds-badge-ai">✦ Typeface: Sora</span>
+            <span class="ds-badge ds-badge-neutral">#0A0F23 · #0D1B3D · #2563EB · #00E0C6</span>
+          </div>
+        </div>
+
+        <p class="t-body-sm t-muted" style="max-width: 680px; margin-top: var(--zx-space-4);">
+          "The system is quiet. Important things glow." — A unified, production-grade enterprise design system for Workforce, HR, Payroll, Compliance, Recruitment, and AI.
+          Supports ~65 screens, 8 canonical page patterns, Dark/Light modes, bilingual RTL/LTR, and 3 density modes.
+        </p>
+
+        <!-- Signature Gradient Strip -->
+        <div style="height: 4px; border-radius: var(--zx-radius-pill); background: linear-gradient(90deg, #2563EB 0%, #00B2FF 50%, #00E0C6 100%); margin-top: var(--zx-space-6); box-shadow: 0 0 12px rgba(0, 224, 198, 0.4);"></div>
+      </section>
+
+      <!-- Design Principles -->
+      <section class="ds-section">
+        <h2 class="t-section-title">Design Principles</h2>
+        <div class="ds-principles-grid">
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-brand-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 2v20M2 12h20"/></svg>
+            </div>
+            <h3 class="t-label">Operational First</h3>
+            <p class="t-caption">Users enter to approve, calculate, resolve, and act. Dashboards support work but never dominate workflows.</p>
+          </article>
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-ai-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+            </div>
+            <h3 class="t-label">Quiet Foundation</h3>
+            <p class="t-caption">85–90% of the interface is calm, neutral, and dense. Strong visual energy is reserved for what truly matters.</p>
+          </article>
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-success-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </div>
+            <h3 class="t-label">Light is an Event</h3>
+            <p class="t-caption">Spotlight, glow, and illumination only for: major KPIs, AI insights, payroll outcomes, security, and brand moments.</p>
+          </article>
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-warning-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </div>
+            <h3 class="t-label">Financial Trust</h3>
+            <p class="t-caption">Payroll demands accounting-grade clarity. Numeric hierarchy, variance context, and audit traceability come first.</p>
+          </article>
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-info-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3 class="t-label">Permission-Aware</h3>
+            <p class="t-caption">Every surface respects role, scope, and sensitivity. Access control is dignified, not playful.</p>
+          </article>
+
+          <article class="ds-principle-card">
+            <div class="ds-principle-icon" style="--accent: var(--zx-danger-500);">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3 class="t-label">Bilingual Native</h3>
+            <p class="t-caption">Arabic RTL and English LTR from the same component system. Mixed-language content works naturally.</p>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Quick Stats -->
+      <section class="ds-section">
+        <h2 class="t-section-title">System Coverage</h2>
+        <div class="ds-stats-grid">
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">280+</span>
+            <span class="t-caption">Design Tokens</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">14</span>
+            <span class="t-caption">Typography Levels</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">8</span>
+            <span class="t-caption">Page Patterns</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">130+</span>
+            <span class="t-caption">Component Variants</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">65</span>
+            <span class="t-caption">Product Screens</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">3</span>
+            <span class="t-caption">Card Levels</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">6</span>
+            <span class="t-caption">Motion Tiers</span>
+          </div>
+          <div class="ds-stat">
+            <span class="ds-stat-value t-mono">13</span>
+            <span class="t-caption">Stress-Test Screens</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Card Hierarchy Preview -->
+      <section class="ds-section">
+        <h2 class="t-section-title">Card Hierarchy</h2>
+        <p class="t-body-sm t-muted" style="margin-bottom: var(--zx-space-7);">Three deliberate visual emphasis levels. Budget: 1 Spotlight per viewport region, maximum 2 glow treatments above the fold.</p>
+        <div class="ds-card-preview-grid">
+
+          <!-- Utility Card -->
+          <article class="ds-card ds-card-utility">
+            <span class="t-overline">LEVEL 1 — UTILITY</span>
+            <strong class="t-section-title">Exceptions</strong>
+            <span class="t-mono" style="font-size: 28px; font-weight: 800;">12</span>
+            <span class="t-caption">3 require action today</span>
+          </article>
+
+          <!-- Emphasis Card -->
+          <article class="ds-card ds-card-emphasis">
+            <span class="t-overline">LEVEL 2 — EMPHASIS</span>
+            <strong class="t-section-title">Approval Pending</strong>
+            <span class="t-mono" style="font-size: 28px; font-weight: 800;">1</span>
+            <span class="t-caption">CFO sign-off required</span>
+          </article>
+
+          <!-- Spotlight Card -->
+          <article class="ds-card ds-card-spotlight" id="spotlightDemo">
+            <div class="ds-spotlight-glow"></div>
+            <span class="t-overline">LEVEL 3 — SPOTLIGHT</span>
+            <strong class="t-section-title">Total Net Payroll</strong>
+            <span class="t-mono" style="font-size: 28px; font-weight: 800;">EGP 8,428,600</span>
+            <span class="ds-badge ds-badge-success">+4.8% vs July</span>
+          </article>
+
+        </div>
+      </section>
+
+      <!-- Page Patterns -->
+      <section class="ds-section">
+        <h2 class="t-section-title">8 Page Patterns</h2>
+        <div class="ds-patterns-grid">
+          <div class="ds-pattern-chip">01 Operational Dashboard</div>
+          <div class="ds-pattern-chip">02 Data Grid / List</div>
+          <div class="ds-pattern-chip">03 Detail Workspace</div>
+          <div class="ds-pattern-chip">04 Guided Process</div>
+          <div class="ds-pattern-chip">05 Kanban / Pipeline</div>
+          <div class="ds-pattern-chip">06 Calendar / Schedule</div>
+          <div class="ds-pattern-chip">07 Inbox / Exceptions</div>
+          <div class="ds-pattern-chip">08 Configuration / Builder</div>
+        </div>
+      </section>
+
+      <!-- Anti-Generic -->
+      <section class="ds-section ds-section-caution">
+        <h2 class="t-section-title">What This System Is Not</h2>
+        <div class="ds-dont-grid">
+          <span class="ds-dont-chip">❌ Generic shadcn admin</span>
+          <span class="ds-dont-chip">❌ Purple AI SaaS dashboard</span>
+          <span class="ds-dont-chip">❌ Linear clone</span>
+          <span class="ds-dont-chip">❌ Glassmorphism UI</span>
+          <span class="ds-dont-chip">❌ Bento card grid</span>
+          <span class="ds-dont-chip">❌ Cyberpunk payroll</span>
+          <span class="ds-dont-chip">❌ Marketing-style spacing</span>
+          <span class="ds-dont-chip">❌ Every card glowing</span>
+        </div>
+      </section>
+
+      <!-- Audit & Enhancement v2.1 Package -->
+      <section class="ds-section">
+        <div class="flex justify-between items-center" style="margin-bottom: var(--zx-space-4);">
+          <div>
+            <h2 class="t-section-title">Audit & Enhancement v2.1 Specifications</h2>
+            <p class="t-caption">Canonical design system architecture, audit findings, implementation contracts, and prompt specifications.</p>
+          </div>
+          <span class="ds-badge ds-badge-ai">✦ v2.1 Canonical</span>
+        </div>
+
+        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--zx-space-4);">
+          <div class="ds-card ds-card-utility">
+            <strong class="t-label">00 · Audit Report</strong>
+            <p class="t-caption">Deep audit of foundations, components, contracts, RTL, and density.</p>
+            <a class="t-metadata" href="enhancement/00_AUDIT_REPORT.md" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">Read 00_AUDIT_REPORT.md →</a>
+          </div>
+
+          <div class="ds-card ds-card-emphasis">
+            <strong class="t-label">01 · Master Build Prompt v3</strong>
+            <p class="t-caption">Phased enterprise build prompt forcing complete system generation.</p>
+            <a class="t-metadata" href="enhancement/01_MASTER_BUILD_PROMPT_v3.md" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">Read 01_MASTER_BUILD_PROMPT_v3.md →</a>
+          </div>
+
+          <div class="ds-card ds-card-utility">
+            <strong class="t-label">02 · Detailed Usage Guide</strong>
+            <p class="t-caption">Token rules, density modes, card hierarchy, and layout specs.</p>
+            <a class="t-metadata" href="enhancement/02_DETAILED_USAGE_GUIDE.md" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">Read 02_DETAILED_USAGE_GUIDE.md →</a>
+          </div>
+
+          <div class="ds-card ds-card-utility">
+            <strong class="t-label">03 · Canonical Component Inventory</strong>
+            <p class="t-caption">Comprehensive inventory of all primitives, controls, grids, and overlays.</p>
+            <a class="t-metadata" href="enhancement/03_CANONICAL_COMPONENT_INVENTORY.md" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">Read 03_CANONICAL_COMPONENT_INVENTORY.md →</a>
+          </div>
+
+          <div class="ds-card ds-card-utility">
+            <strong class="t-label">09 · React/TS Implementation Contract</strong>
+            <p class="t-caption">Component prop contracts, strict typing rules, and state interfaces.</p>
+            <a class="t-metadata" href="enhancement/09_REACT_TYPESCRIPT_IMPLEMENTATION_CONTRACT.md" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">Read 09_REACT_TYPESCRIPT_...md →</a>
+          </div>
+
+          <div class="ds-card ds-card-utility">
+            <strong class="t-label">Semantic Tokens v2.1</strong>
+            <p class="t-caption">Canonical machine-readable JSON token specification.</p>
+            <a class="t-metadata" href="enhancement/tokens.semantic.v2.1.json" target="_blank" style="color: var(--zx-accent); margin-top: var(--zx-space-2); display: inline-block;">View tokens.semantic.v2.1.json →</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="ds-footer">
+        <p class="t-metadata t-faint">Operationally serious. Visually memorable. Intelligently restrained.</p>
+        <p class="t-metadata t-faint">ZainX Workforce Design System · Reference v2.1 · 2026</p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

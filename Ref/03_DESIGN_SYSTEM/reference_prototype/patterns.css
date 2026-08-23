@@ -1,0 +1,421 @@
+/* =============================================================================
+   ZAINX WORKFORCE DESIGN SYSTEM — PATTERNS & OVERLAYS v2.0
+   Data Grid, Filters, Saved Views, Overlays, Tabs, Drawers, and Feedbacks.
+   ============================================================================= */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   1. DATA GRID SYSTEM (Spec §21)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-grid-wrap {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--zx-shadow-raised);
+  display: flex;
+  flex-direction: column;
+}
+
+.zx-grid-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--zx-space-4) var(--zx-space-6);
+  border-bottom: 1px solid var(--zx-border);
+  gap: var(--zx-space-4);
+  background: var(--zx-canvas);
+}
+
+.zx-grid-toolbar-start,
+.zx-grid-toolbar-end {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-3);
+}
+
+.zx-grid-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.zx-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: start;
+}
+
+.zx-table th {
+  background: var(--zx-surface-subtle);
+  color: var(--zx-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: var(--zx-cell-py, 8px) var(--zx-cell-px, 16px);
+  border-bottom: 1px solid var(--zx-border);
+  white-space: nowrap;
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  user-select: none;
+}
+
+.zx-table th.sortable {
+  cursor: pointer;
+}
+
+.zx-table th.sortable:hover {
+  color: var(--zx-text-strong);
+}
+
+.zx-table td {
+  padding: var(--zx-cell-py, 8px) var(--zx-cell-px, 16px);
+  border-bottom: 1px solid var(--zx-border-subtle);
+  font-size: 12.5px;
+  color: var(--zx-text);
+  height: var(--zx-row-height, 36px);
+  white-space: nowrap;
+}
+
+.zx-table tr:hover td {
+  background-color: var(--zx-surface-card-hover);
+}
+
+.zx-table tr.selected td {
+  background-color: var(--zx-surface-selected);
+}
+
+.zx-table td.num,
+.zx-table th.num {
+  text-align: end;
+  font-family: var(--zx-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bulk Action Toolbar */
+.zx-bulk-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--zx-space-3) var(--zx-space-6);
+  background: var(--zx-accent-surface);
+  border-bottom: 1px solid var(--zx-accent-border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--zx-accent);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   2. FILTER BAR & SAVED VIEWS (Spec §22, §23)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-3);
+  flex-wrap: wrap;
+}
+
+.zx-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-2);
+  padding: var(--zx-space-1) var(--zx-space-4);
+  background: var(--zx-surface-subtle);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-sm);
+  font-size: 11.5px;
+  color: var(--zx-text);
+  cursor: pointer;
+  transition: all var(--zx-motion-micro);
+}
+
+.zx-filter-chip:hover {
+  border-color: var(--zx-border-strong);
+  background: var(--zx-canvas);
+}
+
+.zx-filter-chip.active {
+  background: var(--zx-accent-surface);
+  border-color: var(--zx-accent);
+  color: var(--zx-accent);
+  font-weight: 600;
+}
+
+.zx-saved-views {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-1);
+  border-inline-end: 1px solid var(--zx-border);
+  padding-inline-end: var(--zx-space-4);
+  margin-inline-end: var(--zx-space-2);
+}
+
+.zx-view-tab {
+  padding: var(--zx-space-2) var(--zx-space-4);
+  border-radius: var(--zx-radius-xs);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--zx-text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: all var(--zx-motion-micro);
+}
+
+.zx-view-tab:hover {
+  color: var(--zx-text);
+  background: var(--zx-surface-subtle);
+}
+
+.zx-view-tab.active {
+  color: var(--zx-text-strong);
+  font-weight: 700;
+  background: var(--zx-surface-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3. TABS (Spec §28)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-tabs-underline {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-6);
+  border-bottom: 1px solid var(--zx-border);
+}
+
+.zx-tab-underline {
+  padding: var(--zx-space-4) 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--zx-text-muted);
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  margin-bottom: -1px;
+  transition: all var(--zx-motion-micro);
+}
+
+.zx-tab-underline:hover {
+  color: var(--zx-text);
+}
+
+.zx-tab-underline.active {
+  color: var(--zx-accent);
+  border-bottom-color: var(--zx-accent);
+  font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   4. DRAWERS & SIDE PANELS (Spec §39)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--zx-surface-overlay);
+  backdrop-filter: blur(2px);
+  z-index: var(--zx-z-overlay);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--zx-motion-context) var(--zx-ease-productive);
+}
+
+.zx-drawer-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zx-drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  inset-inline-end: 0;
+  width: 480px;
+  max-width: 90vw;
+  background: var(--zx-canvas);
+  border-inline-start: 1px solid var(--zx-border);
+  box-shadow: var(--zx-shadow-overlay);
+  z-index: var(--zx-z-modal);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(100%);
+  transition: transform var(--zx-motion-context) var(--zx-ease-productive);
+}
+
+[dir="rtl"] .zx-drawer {
+  transform: translateX(-100%);
+}
+
+.zx-drawer.open {
+  transform: translateX(0);
+}
+
+.zx-drawer-header {
+  padding: var(--zx-space-6) var(--zx-space-8);
+  border-bottom: 1px solid var(--zx-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zx-drawer-body {
+  padding: var(--zx-space-8);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-6);
+}
+
+.zx-drawer-footer {
+  padding: var(--zx-space-6) var(--zx-space-8);
+  border-top: 1px solid var(--zx-border);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--zx-space-3);
+  background: var(--zx-surface-subtle);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   5. DIALOGS & MODALS (Spec §38)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background: var(--zx-surface-overlay);
+  backdrop-filter: blur(3px);
+  z-index: var(--zx-z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zx-space-8);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--zx-motion-standard) var(--zx-ease-productive);
+}
+
+.zx-dialog-backdrop.open {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.zx-dialog {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-xl);
+  box-shadow: var(--zx-shadow-overlay);
+  width: 520px;
+  max-width: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transform: scale(0.96) translateY(8px);
+  transition: transform var(--zx-motion-standard) var(--zx-ease-enter);
+}
+
+.zx-dialog-backdrop.open .zx-dialog {
+  transform: scale(1) translateY(0);
+}
+
+.zx-dialog-header {
+  padding: var(--zx-space-7) var(--zx-space-8);
+  border-bottom: 1px solid var(--zx-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.zx-dialog-body {
+  padding: var(--zx-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-4);
+}
+
+.zx-dialog-footer {
+  padding: var(--zx-space-6) var(--zx-space-8);
+  border-top: 1px solid var(--zx-border);
+  background: var(--zx-surface-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--zx-space-3);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   6. ALERTS & CALLOUTS (Spec §36)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--zx-space-4);
+  padding: var(--zx-space-5) var(--zx-space-6);
+  border-radius: var(--zx-radius-md);
+  border: 1px solid var(--zx-border);
+  background: var(--zx-surface-subtle);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.zx-alert-info {
+  background: var(--zx-info-surface);
+  border-color: var(--zx-info-border);
+  color: var(--zx-info-text);
+}
+
+.zx-alert-warning {
+  background: var(--zx-warning-surface);
+  border-color: var(--zx-warning-border);
+  color: var(--zx-warning-text);
+}
+
+.zx-alert-danger {
+  background: var(--zx-danger-surface);
+  border-color: var(--zx-danger-border);
+  color: var(--zx-danger-text);
+}
+
+.zx-alert-success {
+  background: var(--zx-success-surface);
+  border-color: var(--zx-success-border);
+  color: var(--zx-success-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   7. SKELETONS (Spec §46)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-skeleton {
+  background: var(--zx-surface-subtle);
+  border-radius: var(--zx-radius-xs);
+  position: relative;
+  overflow: hidden;
+}
+
+.zx-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent);
+  animation: zxShimmer 1.5s infinite;
+}
+
+@keyframes zxShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .zx-skeleton::after {
+    animation: none;
+  }
+}

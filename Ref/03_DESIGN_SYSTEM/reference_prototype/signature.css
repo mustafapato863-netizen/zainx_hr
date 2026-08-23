@@ -1,0 +1,336 @@
+/* =============================================================================
+   ZAINX WORKFORCE DESIGN SYSTEM — SIGNATURE MOTION & EFFECTS v2.0
+   "Light is an event, not decoration."
+   ============================================================================= */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   1. SIGNATURE SPOTLIGHT (Layer C - Signature Spotlight)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-spotlight-card {
+  position: relative;
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--zx-shadow-raised);
+  transition: border-color var(--zx-motion-standard) var(--zx-ease-productive),
+              box-shadow var(--zx-motion-standard) var(--zx-ease-productive);
+}
+
+.zx-spotlight-card:hover {
+  border-color: var(--zx-border-luminous);
+  box-shadow: var(--zx-shadow-spotlight);
+}
+
+.zx-spotlight-glow {
+  position: absolute;
+  top: var(--mouse-y, 50%);
+  left: var(--mouse-x, 50%);
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, rgba(0, 224, 198, 0.16) 0%, rgba(37, 99, 235, 0.10) 45%, transparent 70%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--zx-motion-standard) var(--zx-ease-productive);
+  z-index: 0;
+}
+
+.zx-spotlight-card:hover .zx-spotlight-glow {
+  opacity: 1;
+}
+
+.zx-spotlight-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* AI Spotlight Variant */
+.zx-spotlight-card.ai-variant {
+  border-color: rgba(123, 92, 250, 0.35);
+  box-shadow: var(--zx-ai-glow);
+}
+
+.zx-spotlight-card.ai-variant .zx-spotlight-glow {
+  background: radial-gradient(circle, rgba(123, 92, 250, 0.15) 0%, rgba(37, 183, 204, 0.08) 45%, transparent 70%);
+}
+
+/* Success / Finalized Spotlight Variant */
+.zx-spotlight-card.success-variant {
+  border-color: rgba(22, 138, 91, 0.35);
+  box-shadow: var(--zx-success-glow);
+}
+
+.zx-spotlight-card.success-variant .zx-spotlight-glow {
+  background: radial-gradient(circle, rgba(22, 138, 91, 0.15) 0%, transparent 70%);
+}
+
+@media (pointer: coarse) {
+  .zx-spotlight-glow {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   2. BRAND ENTRY & ASSEMBLY MOTION (Spec §14, 800–1000ms)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-brand-stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--zx-space-10) 0;
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-lg);
+  position: relative;
+  overflow: hidden;
+}
+
+.zx-brand-animated {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zx-brand-animated.animating {
+  animation: zxBrandAssemble var(--zx-motion-brand) var(--zx-ease-enter) forwards;
+}
+
+@keyframes zxBrandAssemble {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(12px);
+    filter: blur(4px);
+  }
+  30% {
+    opacity: 0.9;
+    transform: scale(1.03) translateY(-3px);
+    filter: blur(0);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.05) translateY(-1px);
+    box-shadow: 0 0 36px rgba(88, 108, 255, 0.55), 0 0 12px rgba(37, 183, 204, 0.4);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    box-shadow: 0 4px 20px rgba(88, 108, 255, 0.25);
+  }
+}
+
+/* Light sweep across brand mark */
+.zx-light-sweep {
+  position: relative;
+  overflow: hidden;
+}
+
+.zx-light-sweep::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.22) 50%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  pointer-events: none;
+}
+
+.zx-light-sweep.sweeping::after {
+  animation: zxSweep 750ms var(--zx-ease-productive) forwards;
+}
+
+@keyframes zxSweep {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3. ACCESS GATE / 403 PERMISSION MOTION (Spec §44, 300–600ms)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-access-gate {
+  border: 1px solid var(--zx-danger-border);
+  background: var(--zx-danger-surface);
+  border-radius: var(--zx-radius-lg);
+  padding: var(--zx-space-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-4);
+  position: relative;
+  overflow: hidden;
+}
+
+.zx-access-gate::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--zx-danger-icon), transparent);
+  transform: translateX(-100%);
+}
+
+.zx-access-gate.scanning::before {
+  animation: zxScan 900ms var(--zx-ease-productive) forwards;
+}
+
+@keyframes zxScan {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.zx-access-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--zx-radius-sm);
+  background: rgba(196, 61, 77, 0.12);
+  border: 1px solid var(--zx-danger-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--zx-danger-icon);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   4. AI CONTEXT SCAN / THINKING ANIMATION (Spec §93)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-ai-stage-tracker {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-2);
+  padding: var(--zx-space-4) var(--zx-space-6);
+  background: var(--zx-ai-surface);
+  border: 1px solid var(--zx-ai-border);
+  border-radius: var(--zx-radius-md);
+  font-family: var(--zx-font-mono);
+  font-size: 11px;
+}
+
+.zx-ai-step {
+  padding: var(--zx-space-1) var(--zx-space-3);
+  border-radius: var(--zx-radius-xs);
+  color: var(--zx-text-muted);
+  transition: all var(--zx-motion-standard) var(--zx-ease-productive);
+}
+
+.zx-ai-step.completed {
+  color: var(--zx-ai-text);
+  background: rgba(123, 92, 250, 0.12);
+}
+
+.zx-ai-step.active {
+  color: var(--zx-text-on-brand);
+  background: var(--zx-ai-500);
+  box-shadow: 0 0 10px rgba(123, 92, 250, 0.5);
+  font-weight: 700;
+  animation: zxAiPulse 1.4s infinite ease-in-out;
+}
+
+@keyframes zxAiPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.97); }
+}
+
+.zx-ai-arrow {
+  color: var(--zx-text-faint);
+  font-size: 9px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   5. SUCCESS RESOLUTION ANIMATION (Spec §108, 400–700ms)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-success-moment {
+  position: relative;
+  border-radius: var(--zx-radius-md);
+  padding: var(--zx-space-6) var(--zx-space-8);
+  background: var(--zx-success-surface);
+  border: 1px solid var(--zx-success-border);
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-4);
+  box-shadow: var(--zx-success-glow);
+}
+
+.zx-success-moment.resolving {
+  animation: zxSuccessPulse 650ms var(--zx-ease-enter) forwards;
+}
+
+@keyframes zxSuccessPulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(22, 138, 91, 0.4);
+    transform: scale(0.98);
+  }
+  50% {
+    box-shadow: 0 0 24px 4px rgba(22, 138, 91, 0.3);
+    transform: scale(1.01);
+  }
+  100% {
+    box-shadow: var(--zx-success-glow);
+    transform: scale(1);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   6. NEON ACCENT RULES (Spec §110)
+   1px glowing border fragments, soft internal tint, never cyberpunk.
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-luminous-edge-top {
+  position: relative;
+}
+
+.zx-luminous-edge-top::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 10%;
+  right: 10%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--zx-accent), transparent);
+  box-shadow: 0 0 8px var(--zx-accent);
+}
+
+.zx-luminous-edge-start {
+  position: relative;
+}
+
+.zx-luminous-edge-start::after {
+  content: "";
+  position: absolute;
+  top: 10%;
+  bottom: 10%;
+  inset-inline-start: 0;
+  width: 2px;
+  background: var(--zx-accent);
+  box-shadow: 0 0 10px var(--zx-accent);
+  border-radius: var(--zx-radius-pill);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   7. REDUCED MOTION SAFETY
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .zx-brand-animated.animating,
+  .zx-light-sweep.sweeping::after,
+  .zx-access-gate.scanning::before,
+  .zx-ai-step.active,
+  .zx-success-moment.resolving {
+    animation: none !important;
+    transform: none !important;
+  }
+}

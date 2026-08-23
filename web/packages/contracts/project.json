@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/contracts",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/contracts/src",
+  "projectType": "library",
+  "tags": ["scope:contracts", "type:lib"],
+  "targets": {
+    "generate": {
+      "command": "orval --config ./orval.config.ts"
+    }
+  }
+}

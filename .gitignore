@@ -1,0 +1,36 @@
+# Build outputs & caches
+bin/
+obj/
+dist/
+**/bin/
+**/obj/
+**/dist/
+**/node_modules/
+**/.nx/
+**/tmp/
+.pnpm-store/
+
+# Local Environment & Secrets
+deploy/docker/.env
+*.env
+*.env.local
+*.env.*.local
+
+# IDE & Editor Files
+.idea/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Testing & Reports
+playwright-report/
+**/playwright-report/
+test-results/
+**/test-results/
+
+# OS specific
+Thumbs.db
+[Dd]esktop.ini
+.DS_Store

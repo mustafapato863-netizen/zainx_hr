@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/approvals",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/approvals/src",
+  "projectType": "library",
+  "tags": ["scope:approvals", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

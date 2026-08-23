@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Controls & Forms — ZainX Design System</title>
+  <link rel="icon" type="image/png" href="../brand/zainx-mark.png">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../foundations.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../signature.css">
+</head>
+<body>
+
+<div class="ds-app" id="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="ds-sidebar" id="dsSidebar" aria-label="Design system navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="../brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Design System v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav" aria-label="Design system sections">
+      <p class="ds-nav-group">OVERVIEW</p>
+      <a class="ds-nav-link" href="../index.html" data-page="index">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Overview
+      </a>
+
+      <p class="ds-nav-group">FOUNDATIONS</p>
+      <a class="ds-nav-link" href="foundations.html" data-page="foundations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Colors · Typography · Spacing
+      </a>
+
+      <p class="ds-nav-group">COMPONENTS</p>
+      <a class="ds-nav-link active" href="controls.html" data-page="controls">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Buttons · Inputs · Forms
+      </a>
+      <a class="ds-nav-link" href="navigation.html" data-page="navigation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Navigation · Sidebar · Tabs
+      </a>
+      <a class="ds-nav-link" href="data.html" data-page="data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="14" y="6" width="3" height="12" rx="1"/></svg>
+        Data Grid · Filters · Charts
+      </a>
+      <a class="ds-nav-link" href="feedback.html" data-page="feedback">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts · Loading · Errors
+      </a>
+      <a class="ds-nav-link" href="overlays.html" data-page="overlays">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dialogs · Drawers · Menus
+      </a>
+
+      <p class="ds-nav-group">PRODUCT</p>
+      <a class="ds-nav-link" href="product.html" data-page="product">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        People · Payroll · Recruitment · AI
+      </a>
+
+      <p class="ds-nav-group">SIGNATURE</p>
+      <a class="ds-nav-link" href="signature.html" data-page="signature">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Motion · Spotlight · Access Gate
+      </a>
+
+      <p class="ds-nav-group">SCREENS</p>
+      <a class="ds-nav-link" href="../screens/01-employee-directory.html" data-page="screen-01">Employee Directory</a>
+      <a class="ds-nav-link" href="../screens/03-payroll-run.html" data-page="screen-03">Payroll Run</a>
+      <a class="ds-nav-link" href="../screens/05-recruitment-pipeline.html" data-page="screen-05">Recruitment Pipeline</a>
+      <a class="ds-nav-link" href="../screens/12-login.html" data-page="screen-12">Login</a>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="ds-main" id="dsMain">
+
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <button class="ds-sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="ds-breadcrumb">
+          <a href="../index.html">Design System</a>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Controls & Forms</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button" title="Toggle theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Theme</span>
+        </button>
+        <button class="ds-control-btn" id="rtlToggle" type="button" title="Toggle RTL">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+          <span>RTL</span>
+        </button>
+        <button class="ds-control-btn" id="densityToggle" type="button" title="Toggle density">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          <span>Density</span>
+        </button>
+        <button class="ds-control-btn" id="motionToggle" type="button" title="Toggle motion">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Motion</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="ds-content">
+
+      <div>
+        <span class="ds-hero-badge t-overline">COMPONENTS</span>
+        <h1 class="t-display-lg">Buttons, Inputs & Form Controls</h1>
+        <p class="t-page-subtitle">Production-grade enterprise primitives designed for speed, clarity, and dense data entry.</p>
+      </div>
+
+      <!-- 1. BUTTONS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">1. Button System (Spec §17)</h2>
+        
+        <div class="ds-card ds-card-utility" style="gap: var(--zx-space-6);">
+          <div class="t-label">Variants</div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button class="zx-btn zx-btn-primary" type="button">Primary Action</button>
+            <button class="zx-btn zx-btn-secondary" type="button">Secondary</button>
+            <button class="zx-btn zx-btn-ghost" type="button">Ghost / Tertiary</button>
+            <button class="zx-btn zx-btn-danger" type="button">Danger Subtle</button>
+            <button class="zx-btn zx-btn-danger-solid" type="button">Danger Solid</button>
+            <button class="zx-btn zx-btn-success" type="button">Success</button>
+            <button class="zx-btn zx-btn-ai" type="button">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg>
+              <span>AI Assist</span>
+            </button>
+            <button class="zx-btn zx-btn-primary loading" type="button">Loading</button>
+            <button class="zx-btn zx-btn-secondary" type="button" disabled>Disabled</button>
+          </div>
+
+          <div class="t-label" style="margin-top: var(--zx-space-4);">Sizes</div>
+          <div class="flex flex-wrap items-center gap-3">
+            <button class="zx-btn zx-btn-secondary zx-btn-xs" type="button">XS (26px)</button>
+            <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">SM (30px)</button>
+            <button class="zx-btn zx-btn-secondary zx-btn-md" type="button">MD (36px — Default)</button>
+            <button class="zx-btn zx-btn-secondary zx-btn-lg" type="button">LG (42px)</button>
+          </div>
+
+          <div class="t-label" style="margin-top: var(--zx-space-4);">Icon Buttons & Groups</div>
+          <div class="flex flex-wrap items-center gap-4">
+            <button class="zx-btn zx-btn-secondary zx-btn-icon" type="button" aria-label="Edit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+            </button>
+            <button class="zx-btn zx-btn-secondary zx-btn-icon" type="button" aria-label="Delete">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/></svg>
+            </button>
+            <div class="zx-btn-group">
+              <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">Day</button>
+              <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button" style="background: var(--zx-surface-subtle); color: var(--zx-text-strong);">Week</button>
+              <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">Month</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. INPUTS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">2. Inputs & Data Entry (Spec §18)</h2>
+
+        <div class="grid" style="grid-template-columns: repeat(2, 1fr); gap: var(--zx-space-6);">
+
+          <!-- Text Input -->
+          <div class="zx-field">
+            <label class="zx-label">Employee Full Name <span class="zx-required">*</span></label>
+            <input class="zx-input" type="text" placeholder="e.g. Ahmed Hassan" value="Ahmed Hassan">
+            <span class="zx-helper">Primary legal name as shown on National ID.</span>
+          </div>
+
+          <!-- Currency Input -->
+          <div class="zx-field">
+            <label class="zx-label">Base Monthly Salary <span class="zx-required">*</span></label>
+            <div class="zx-input-wrapper">
+              <span class="zx-input-addon">EGP</span>
+              <input class="zx-input currency" type="text" value="24,500.00">
+            </div>
+            <span class="zx-helper">Formatted with tabular numerals.</span>
+          </div>
+
+          <!-- Search Input with Icon -->
+          <div class="zx-field">
+            <label class="zx-label">Global Search</label>
+            <div class="zx-input-wrapper">
+              <span class="zx-input-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              </span>
+              <input class="zx-input has-icon" type="text" placeholder="Search people, payroll, rules… (⌘K)">
+            </div>
+          </div>
+
+          <!-- Select -->
+          <div class="zx-field">
+            <label class="zx-label">Department</label>
+            <select class="zx-select">
+              <option>Operations</option>
+              <option>Finance & Accounting</option>
+              <option>Engineering</option>
+              <option>Human Resources</option>
+            </select>
+          </div>
+
+          <!-- Validation Error State -->
+          <div class="zx-field error">
+            <label class="zx-label">Social Insurance Number <span class="zx-required">*</span></label>
+            <input class="zx-input" type="text" value="98765">
+            <span class="zx-helper">Invalid format. Egyptian Insurance ID must be 9 digits.</span>
+          </div>
+
+          <!-- Textarea -->
+          <div class="zx-field">
+            <label class="zx-label">Adjustment Reason</label>
+            <textarea class="zx-textarea" placeholder="Provide audit explanation for this compensation change…"></textarea>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 3. SELECTION CONTROLS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">3. Selection Controls (Spec §19)</h2>
+
+        <div class="ds-card ds-card-utility" style="gap: var(--zx-space-6);">
+          
+          <div class="flex items-center gap-8 flex-wrap">
+            <!-- Checkboxes -->
+            <div class="flex flex-col gap-3">
+              <div class="t-label">Checkboxes</div>
+              <label class="zx-checkbox"><input type="checkbox" checked> Checked</label>
+              <label class="zx-checkbox"><input type="checkbox" id="demoIndeterminate"> Indeterminate</label>
+              <label class="zx-checkbox"><input type="checkbox"> Unchecked</label>
+            </div>
+
+            <!-- Radios -->
+            <div class="flex flex-col gap-3">
+              <div class="t-label">Radio Buttons</div>
+              <label class="zx-radio"><input type="radio" name="r1" checked> Standard Calculation</label>
+              <label class="zx-radio"><input type="radio" name="r1"> Custom Rule Override</label>
+            </div>
+
+            <!-- Switches -->
+            <div class="flex flex-col gap-3">
+              <div class="t-label">Switches</div>
+              <label class="zx-switch"><input type="checkbox" checked> Auto-sync WPS</label>
+              <label class="zx-switch"><input type="checkbox"> Tax Exemption</label>
+            </div>
+
+            <!-- Segmented Control -->
+            <div class="flex flex-col gap-3">
+              <div class="t-label">Segmented Control</div>
+              <div class="zx-segmented">
+                <button class="zx-segmented-item active" type="button">All (482)</button>
+                <button class="zx-segmented-item" type="button">Ready (470)</button>
+                <button class="zx-segmented-item" type="button">Exceptions (12)</button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 4. STATUS SYSTEM -->
+      <section class="ds-section">
+        <h2 class="t-section-title">4. Status System (Spec §29, §30)</h2>
+        <p class="t-body-sm t-muted">Never encode state with color only. All statuses combine semantic icon + label + surface tint.</p>
+
+        <div class="flex flex-wrap gap-4">
+          <!-- Generic -->
+          <div class="flex flex-col gap-2">
+            <span class="t-overline">GENERIC</span>
+            <div class="flex flex-wrap gap-2">
+              <span class="ds-badge ds-badge-success">● Active</span>
+              <span class="ds-badge ds-badge-warning">● Pending</span>
+              <span class="ds-badge ds-badge-danger">● Rejected</span>
+              <span class="ds-badge ds-badge-neutral">● Archived</span>
+            </div>
+          </div>
+
+          <!-- Payroll -->
+          <div class="flex flex-col gap-2">
+            <span class="t-overline">PAYROLL RUN</span>
+            <div class="flex flex-wrap gap-2">
+              <span class="ds-badge ds-badge-neutral">Draft</span>
+              <span class="ds-badge ds-badge-info">Inputs Loaded</span>
+              <span class="ds-badge ds-badge-ai">Calculated</span>
+              <span class="ds-badge ds-badge-warning">Under Review</span>
+              <span class="ds-badge ds-badge-success">Finalized & Locked</span>
+            </div>
+          </div>
+
+          <!-- Recruitment -->
+          <div class="flex flex-col gap-2">
+            <span class="t-overline">RECRUITMENT PIPELINE</span>
+            <div class="flex flex-wrap gap-2">
+              <span class="ds-badge ds-badge-neutral">Applied</span>
+              <span class="ds-badge ds-badge-info">Screening</span>
+              <span class="ds-badge ds-badge-ai">Interview</span>
+              <span class="ds-badge ds-badge-warning">Offer</span>
+              <span class="ds-badge ds-badge-success">Hired</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. AVATARS & EMPLOYEE CELLS -->
+      <section class="ds-section">
+        <h2 class="t-section-title">5. Avatars & Employee Cells (Spec §31, §32)</h2>
+
+        <div class="grid" style="grid-template-columns: 1fr 1fr; gap: var(--zx-space-6);">
+          
+          <!-- Avatar Sizes -->
+          <div class="ds-card ds-card-utility" style="gap: var(--zx-space-4);">
+            <span class="t-label">Avatar Scale (20 / 24 / 28 / 32 / 40 / 48 / 64)</span>
+            <div class="flex items-center gap-3 flex-wrap">
+              <span class="zx-avatar zx-avatar-20">AH</span>
+              <span class="zx-avatar zx-avatar-24">AH</span>
+              <span class="zx-avatar zx-avatar-28">AH</span>
+              <span class="zx-avatar zx-avatar-32">AH</span>
+              <span class="zx-avatar zx-avatar-40">AH</span>
+              <span class="zx-avatar zx-avatar-48">AH</span>
+              <span class="zx-avatar zx-avatar-64">AH</span>
+            </div>
+
+            <span class="t-label" style="margin-top: var(--zx-space-3);">Avatar Group</span>
+            <div class="zx-avatar-group">
+              <span class="zx-avatar zx-avatar-28" style="background: #4F46E5;">AH</span>
+              <span class="zx-avatar zx-avatar-28" style="background: #06B6D4;">SA</span>
+              <span class="zx-avatar zx-avatar-28" style="background: #10B981;">ON</span>
+              <span class="zx-avatar zx-avatar-28" style="background: var(--zx-surface-subtle); color: var(--zx-text); font-size: 10px;">+5</span>
+            </div>
+          </div>
+
+          <!-- Employee Cell Demo -->
+          <div class="ds-card ds-card-utility" style="gap: var(--zx-space-4);">
+            <span class="t-label">Employee Cell Component</span>
+            
+            <div class="zx-employee-cell">
+              <span class="zx-avatar zx-avatar-32">AH</span>
+              <div>
+                <strong>Ahmed Hassan · أحمد حسن</strong>
+                <small>EMP-0148 · Senior Operations Specialist</small>
+              </div>
+            </div>
+
+            <div class="zx-employee-cell">
+              <span class="zx-avatar zx-avatar-32" style="background: linear-gradient(135deg, #EC4899, #8B5CF6);">SA</span>
+              <div>
+                <strong>Sara Adel · سارة عادل</strong>
+                <small>EMP-0217 · Financial Controller</small>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 6. MONEY & SENSITIVE DATA -->
+      <section class="ds-section">
+        <h2 class="t-section-title">6. Money & Sensitive Values (Spec §33, §34, §138)</h2>
+
+        <div class="ds-card ds-card-utility">
+          <div class="grid" style="grid-template-columns: repeat(3, 1fr); gap: var(--zx-space-6);">
+            
+            <div class="flex flex-col gap-2">
+              <span class="t-overline">FINANCIAL AMOUNTS</span>
+              <span class="zx-money" style="font-size: 18px;">EGP 24,900.00</span>
+              <span class="zx-money positive">+EGP 1,200.00 (+4.8%)</span>
+              <span class="zx-money negative">-EGP 4,325.00 (Tax/Ins)</span>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <span class="t-overline">SENSITIVE SALARY MASKING</span>
+              <div class="zx-sensitive">
+                <span class="zx-sensitive-masked" id="sensitiveSalary">••••••••••</span>
+                <button class="zx-sensitive-btn" id="toggleSalaryBtn" type="button" aria-label="Toggle salary visibility">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </div>
+              <span class="t-caption">Requires <code>payroll.salary.read</code> permission.</span>
+            </div>
+
+            <div class="flex flex-col gap-2">
+              <span class="t-overline">COPYABLE RECORD IDS</span>
+              <div class="flex flex-wrap gap-2">
+                <span class="zx-copy-id" data-copy="EMP-0148">EMP-0148 📋</span>
+                <span class="zx-copy-id" data-copy="RUN-2026-08-EGY">RUN-2026-08-EGY 📋</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="ds-footer">
+        <p class="t-metadata t-faint">ZainX Workforce Design System · Controls Reference</p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+<script>
+  // Indeterminate checkbox demo
+  const ind = document.getElementById('demoIndeterminate');
+  if (ind) ind.indeterminate = true;
+
+  // Sensitive salary reveal demo
+  const sal = document.getElementById('sensitiveSalary');
+  const btn = document.getElementById('toggleSalaryBtn');
+  let revealed = false;
+  if (sal && btn) {
+    btn.addEventListener('click', () => {
+      revealed = !revealed;
+      sal.textContent = revealed ? 'EGP 32,500.00' : '••••••••••';
+    });
+  }
+</script>
+</body>
+</html>

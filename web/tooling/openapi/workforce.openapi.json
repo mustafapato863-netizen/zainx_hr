@@ -1,0 +1,61 @@
+{
+    "openapi":  "3.1.1",
+    "info":  {
+                 "title":  "Workforce.Host.Api | v1",
+                 "version":  "1.0.0"
+             },
+    "servers":  [
+                    {
+                        "url":  "http://127.0.0.1:5041/"
+                    }
+                ],
+    "paths":  {
+                  "/health":  {
+                                  "get":  {
+                                              "tags":  [
+                                                           "Workforce.Host.Api"
+                                                       ],
+                                              "summary":  "System health and liveness probe",
+                                              "operationId":  "GetHealth",
+                                              "responses":  {
+                                                                "200":  {
+                                                                            "description":  "OK"
+                                                                        }
+                                                            }
+                                          }
+                              },
+                  "/health/ready":  {
+                                        "get":  {
+                                                    "tags":  [
+                                                                 "Workforce.Host.Api"
+                                                             ],
+                                                    "summary":  "System readiness probe verifying database connectivity",
+                                                    "operationId":  "GetReadiness",
+                                                    "responses":  {
+                                                                      "200":  {
+                                                                                  "description":  "OK"
+                                                                              }
+                                                                  }
+                                                }
+                                    },
+                  "/test-error":  {
+                                      "get":  {
+                                                  "tags":  [
+                                                               "Workforce.Host.Api"
+                                                           ],
+                                                  "summary":  "Simulated failure returning RFC 7807 ProblemDetails",
+                                                  "operationId":  "GetTestError",
+                                                  "responses":  {
+                                                                    "200":  {
+                                                                                "description":  "OK"
+                                                                            }
+                                                                }
+                                              }
+                                  }
+              },
+    "tags":  [
+                 {
+                     "name":  "Workforce.Host.Api"
+                 }
+             ]
+}

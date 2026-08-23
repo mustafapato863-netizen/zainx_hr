@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foundations — ZainX Design System</title>
+  <link rel="icon" type="image/png" href="../brand/zainx-mark.png">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../foundations.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../signature.css">
+</head>
+<body>
+
+<div class="ds-app" id="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <aside class="ds-sidebar" id="dsSidebar" aria-label="Design system navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="../brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Design System v2.0</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav" aria-label="Design system sections">
+      <p class="ds-nav-group">OVERVIEW</p>
+      <a class="ds-nav-link" href="../index.html" data-page="index">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Overview
+      </a>
+
+      <p class="ds-nav-group">FOUNDATIONS</p>
+      <a class="ds-nav-link active" href="foundations.html" data-page="foundations">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Colors · Typography · Spacing
+      </a>
+
+      <p class="ds-nav-group">COMPONENTS</p>
+      <a class="ds-nav-link" href="controls.html" data-page="controls">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Buttons · Inputs · Forms
+      </a>
+      <a class="ds-nav-link" href="navigation.html" data-page="navigation">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+        Navigation · Sidebar · Tabs
+      </a>
+      <a class="ds-nav-link" href="data.html" data-page="data">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><rect x="7" y="10" width="3" height="8" rx="1"/><rect x="14" y="6" width="3" height="12" rx="1"/></svg>
+        Data Grid · Filters · Charts
+      </a>
+      <a class="ds-nav-link" href="feedback.html" data-page="feedback">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts · Loading · Errors
+      </a>
+      <a class="ds-nav-link" href="overlays.html" data-page="overlays">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Dialogs · Drawers · Menus
+      </a>
+
+      <p class="ds-nav-group">PRODUCT</p>
+      <a class="ds-nav-link" href="product.html" data-page="product">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        People · Payroll · Recruitment · AI
+      </a>
+
+      <p class="ds-nav-group">SIGNATURE</p>
+      <a class="ds-nav-link" href="signature.html" data-page="signature">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        Motion · Spotlight · Access Gate
+      </a>
+
+      <p class="ds-nav-group">SCREENS</p>
+      <a class="ds-nav-link" href="../screens/01-employee-directory.html" data-page="screen-01">Employee Directory</a>
+      <a class="ds-nav-link" href="../screens/03-payroll-run.html" data-page="screen-03">Payroll Run</a>
+      <a class="ds-nav-link" href="../screens/05-recruitment-pipeline.html" data-page="screen-05">Recruitment Pipeline</a>
+      <a class="ds-nav-link" href="../screens/12-login.html" data-page="screen-12">Login</a>
+    </nav>
+  </aside>
+
+  <!-- ═══════════ MAIN CONTENT ═══════════ -->
+  <main class="ds-main" id="dsMain">
+
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <button class="ds-sidebar-toggle" id="sidebarToggle" type="button" aria-label="Toggle sidebar">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <span class="ds-breadcrumb">
+          <a href="../index.html">Design System</a>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Foundations</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button" title="Toggle theme">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span>Theme</span>
+        </button>
+        <button class="ds-control-btn" id="rtlToggle" type="button" title="Toggle RTL">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/></svg>
+          <span>RTL</span>
+        </button>
+        <button class="ds-control-btn" id="densityToggle" type="button" title="Toggle density">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="21" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="21" y1="18" x2="3" y2="18"/></svg>
+          <span>Density</span>
+        </button>
+        <button class="ds-control-btn" id="motionToggle" type="button" title="Toggle motion">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <span>Motion</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="ds-content">
+
+      <div>
+        <span class="ds-hero-badge t-overline">BRAND IDENTITY & FOUNDATIONS</span>
+        <h1 class="t-display-lg">ZainX Brand Identity & Foundations</h1>
+        <p class="t-page-subtitle">Smarter Business. One System. — Official enterprise brand language, typography, and precision token system.</p>
+      </div>
+
+      <!-- 0. OFFICIAL BRAND IDENTITY & CORE PALETTE -->
+      <section class="ds-section">
+        <h2 class="t-section-title">0. Official Brand Identity & Core Palette</h2>
+
+        <!-- Brand Identity Showcase Card -->
+        <div class="ds-card ds-card-spotlight" style="background: #0A0F23; border: 1px solid rgba(0, 224, 198, 0.25);">
+          <div class="ds-spotlight-glow"></div>
+          
+          <div class="flex justify-between items-center flex-wrap gap-4" style="border-bottom: 1px solid rgba(255, 255, 255, 0.1); padding-bottom: var(--zx-space-6);">
+            <div class="flex items-center gap-4">
+              <img src="../brand/zainx-mark.png" alt="ZainX Primary Symbol" width="48" height="48" style="object-fit: contain;">
+              <div>
+                <strong style="font-size: 24px; font-weight: 800; letter-spacing: -0.02em; color: #FFFFFF;">ZainX</strong>
+                <span class="t-caption" style="display: block; color: var(--zx-brand-cyan); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700;">SMARTER BUSINESS. ONE SYSTEM.</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="ds-badge ds-badge-ai">✦ Primary Typeface: Sora</span>
+              <span class="ds-badge ds-badge-success">Enterprise Grade</span>
+            </div>
+          </div>
+
+          <!-- Color Swatches Row from Style Guide -->
+          <div style="margin-top: var(--zx-space-6);">
+            <span class="t-overline" style="color: rgba(255, 255, 255, 0.6);">CORE COLOR PALETTE</span>
+            <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: var(--zx-space-3); margin-top: var(--zx-space-3);">
+              
+              <div style="background: #0A0F23; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #0A0F23; border: 1px solid rgba(255, 255, 255, 0.3);"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#0A0F23</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Obsidian Canvas</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #0D1B3D;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#0D1B3D</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Deep Navy Surface</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #2563EB;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#2563EB</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Royal Blue</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #00B2FF;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#00B2FF</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Electric Sky Blue</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #00E0C6;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px; color: #00E0C6;">#00E0C6</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Neon Cyan Accent</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #64748B;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#64748B</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Slate Muted Text</span>
+              </div>
+
+              <div style="background: #0D1B3D; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: var(--zx-radius-sm); padding: var(--zx-space-3); color: #fff;">
+                <div style="height: 28px; border-radius: 4px; background: #E5E7EB;"></div>
+                <strong style="font-size: 11px; display: block; margin-top: 6px;">#E5E7EB</strong>
+                <span class="t-caption" style="font-size: 9px; opacity: 0.7;">Light Gray Neutral</span>
+              </div>
+
+            </div>
+
+            <!-- Signature Gradient Bar -->
+            <div style="margin-top: var(--zx-space-4);">
+              <span class="t-caption" style="font-size: 10px; font-weight: 700; color: rgba(255, 255, 255, 0.7); text-transform: uppercase;">Signature Brand Gradient (#2563EB → #00E0C6)</span>
+              <div style="height: 16px; border-radius: var(--zx-radius-pill); background: linear-gradient(90deg, #2563EB 0%, #00B2FF 50%, #00E0C6 100%); margin-top: 4px; box-shadow: 0 0 16px rgba(0, 224, 198, 0.35);"></div>
+            </div>
+
+            <!-- Brand Essence Pillars -->
+            <div class="flex items-center gap-2 flex-wrap" style="margin-top: var(--zx-space-6); padding-top: var(--zx-space-4); border-top: 1px solid rgba(255, 255, 255, 0.08);">
+              <span class="t-overline" style="color: rgba(255, 255, 255, 0.5);">BRAND ESSENCE:</span>
+              <span class="ds-badge ds-badge-neutral">INTELLIGENT</span>
+              <span class="ds-badge ds-badge-neutral">CONNECTED</span>
+              <span class="ds-badge ds-badge-neutral">INTEGRATED</span>
+              <span class="ds-badge ds-badge-neutral">AUTOMATED</span>
+              <span class="ds-badge ds-badge-neutral">SCALABLE</span>
+              <span class="ds-badge ds-badge-neutral">EFFICIENT</span>
+              <span class="ds-badge ds-badge-neutral">RELIABLE</span>
+              <span class="ds-badge ds-badge-ai">FUTURE-READY</span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- 1. COLOR SCALES -->
+      <section class="ds-section">
+        <h2 class="t-section-title">1. Precision Token Scales</h2>
+        <p class="t-body-sm t-muted">Click any swatch to copy its CSS token variable.</p>
+
+        <!-- Neutral Scale -->
+        <div class="ds-color-scale">
+          <div class="ds-color-scale-title">Neutral Scale (16 steps — Surface to Text)</div>
+          <div class="ds-color-row">
+            <div class="ds-swatch" style="background: var(--zx-neutral-0);" data-copy="var(--zx-neutral-0)"><span class="ds-swatch-label">0</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-25);" data-copy="var(--zx-neutral-25)"><span class="ds-swatch-label">25</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-50);" data-copy="var(--zx-neutral-50)"><span class="ds-swatch-label">50</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-100);" data-copy="var(--zx-neutral-100)"><span class="ds-swatch-label">100</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-150);" data-copy="var(--zx-neutral-150)"><span class="ds-swatch-label">150</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-200);" data-copy="var(--zx-neutral-200)"><span class="ds-swatch-label">200</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-300);" data-copy="var(--zx-neutral-300)"><span class="ds-swatch-label">300</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-400);" data-copy="var(--zx-neutral-400)"><span class="ds-swatch-label">400</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-500);" data-copy="var(--zx-neutral-500)"><span class="ds-swatch-label">500</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-600);" data-copy="var(--zx-neutral-600)"><span class="ds-swatch-label">600</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-700);" data-copy="var(--zx-neutral-700)"><span class="ds-swatch-label">700</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-800);" data-copy="var(--zx-neutral-800)"><span class="ds-swatch-label">800</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-850);" data-copy="var(--zx-neutral-850)"><span class="ds-swatch-label">850</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-900);" data-copy="var(--zx-neutral-900)"><span class="ds-swatch-label">900</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-950);" data-copy="var(--zx-neutral-950)"><span class="ds-swatch-label">950</span></div>
+            <div class="ds-swatch" style="background: var(--zx-neutral-1000);" data-copy="var(--zx-neutral-1000)"><span class="ds-swatch-label">1000</span></div>
+          </div>
+        </div>
+
+        <!-- Brand Scale -->
+        <div class="ds-color-scale">
+          <div class="ds-color-scale-title">Brand / Accent Scale (50–950)</div>
+          <div class="ds-color-row">
+            <div class="ds-swatch" style="background: var(--zx-brand-50);" data-copy="var(--zx-brand-50)"><span class="ds-swatch-label">50</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-100);" data-copy="var(--zx-brand-100)"><span class="ds-swatch-label">100</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-200);" data-copy="var(--zx-brand-200)"><span class="ds-swatch-label">200</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-300);" data-copy="var(--zx-brand-300)"><span class="ds-swatch-label">300</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-400);" data-copy="var(--zx-brand-400)"><span class="ds-swatch-label">400</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-500);" data-copy="var(--zx-brand-500)"><span class="ds-swatch-label">500</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-600);" data-copy="var(--zx-brand-600)"><span class="ds-swatch-label">600</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-700);" data-copy="var(--zx-brand-700)"><span class="ds-swatch-label">700</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-800);" data-copy="var(--zx-brand-800)"><span class="ds-swatch-label">800</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-900);" data-copy="var(--zx-brand-900)"><span class="ds-swatch-label">900</span></div>
+            <div class="ds-swatch" style="background: var(--zx-brand-950);" data-copy="var(--zx-brand-950)"><span class="ds-swatch-label">950</span></div>
+          </div>
+        </div>
+
+        <!-- Semantic Families -->
+        <div class="ds-color-scale">
+          <div class="ds-color-scale-title">Semantic Families (Surface · Surface Strong · Border · Icon · Text · Strong · Glow)</div>
+          
+          <!-- Success -->
+          <div class="ds-semantic-row">
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-surface); color: var(--zx-success-text);" data-copy="var(--zx-success-surface)">surface</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-surface-strong); color: var(--zx-success-text);" data-copy="var(--zx-success-surface-strong)">strong-sfc</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-border); color: var(--zx-success-text);" data-copy="var(--zx-success-border)">border</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-icon); color: #fff;" data-copy="var(--zx-success-icon)">icon</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-surface); color: var(--zx-success-text); font-weight: 700;" data-copy="var(--zx-success-text)">text</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-strong); color: #fff;" data-copy="var(--zx-success-strong)">strong</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-success-surface); box-shadow: var(--zx-success-glow); color: var(--zx-success-text);" data-copy="var(--zx-success-glow)">glow</div>
+          </div>
+
+          <!-- Warning -->
+          <div class="ds-semantic-row">
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-surface); color: var(--zx-warning-text);" data-copy="var(--zx-warning-surface)">surface</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-surface-strong); color: var(--zx-warning-text);" data-copy="var(--zx-warning-surface-strong)">strong-sfc</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-border); color: var(--zx-warning-text);" data-copy="var(--zx-warning-border)">border</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-icon); color: #fff;" data-copy="var(--zx-warning-icon)">icon</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-surface); color: var(--zx-warning-text); font-weight: 700;" data-copy="var(--zx-warning-text)">text</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-strong); color: #fff;" data-copy="var(--zx-warning-strong)">strong</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-warning-surface); box-shadow: var(--zx-warning-glow); color: var(--zx-warning-text);" data-copy="var(--zx-warning-glow)">glow</div>
+          </div>
+
+          <!-- Danger -->
+          <div class="ds-semantic-row">
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-surface); color: var(--zx-danger-text);" data-copy="var(--zx-danger-surface)">surface</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-surface-strong); color: var(--zx-danger-text);" data-copy="var(--zx-danger-surface-strong)">strong-sfc</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-border); color: var(--zx-danger-text);" data-copy="var(--zx-danger-border)">border</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-icon); color: #fff;" data-copy="var(--zx-danger-icon)">icon</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-surface); color: var(--zx-danger-text); font-weight: 700;" data-copy="var(--zx-danger-text)">text</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-strong); color: #fff;" data-copy="var(--zx-danger-strong)">strong</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-danger-surface); box-shadow: var(--zx-danger-glow); color: var(--zx-danger-text);" data-copy="var(--zx-danger-glow)">glow</div>
+          </div>
+
+          <!-- AI / Intelligence -->
+          <div class="ds-semantic-row">
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-surface); color: var(--zx-ai-text);" data-copy="var(--zx-ai-surface)">surface</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-surface-strong); color: var(--zx-ai-text);" data-copy="var(--zx-ai-surface-strong)">strong-sfc</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-border); color: var(--zx-ai-text);" data-copy="var(--zx-ai-border)">border</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-icon); color: #fff;" data-copy="var(--zx-ai-icon)">icon</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-surface); color: var(--zx-ai-text); font-weight: 700;" data-copy="var(--zx-ai-text)">text</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-800); color: #fff;" data-copy="var(--zx-ai-800)">strong</div>
+            <div class="ds-semantic-swatch" style="background: var(--zx-ai-surface); box-shadow: var(--zx-ai-glow); color: var(--zx-ai-text);" data-copy="var(--zx-ai-glow)">glow</div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 2. TYPOGRAPHY -->
+      <section class="ds-section">
+        <h2 class="t-section-title">2. Typography System — Primary Typeface: Sora (14 Levels)</h2>
+        <p class="t-body-sm t-muted">Enterprise hierarchy from Display to Monospace numerals with full Arabic RTL support (Sora & IBM Plex Sans Arabic).</p>
+
+        <div class="ds-type-specimen">
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Display Large</span>
+              <span class="ds-type-spec">36px / 800 / -0.6px</span>
+            </div>
+            <div class="ds-type-sample t-display-lg">Workforce Platform — نظام القوى العاملة</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Display Medium</span>
+              <span class="ds-type-spec">28px / 700 / -0.4px</span>
+            </div>
+            <div class="ds-type-sample t-display-md">Payroll Run August 2026 — دورة الرواتب</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Page Title</span>
+              <span class="ds-type-spec">22px / 700 / -0.3px</span>
+            </div>
+            <div class="ds-type-sample t-page-title">Employee Directory · دليل الموظفين (482 Active)</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Page Subtitle</span>
+              <span class="ds-type-spec">16px / 500 / 1.4</span>
+            </div>
+            <div class="ds-type-sample t-page-subtitle">Readiness, exceptions, cost and finalization in one operational workspace.</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Section Title</span>
+              <span class="ds-type-spec">15px / 700 / 1.3</span>
+            </div>
+            <div class="ds-type-sample t-section-title">Calculation Breakdown · تفاصيل الاحتساب</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Body Large</span>
+              <span class="ds-type-spec">16px / 400 / 1.5</span>
+            </div>
+            <div class="ds-type-sample t-body-lg">Total net payroll increased by 4.8% due to overtime in Operations and 23 approved salary adjustments.</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Body (Default)</span>
+              <span class="ds-type-spec">14px / 400 / 1.5</span>
+            </div>
+            <div class="ds-type-sample t-body">Standard operational text across all workforce tables, forms, and contextual detail workspaces. النص القياسي للواجهات.</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Body Small</span>
+              <span class="ds-type-spec">13px / 400 / 1.45</span>
+            </div>
+            <div class="ds-type-sample t-body-sm">Secondary descriptive content, helper text, and compact table cell notes.</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Label</span>
+              <span class="ds-type-spec">13px / 600 / 1.3</span>
+            </div>
+            <div class="ds-type-sample t-label">Social Insurance Contribution · التأمينات الاجتماعية</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Overline</span>
+              <span class="ds-type-spec">10px / 700 / 1px LS</span>
+            </div>
+            <div class="ds-type-sample t-overline">PAYROLL RUN / AUGUST 2026 / EGYPT LEGAL ENTITY</div>
+          </div>
+
+          <div class="ds-type-row">
+            <div class="ds-type-meta">
+              <span class="ds-type-name">Monospace Numeric</span>
+              <span class="ds-type-spec">13px / 500 / tnum</span>
+            </div>
+            <div class="ds-type-sample t-mono">EGP 8,428,600.00 · +4.8% · EMP-0148 · 2026-08-22</div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- 3. SPACING SCALE -->
+      <section class="ds-section">
+        <h2 class="t-section-title">3. Spacing Scale</h2>
+        <p class="t-body-sm t-muted">Predictable 15-step spacing scale from 0 to 80px.</p>
+
+        <div class="ds-spacing-demo">
+          <div class="ds-spacing-item"><span class="ds-spacing-label">0 (0px)</span><div class="ds-spacing-bar" style="width: 2px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">1 (2px)</span><div class="ds-spacing-bar" style="width: 2px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">2 (4px)</span><div class="ds-spacing-bar" style="width: 4px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">3 (6px)</span><div class="ds-spacing-bar" style="width: 6px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">4 (8px)</span><div class="ds-spacing-bar" style="width: 8px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">5 (10px)</span><div class="ds-spacing-bar" style="width: 10px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">6 (12px)</span><div class="ds-spacing-bar" style="width: 12px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">7 (16px)</span><div class="ds-spacing-bar" style="width: 16px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">8 (20px)</span><div class="ds-spacing-bar" style="width: 20px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">9 (24px)</span><div class="ds-spacing-bar" style="width: 24px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">10 (32px)</span><div class="ds-spacing-bar" style="width: 32px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">11 (40px)</span><div class="ds-spacing-bar" style="width: 40px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">12 (48px)</span><div class="ds-spacing-bar" style="width: 48px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">13 (64px)</span><div class="ds-spacing-bar" style="width: 64px;"></div></div>
+          <div class="ds-spacing-item"><span class="ds-spacing-label">14 (80px)</span><div class="ds-spacing-bar" style="width: 80px;"></div></div>
+        </div>
+      </section>
+
+      <!-- 4. RADIUS & ELEVATION -->
+      <section class="ds-section">
+        <h2 class="t-section-title">4. Radius & Elevation</h2>
+        
+        <div class="ds-radius-demo">
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-xs);"></div><span class="t-caption">xs (4px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-sm);"></div><span class="t-caption">sm (6px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-md);"></div><span class="t-caption">md (8px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-lg);"></div><span class="t-caption">lg (10px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-xl);"></div><span class="t-caption">xl (12px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-2xl);"></div><span class="t-caption">2xl (16px)</span></div>
+          <div class="ds-radius-item"><div class="ds-radius-box" style="border-radius: var(--zx-radius-pill);"></div><span class="t-caption">pill (999px)</span></div>
+        </div>
+
+        <div class="ds-elevation-demo" style="margin-top: var(--zx-space-8);">
+          <div class="ds-elevation-item" style="box-shadow: var(--zx-shadow-flat);">Flat</div>
+          <div class="ds-elevation-item" style="box-shadow: var(--zx-shadow-raised);">Raised</div>
+          <div class="ds-elevation-item" style="box-shadow: var(--zx-shadow-floating);">Floating</div>
+          <div class="ds-elevation-item" style="box-shadow: var(--zx-shadow-overlay);">Overlay</div>
+          <div class="ds-elevation-item" style="box-shadow: var(--zx-shadow-spotlight); border-color: var(--zx-accent-border);">Spotlight</div>
+        </div>
+      </section>
+
+      <!-- 5. MOTION SYSTEM -->
+      <section class="ds-section">
+        <h2 class="t-section-title">5. Motion System</h2>
+        <p class="t-body-sm t-muted">Click any motion card to trigger the timing duration.</p>
+
+        <div class="ds-motion-demo">
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 80)">
+            <span class="t-label">Instant (80ms)</span>
+            <span class="t-caption">Active press, micro-clicks</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 80ms var(--zx-ease-productive);"></div></div>
+          </div>
+
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 140)">
+            <span class="t-label">Micro (140ms)</span>
+            <span class="t-caption">Hover, checkbox, chip selection</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 140ms var(--zx-ease-productive);"></div></div>
+          </div>
+
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 220)">
+            <span class="t-label">Standard (220ms)</span>
+            <span class="t-caption">Dropdown, menu, tab switch</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 220ms var(--zx-ease-enter);"></div></div>
+          </div>
+
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 320)">
+            <span class="t-label">Context (320ms)</span>
+            <span class="t-caption">Drawer, AI panel, workspace change</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 320ms var(--zx-ease-enter);"></div></div>
+          </div>
+
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 640)">
+            <span class="t-label">Expressive (640ms)</span>
+            <span class="t-caption">403 permission gate, success resolve</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 640ms var(--zx-ease-expressive);"></div></div>
+          </div>
+
+          <div class="ds-motion-item" onclick="this.classList.toggle('playing'); setTimeout(()=>this.classList.remove('playing'), 900)">
+            <span class="t-label">Brand (900ms)</span>
+            <span class="t-caption">Login assembly, app bootstrap</span>
+            <div class="ds-motion-bar"><div class="ds-motion-bar-fill" style="transition: width 900ms var(--zx-ease-enter);"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. ICON SYSTEM -->
+      <section class="ds-section">
+        <h2 class="t-section-title">6. Functional Iconography (Lucide 1.75px Line Standard)</h2>
+        <p class="t-body-sm t-muted">Clean enterprise line geometry. Consistent 1.75px stroke with rounded joins.</p>
+
+        <!-- Navigation Icons -->
+        <div class="ds-color-scale-title" style="margin-top: var(--zx-space-4);">Navigation & Modules</div>
+        <div class="ds-icon-grid">
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            <span>Home</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+            <span>My Work</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <span>People</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span>Time</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+            <span>Leave</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+            <span>Payroll</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            <span>Recruitment</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            <span>Reports</span>
+          </div>
+          <div class="ds-icon-item" style="border-color: var(--zx-ai-border); background: var(--zx-ai-surface);">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--zx-ai-500)" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+            <span style="color: var(--zx-ai-text);">ZainX AI</span>
+          </div>
+          <div class="ds-icon-item">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+            <span>Admin</span>
+          </div>
+        </div>
+
+        <!-- Action Icons -->
+        <div class="ds-color-scale-title" style="margin-top: var(--zx-space-7);">Actions & Operations</div>
+        <div class="ds-icon-grid">
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg><span>Add</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg><span>Edit</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg><span>Delete</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg><span>Search</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="4" x2="20" y1="21" y2="21"/><line x1="4" x2="20" y1="3" y2="3"/><line x1="4" x2="20" y1="12" y2="12"/></svg><span>Filter</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 16 4 4 4-4"/><path d="M7 20V4"/><path d="m21 8-4-4-4 4"/><path d="M17 4v16"/></svg><span>Sort</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg><span>Export</span></div>
+          <div class="ds-icon-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg><span>Refresh</span></div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="ds-footer">
+        <p class="t-metadata t-faint">ZainX Workforce Design System · Foundations Reference</p>
+      </footer>
+
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+</body>
+</html>

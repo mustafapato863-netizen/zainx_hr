@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "name": "ZainX Workforce Semantic Tokens",
+    "version": "2.1",
+    "principles": [
+      "The system is quiet. Important things glow.",
+      "Light is an event, not decoration."
+    ]
+  },
+  "primitive": {
+    "neutral": {
+      "0": "#FFFFFF",
+      "25": "#FAFBFC",
+      "50": "#F7F8FA",
+      "100": "#F1F3F6",
+      "150": "#E8ECF0",
+      "200": "#DDE2E8",
+      "300": "#C8D0DB",
+      "400": "#A8B3C2",
+      "500": "#8A96A8",
+      "600": "#697386",
+      "700": "#525D6F",
+      "800": "#3A4454",
+      "850": "#2A3344",
+      "900": "#1C2536",
+      "950": "#131B2B",
+      "1000": "#0B0E14"
+    },
+    "brand": {
+      "50": "#EEF1FF",
+      "100": "#DFE3FF",
+      "200": "#C5CCFF",
+      "300": "#A1ABFF",
+      "400": "#7C88FF",
+      "500": "#586CFF",
+      "600": "#4759E7",
+      "700": "#3A48C7",
+      "800": "#303BA0",
+      "900": "#2C367E",
+      "950": "#1A1F4A"
+    }
+  },
+  "theme": {
+    "light": {
+      "surface": {
+        "canvas": "#F7F8FA",
+        "default": "#FFFFFF",
+        "subtle": "#F1F3F6",
+        "raised": "#FFFFFF",
+        "floating": "#FFFFFF"
+      },
+      "text": {
+        "primary": "#131B2B",
+        "secondary": "#525D6F",
+        "tertiary": "#697386",
+        "disabled": "#A8B3C2",
+        "inverse": "#FFFFFF",
+        "link": "#3A48C7"
+      },
+      "border": {
+        "subtle": "#E8ECF0",
+        "default": "#DDE2E8",
+        "strong": "#C8D0DB",
+        "selected": "#7C88FF",
+        "focus": "#586CFF"
+      },
+      "overlay": "rgba(11,14,20,.48)"
+    },
+    "dark": {
+      "surface": {
+        "canvas": "#0B0E14",
+        "default": "#131B2B",
+        "subtle": "#1C2536",
+        "raised": "#1C2536",
+        "floating": "#2A3344"
+      },
+      "text": {
+        "primary": "#F7F8FA",
+        "secondary": "#C8D0DB",
+        "tertiary": "#A8B3C2",
+        "disabled": "#697386",
+        "inverse": "#0B0E14",
+        "link": "#A1ABFF"
+      },
+      "border": {
+        "subtle": "#1C2536",
+        "default": "#2A3344",
+        "strong": "#3A4454",
+        "selected": "#7C88FF",
+        "focus": "#A1ABFF"
+      },
+      "overlay": "rgba(0,0,0,.62)"
+    }
+  },
+  "semantic": {
+    "success": {
+      "surface": "#ECFDF5",
+      "border": "#A7F3D0",
+      "text": "#0E6B42",
+      "strong": "#168A5B",
+      "glow": "rgba(22,138,91,.14)"
+    },
+    "warning": {
+      "surface": "#FFFBEB",
+      "border": "#FDE68A",
+      "text": "#7F4F0A",
+      "strong": "#B87312",
+      "glow": "rgba(184,115,18,.14)"
+    },
+    "danger": {
+      "surface": "#FFF1F2",
+      "border": "#FECDD3",
+      "text": "#882535",
+      "strong": "#C43D4D",
+      "glow": "rgba(196,61,77,.14)"
+    },
+    "info": {
+      "surface": "#EFF6FF",
+      "border": "#BFDBFE",
+      "text": "#1D4896",
+      "strong": "#2F6FD8",
+      "glow": "rgba(47,111,216,.14)"
+    },
+    "ai": {
+      "surface": "#F3F0FF",
+      "border": "#D4C5FE",
+      "text": "#5A3ED4",
+      "strong": "#7B5CFA",
+      "secondary": "#25B7CC",
+      "glow": "rgba(123,92,250,.14)"
+    }
+  },
+  "layout": {
+    "sidebar": {
+      "expanded": "240px",
+      "compact": "68px"
+    },
+    "topbar": "56px",
+    "drawer": {
+      "sm": "360px",
+      "md": "440px",
+      "lg": "520px",
+      "xl": "640px",
+      "2xl": "760px"
+    },
+    "content": {
+      "reading": "960px",
+      "form": "1120px",
+      "workspace": "1440px",
+      "grid": "none"
+    }
+  },
+  "density": {
+    "row": {
+      "compact": "36px",
+      "standard": "44px",
+      "comfortable": "52px"
+    },
+    "control": {
+      "compact": "32px",
+      "standard": "36px",
+      "comfortable": "40px"
+    },
+    "touchTargetMin": "44px"
+  },
+  "breakpoint": {
+    "xs": "360px",
+    "sm": "640px",
+    "md": "768px",
+    "lg": "1024px",
+    "xl": "1280px",
+    "2xl": "1536px"
+  },
+  "zIndex": {
+    "base": 0,
+    "sticky": 20,
+    "dropdown": 40,
+    "drawer": 60,
+    "modal": 80,
+    "command": 90,
+    "toast": 100,
+    "tooltip": 110
+  },
+  "focus": {
+    "width": "2px",
+    "offset": "2px"
+  },
+  "motion": {
+    "duration": {
+      "instant": "80ms",
+      "micro": "140ms",
+      "standard": "220ms",
+      "context": "320ms",
+      "expressive": "640ms",
+      "brand": "900ms"
+    },
+    "easing": {
+      "productive": "cubic-bezier(0.2,0,0,1)",
+      "enter": "cubic-bezier(0.16,1,0.3,1)",
+      "exit": "cubic-bezier(0.4,0,1,1)",
+      "expressive": "cubic-bezier(0.2,0.8,0.2,1)"
+    }
+  },
+  "effect": {
+    "spotlight": {
+      "desktopRadiusMin": "300px",
+      "desktopRadiusMax": "420px",
+      "touchRadius": "280px",
+      "lightOpacityMax": 0.06,
+      "darkOpacityMax": 0.09,
+      "borderAlphaMax": 0.24
+    },
+    "successResolve": {
+      "min": "400ms",
+      "max": "700ms"
+    },
+    "accessGate": {
+      "min": "300ms",
+      "max": "600ms"
+    }
+  }
+}

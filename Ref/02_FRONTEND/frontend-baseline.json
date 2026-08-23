@@ -1,0 +1,66 @@
+{
+  "name": "ZainX Workforce Frontend Baseline",
+  "version": "4.0",
+  "date": "2026-08-23",
+  "runtime": {
+    "react": "19.2",
+    "typescript": "strict",
+    "vite": true,
+    "pnpm": true,
+    "nx": true
+  },
+  "designSystem": {
+    "tailwind": "4",
+    "tokens": "Style Dictionary + CSS Variables",
+    "primitives": "React Aria Components",
+    "icons": [
+      "Lucide React",
+      "ZainX SVG"
+    ],
+    "motion": [
+      "Motion for React",
+      "GSAP brand-only"
+    ]
+  },
+  "state": {
+    "globalClient": "Redux Toolkit",
+    "server": "TanStack Query",
+    "workflow": "XState v5",
+    "url": "TanStack Router",
+    "forms": "React Hook Form + Zod",
+    "local": "React state"
+  },
+  "contracts": {
+    "rest": "OpenAPI + Orval",
+    "graphql": "Optional compositional reads + GraphQL Code Generator"
+  },
+  "enterpriseUI": {
+    "grid": "AG Grid Enterprise behind ZainXDataGrid",
+    "lightTable": "TanStack Table",
+    "virtualization": "TanStack Virtual",
+    "scheduler": "FullCalendar Scheduler",
+    "charts": "Apache ECharts",
+    "richText": "Tiptap",
+    "dragDrop": "dnd-kit"
+  },
+  "quality": {
+    "storybook": true,
+    "vitest": true,
+    "testingLibrary": true,
+    "msw": true,
+    "playwright": true,
+    "axe": true,
+    "openTelemetryWeb": true
+  },
+  "toolchainCandidate": {
+    "node": "24 LTS",
+    "react": "19.2",
+    "typescript": "6.0 candidate; temporary 5.9 fallback only by ADR",
+    "vite": "8.x",
+    "nx": "23.x",
+    "storybook": "10.x",
+    "tailwind": "4.x"
+  },
+  "repositoryTopology": ".NET full product root with nested /web Nx+pnpm workspace",
+  "payrollFrontendAuthority": "orchestration/display only; backend owns calculation/rules/finalization"
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/people",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/people/src",
+  "projectType": "library",
+  "tags": ["scope:people", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

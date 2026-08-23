@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/payroll",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/payroll/src",
+  "projectType": "library",
+  "tags": ["scope:payroll", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

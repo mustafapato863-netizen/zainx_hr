@@ -1,0 +1,242 @@
+/* =============================================================================
+   ZAINX WORKFORCE DESIGN SYSTEM — PRODUCT COMPONENTS v2.0
+   Payroll, People, Recruitment, Attendance, Approvals, Admin, and AI Copilot.
+   ============================================================================= */
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   1. PAYROLL RUN HEADER (Spec §49)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-payroll-header {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-lg);
+  padding: var(--zx-space-7) var(--zx-space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--zx-space-6);
+  flex-wrap: wrap;
+  box-shadow: var(--zx-shadow-raised);
+}
+
+.zx-payroll-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-8);
+}
+
+.zx-payroll-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zx-payroll-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--zx-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.zx-payroll-stat-value {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--zx-text-strong);
+  font-family: var(--zx-font-mono);
+  letter-spacing: -0.3px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   2. PAYROLL CALCULATION BREAKDOWN (Spec §52)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-calc-card {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--zx-shadow-raised);
+}
+
+.zx-calc-section {
+  padding: var(--zx-space-6) var(--zx-space-8);
+  border-bottom: 1px solid var(--zx-border-subtle);
+}
+
+.zx-calc-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--zx-text-faint);
+  margin-bottom: var(--zx-space-4);
+}
+
+.zx-calc-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--zx-space-2) 0;
+  font-size: 13px;
+}
+
+.zx-calc-row strong {
+  font-family: var(--zx-font-mono);
+  font-weight: 600;
+}
+
+.zx-calc-total-row {
+  background: var(--zx-surface-subtle);
+  padding: var(--zx-space-5) var(--zx-space-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   3. APPROVAL BEFORE / AFTER COMPARISON (Spec §69)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-comparison-card {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-md);
+  padding: var(--zx-space-6) var(--zx-space-7);
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-6);
+}
+
+.zx-diff-box {
+  flex: 1;
+  padding: var(--zx-space-4) var(--zx-space-5);
+  border-radius: var(--zx-radius-sm);
+  background: var(--zx-surface-subtle);
+  border: 1px solid var(--zx-border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-1);
+}
+
+.zx-diff-box.after {
+  background: var(--zx-success-surface);
+  border-color: var(--zx-success-border);
+}
+
+.zx-diff-arrow {
+  color: var(--zx-text-faint);
+  font-size: 18px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   4. RECRUITMENT KANBAN (Spec §56, §57)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-kanban-board {
+  display: flex;
+  gap: var(--zx-space-4);
+  overflow-x: auto;
+  padding-bottom: var(--zx-space-4);
+}
+
+.zx-kanban-column {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--zx-surface-subtle);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+}
+
+.zx-kanban-column-header {
+  padding: var(--zx-space-4) var(--zx-space-5);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--zx-border);
+  font-weight: 700;
+  font-size: 12.5px;
+}
+
+.zx-kanban-cards {
+  padding: var(--zx-space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-3);
+  overflow-y: auto;
+}
+
+.zx-candidate-card {
+  background: var(--zx-canvas);
+  border: 1px solid var(--zx-border);
+  border-radius: var(--zx-radius-sm);
+  padding: var(--zx-space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-2);
+  box-shadow: var(--zx-shadow-raised);
+  cursor: grab;
+  transition: all var(--zx-motion-micro);
+}
+
+.zx-candidate-card:hover {
+  border-color: var(--zx-border-strong);
+  transform: translateY(-1px);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════════
+   5. AI COPILOT PANEL (Spec §90, §91, §94)
+   ═══════════════════════════════════════════════════════════════════════════════ */
+
+.zx-copilot-panel {
+  width: 440px;
+  background: var(--zx-canvas);
+  border: 1px solid rgba(123, 92, 250, 0.35);
+  border-radius: var(--zx-radius-lg);
+  box-shadow: var(--zx-ai-glow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.zx-copilot-header {
+  padding: var(--zx-space-5) var(--zx-space-6);
+  border-bottom: 1px solid var(--zx-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--zx-ai-surface);
+}
+
+.zx-copilot-body {
+  padding: var(--zx-space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-4);
+  flex: 1;
+}
+
+.zx-provenance-chips {
+  display: flex;
+  gap: var(--zx-space-2);
+  flex-wrap: wrap;
+}
+
+.zx-provenance-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-1);
+  padding: 2px 6px;
+  border-radius: var(--zx-radius-xs);
+  background: var(--zx-surface-subtle);
+  border: 1px solid var(--zx-border);
+  font-size: 10px;
+  font-family: var(--zx-font-mono);
+  color: var(--zx-text-muted);
+}

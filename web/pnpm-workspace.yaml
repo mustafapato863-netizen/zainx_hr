@@ -1,0 +1,13 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+  - 'tooling/*'
+
+allowBuilds:
+  '@bundled-es-modules/glob': true
+  '@parcel/watcher': true
+  '@scarf/scarf': true
+  esbuild: true
+  msw: true
+  nx: true
+  style-dictionary: true

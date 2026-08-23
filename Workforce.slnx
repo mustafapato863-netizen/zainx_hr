@@ -1,0 +1,63 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Workforce.BuildingBlocks/Workforce.BuildingBlocks.csproj" />
+    <Project Path="src/Workforce.Host.Api/Workforce.Host.Api.csproj" />
+    <Project Path="src/Workforce.Host.Worker/Workforce.Host.Worker.csproj" />
+    <Project Path="src/Workforce.SharedKernel/Workforce.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Ai/">
+    <Project Path="src/Modules/Ai/Workforce.Modules.Ai.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Approvals/">
+    <Project Path="src/Modules/Approvals/Workforce.Modules.Approvals.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Attendance/">
+    <Project Path="src/Modules/Attendance/Workforce.Modules.Attendance.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Audit/">
+    <Project Path="src/Modules/Audit/Workforce.Modules.Audit.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Compliance/">
+    <Project Path="src/Modules/Compliance/Workforce.Modules.Compliance.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Documents/">
+    <Project Path="src/Modules/Documents/Workforce.Modules.Documents.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Workforce.Modules.Identity.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Integrations/">
+    <Project Path="src/Modules/Integrations/Workforce.Modules.Integrations.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Leave/">
+    <Project Path="src/Modules/Leave/Workforce.Modules.Leave.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Workforce.Modules.Notifications.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Organization/">
+    <Project Path="src/Modules/Organization/Workforce.Modules.Organization.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payroll/">
+    <Project Path="src/Modules/Payroll/Workforce.Modules.Payroll.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/People/">
+    <Project Path="src/Modules/People/Workforce.Modules.People.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Recruitment/">
+    <Project Path="src/Modules/Recruitment/Workforce.Modules.Recruitment.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Reporting/">
+    <Project Path="src/Modules/Reporting/Workforce.Modules.Reporting.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Settlement/">
+    <Project Path="src/Modules/Settlement/Workforce.Modules.Settlement.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Tenancy/">
+    <Project Path="src/Modules/Tenancy/Workforce.Modules.Tenancy.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Architecture.Tests/Architecture.Tests.csproj" />
+  </Folder>
+</Solution>

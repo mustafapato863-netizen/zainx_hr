@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en" dir="ltr" data-theme="dark" data-density="compact">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Employee Directory — ZainX Workforce</title>
+  <link rel="icon" type="image/png" href="../brand/zainx-mark.png">
+  <link rel="stylesheet" href="../tokens.css">
+  <link rel="stylesheet" href="../foundations.css">
+  <link rel="stylesheet" href="../components.css">
+  <link rel="stylesheet" href="../patterns.css">
+  <link rel="stylesheet" href="../signature.css">
+</head>
+<body>
+
+<div class="ds-app">
+
+  <!-- Application Shell Sidebar -->
+  <aside class="ds-sidebar" aria-label="Main Navigation">
+    <div class="ds-sidebar-header">
+      <div class="ds-brand">
+        <img class="ds-brand-icon" src="../brand/zainx-mark.png" alt="ZainX Logo" width="26" height="26">
+        <div>
+          <strong>ZainX</strong>
+          <span class="t-metadata">Workforce OS</span>
+        </div>
+      </div>
+    </div>
+
+    <nav class="ds-nav">
+      <p class="ds-nav-group">WORKSPACE</p>
+      <a class="ds-nav-link" href="../index.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Home
+      </a>
+      <a class="ds-nav-link active" href="01-employee-directory.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        People Directory
+      </a>
+      <a class="ds-nav-link" href="03-payroll-run.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+        Payroll
+      </a>
+      <a class="ds-nav-link" href="05-recruitment-pipeline.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Recruitment
+      </a>
+      <a class="ds-nav-link" href="12-login.html">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        Sign Out / Login
+      </a>
+    </nav>
+  </aside>
+
+  <!-- Main View -->
+  <main class="ds-main">
+    
+    <!-- Topbar -->
+    <header class="ds-topbar">
+      <div class="ds-topbar-start">
+        <span class="ds-breadcrumb">
+          <span>People</span>
+          <span class="ds-breadcrumb-sep">/</span>
+          <span class="ds-breadcrumb-current">Employee Directory</span>
+        </span>
+      </div>
+      <div class="ds-topbar-controls">
+        <button class="ds-control-btn" id="themeToggle" type="button">Theme</button>
+        <button class="ds-control-btn" id="rtlToggle" type="button">RTL</button>
+        <button class="ds-control-btn" id="densityToggle" type="button">Density</button>
+        <button class="zx-btn zx-btn-primary zx-btn-xs" type="button">＋ Add Employee</button>
+      </div>
+    </header>
+
+    <div class="ds-content">
+
+      <!-- Page Header -->
+      <div class="flex justify-between items-center">
+        <div>
+          <h1 class="t-page-title">Employee Directory · دليل الموظفين</h1>
+          <p class="t-page-subtitle">482 Total employees across 3 legal entities in Egypt</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">Import CSV</button>
+          <button class="zx-btn zx-btn-secondary zx-btn-sm" type="button">Export Directory</button>
+        </div>
+      </div>
+
+      <!-- Data Grid Component -->
+      <div class="zx-grid-wrap">
+
+        <div class="zx-grid-toolbar">
+          <div class="zx-grid-toolbar-start">
+            <div class="zx-saved-views">
+              <button class="zx-view-tab active" type="button">All (482)</button>
+              <button class="zx-view-tab" type="button">Full-time (430)</button>
+              <button class="zx-view-tab" type="button">Contractors (52)</button>
+            </div>
+            <div class="zx-filter-bar">
+              <div class="zx-filter-chip active"><span>Legal Entity: Cairo Holdings</span> ✕</div>
+            </div>
+          </div>
+          <div class="zx-grid-toolbar-end">
+            <input class="zx-input zx-input-xs" style="width: 180px; height: 28px;" type="text" placeholder="Filter employees…">
+          </div>
+        </div>
+
+        <div class="zx-grid-table-container">
+          <table class="zx-table">
+            <thead>
+              <tr>
+                <th style="width: 32px;"><input type="checkbox" aria-label="Select all employees"></th>
+                <th>Employee Name</th>
+                <th>Job Title</th>
+                <th>Department</th>
+                <th>Legal Entity</th>
+                <th>Status</th>
+                <th class="num">Hire Date</th>
+                <th style="width: 36px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><input type="checkbox" aria-label="Select Ahmed Hassan"></td>
+                <td>
+                  <div class="zx-employee-cell">
+                    <span class="zx-avatar zx-avatar-24">AH</span>
+                    <div><strong>Ahmed Hassan</strong><small>EMP-0148</small></div>
+                  </div>
+                </td>
+                <td>Senior Operations Specialist</td>
+                <td>Operations</td>
+                <td>Cairo Holdings SAE</td>
+                <td><span class="ds-badge ds-badge-success">Active</span></td>
+                <td class="num">2022-03-15</td>
+                <td><button class="zx-btn zx-btn-ghost zx-btn-xs" type="button">•••</button></td>
+              </tr>
+
+              <tr>
+                <td><input type="checkbox" aria-label="Select Sara Adel"></td>
+                <td>
+                  <div class="zx-employee-cell">
+                    <span class="zx-avatar zx-avatar-24" style="background: #EC4899;">SA</span>
+                    <div><strong>Sara Adel</strong><small>EMP-0217</small></div>
+                  </div>
+                </td>
+                <td>Financial Controller</td>
+                <td>Finance</td>
+                <td>Cairo Holdings SAE</td>
+                <td><span class="ds-badge ds-badge-success">Active</span></td>
+                <td class="num">2021-08-01</td>
+                <td><button class="zx-btn zx-btn-ghost zx-btn-xs" type="button">•••</button></td>
+              </tr>
+
+              <tr>
+                <td><input type="checkbox" aria-label="Select Omar Nabil"></td>
+                <td>
+                  <div class="zx-employee-cell">
+                    <span class="zx-avatar zx-avatar-24" style="background: #10B981;">ON</span>
+                    <div><strong>Omar Nabil</strong><small>EMP-0319</small></div>
+                  </div>
+                </td>
+                <td>Logistics Supervisor</td>
+                <td>Operations</td>
+                <td>Alexandria Logistics LLC</td>
+                <td><span class="ds-badge ds-badge-warning">On Leave</span></td>
+                <td class="num">2023-01-10</td>
+                <td><button class="zx-btn zx-btn-ghost zx-btn-xs" type="button">•••</button></td>
+              </tr>
+
+              <tr>
+                <td><input type="checkbox" aria-label="Select Mariam Farouk"></td>
+                <td>
+                  <div class="zx-employee-cell">
+                    <span class="zx-avatar zx-avatar-24" style="background: #8B5CF6;">MF</span>
+                    <div><strong>Mariam Farouk</strong><small>EMP-0402</small></div>
+                  </div>
+                </td>
+                <td>HR Generalist</td>
+                <td>Human Resources</td>
+                <td>Cairo Holdings SAE</td>
+                <td><span class="ds-badge ds-badge-success">Active</span></td>
+                <td class="num">2024-05-20</td>
+                <td><button class="zx-btn zx-btn-ghost zx-btn-xs" type="button">•••</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="zx-pagination">
+          <span>Showing <strong>1–4</strong> of <strong>482</strong></span>
+          <div class="zx-pagination-controls">
+            <button class="zx-pagination-btn" type="button" disabled>‹</button>
+            <button class="zx-pagination-btn active" type="button">1</button>
+            <button class="zx-pagination-btn" type="button">2</button>
+            <button class="zx-pagination-btn" type="button">›</button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script src="../app.js"></script>
+</body>
+</html>

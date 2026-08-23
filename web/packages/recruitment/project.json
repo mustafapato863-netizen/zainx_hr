@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/recruitment",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/recruitment/src",
+  "projectType": "library",
+  "tags": ["scope:recruitment", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

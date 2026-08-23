@@ -1,0 +1,12 @@
+{
+  "name": "@zainx/leave",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "packages/leave/src",
+  "projectType": "library",
+  "tags": ["scope:leave", "type:lib"],
+  "targets": {
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}
