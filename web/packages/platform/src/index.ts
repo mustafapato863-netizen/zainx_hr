@@ -4,3 +4,5 @@ export interface SessionContext {
   userId: string;
   roles: string[];
 }
+
+export * from './components/NotificationCenter';

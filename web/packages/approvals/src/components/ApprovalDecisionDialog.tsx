@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
+import { ApprovalInboxItemDto } from '@zainx/contracts';
 import { Button } from '@zainx/design-system';
-import { ApprovalItemDto } from '@zainx/contracts';
 
 export interface ApprovalDecisionDialogProps {
-  item: ApprovalItemDto | null;
+  item: ApprovalInboxItemDto | null;
   action: 'approve' | 'reject' | null;
   isOpen: boolean;
   onClose: () => void;
@@ -40,7 +40,7 @@ export const ApprovalDecisionDialog: React.FC<ApprovalDecisionDialogProps> = ({
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      await onConfirmDecision?.(item.id, action, comments, item.rowVersion);
+      await onConfirmDecision?.(item.id, action, comments, Number(item.rowVersion));
       onClose();
     } catch (err: any) {
       setErrorMessage(
@@ -65,7 +65,7 @@ export const ApprovalDecisionDialog: React.FC<ApprovalDecisionDialogProps> = ({
           <h2 id="decision-dialog-title" className="text-base font-bold text-text-primary">
             {isApprove ? 'Confirm Approval' : 'Confirm Rejection'}
           </h2>
-          <Button variant="ghost" size="sm" onClick={onClose} ariaLabel="Close dialog">
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close dialog">
             ✕
           </Button>
         </div>
@@ -78,9 +78,9 @@ export const ApprovalDecisionDialog: React.FC<ApprovalDecisionDialogProps> = ({
 
         <div className="mt-4 p-3.5 rounded-lg bg-surface-secondary/50 border border-border-secondary text-xs space-y-1">
           <div className="font-semibold text-text-primary">{item.title}</div>
-          <div className="text-text-secondary">{item.summary}</div>
+          <div className="text-text-secondary">{item.sourceModule} • {item.workflowType}</div>
           <div className="text-text-muted text-[11px] pt-1">
-            Subject: {item.subjectEmployeeNameEn} • Step {item.currentStepOrder} of {item.totalSteps}
+            Requester: {item.requesterEmploymentId} • Step {Number(item.currentStepOrder)} of {Number(item.totalSteps)}
           </div>
         </div>
 

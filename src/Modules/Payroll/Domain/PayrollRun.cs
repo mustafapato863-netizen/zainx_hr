@@ -119,6 +119,12 @@ public class PayrollRun
             _employeeResults.Add(result);
             _exceptions.AddRange(empExceptions);
 
+            var blocking = empExceptions.FirstOrDefault(e => e.Severity == ExceptionSeverity.Blocking);
+            if (blocking != null)
+            {
+                throw new InvalidOperationException($"BLOCKING EXCEPTION: {blocking.Reason}");
+            }
+
             runGross += result.GrossPay;
             runNet += result.NetPay;
             runEmployer += result.EmployerContributions;
@@ -128,8 +134,15 @@ public class PayrollRun
         TotalNet = RoundingPolicy.RoundLine(runNet);
         TotalEmployerContributions = RoundingPolicy.RoundLine(runEmployer);
 
-        // Compute Reproducibility Fingerprint SHA-256
-        var hashInput = $"{Id}:{TotalGross:F2}:{TotalNet:F2}:{EmployeeCount}:{engine.EngineVersion}";
+        // Compute Canonical Reproducibility Fingerprint SHA-256 (BASED ONLY ON INPUTS AND RULES, NOT OUTPUTS OR VOLATILE IDs)
+        var sortedRules = string.Join(",", activeRules.OrderBy(r => r.RuleId).Select(r =>
+        {
+            var paramHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(r.ParametersJson)))[..12];
+            return $"{r.RuleId}:v{r.VersionNumber}:{r.EffectivePeriod.EffectiveFrom:yyyyMMdd}..{(r.EffectivePeriod.EffectiveTo.HasValue ? r.EffectivePeriod.EffectiveTo.Value.ToString("yyyyMMdd") : "open")}:{paramHash}";
+        }));
+        var sortedInputs = string.Join("\n", _inputSnapshots.OrderBy(i => i.EmploymentId).Select(i => i.ToCanonicalFingerprintString()));
+        var hashInput = $"ENGINE:{engine.EngineVersion}|ROUNDING:MidpointRounding.AwayFromZero\nRULES:[{sortedRules}]\nINPUTS:\n{sortedInputs}";
+        
         using var sha = SHA256.Create();
         var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(hashInput));
         ReproducibilityHash = Convert.ToHexString(bytes);

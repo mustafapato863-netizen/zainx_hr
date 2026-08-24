@@ -6,16 +6,25 @@ using Workforce.BuildingBlocks.Database;
 using Workforce.Host.Api.Middleware;
 using Workforce.Modules.Attendance.Infrastructure;
 using Workforce.Modules.Approvals.Infrastructure;
+using Workforce.Modules.Audit.Infrastructure;
 using Workforce.Modules.Compliance.Domain;
 using Workforce.Modules.Compliance.Infrastructure;
 using Workforce.Modules.Documents.Infrastructure;
+using Workforce.Modules.Identity.Infrastructure;
+using Workforce.Modules.Integrations.Application;
+using Workforce.Modules.Integrations.Infrastructure;
 using Workforce.Modules.Leave.Infrastructure;
+using Workforce.Modules.Notifications.Infrastructure;
 using Workforce.Modules.Organization.Infrastructure;
 using Workforce.Modules.Payroll.Domain.CalculationEngine;
 using Workforce.Modules.Payroll.Infrastructure;
 using Workforce.Modules.People.Infrastructure;
+using Workforce.Modules.Reporting.Application;
+using Workforce.Modules.Reporting.Infrastructure;
 using Workforce.Modules.Settlement.Domain.ExportAdapters;
 using Workforce.Modules.Settlement.Infrastructure;
+using Workforce.Modules.Recruitment.Domain;
+using Workforce.Modules.Recruitment.Infrastructure;
 using Workforce.SharedKernel.Primitives;
 using Workforce.SharedKernel.Security;
 
@@ -70,6 +79,7 @@ builder.Services.AddScoped<IUserContext>(sp =>
         "UTC",
         new HashSet<string> 
         { 
+            "*",
             "people.employee.read", "people.employee.create", "people.employee.update", "people.employee.reveal_pii",
             "organization.unit.read", "organization.unit.create", "organization.unit.update",
             "documents.read", "documents.upload", "documents.download",
@@ -79,22 +89,34 @@ builder.Services.AddScoped<IUserContext>(sp =>
             "payroll.run.read", "payroll.run.create", "payroll.run.calculate", "payroll.run.finalize", "payroll.exceptions.resolve",
             "settlement.batch.read", "settlement.batch.generate", "settlement.batch.approve", "settlement.batch.export",
             "compliance.rules.read",
+            "recruitment.requisition.read", "recruitment.requisition.create", "recruitment.requisition.approve",
+            "recruitment.candidate.read", "recruitment.candidate.manage",
+            "recruitment.application.read", "recruitment.application.move", "recruitment.application.reject",
+            "recruitment.interview.manage", "recruitment.scorecard.submit", "recruitment.scorecard.read_all",
+            "recruitment.offer.read", "recruitment.offer.read_sensitive", "recruitment.offer.create", "recruitment.offer.approve", "recruitment.offer.issue",
+            "recruitment.hire",
+            "reports.read", "reports.export",
+            "admin.roles.manage", "admin.settings.manage", "admin.retention.manage",
+            "integrations.manage",
+            "audit.read",
             "admin" 
         },
-        new HashSet<string> { "core.platform", "people", "organization", "documents", "attendance", "leave", "approvals", "payroll", "compliance", "settlement" }
+        new HashSet<string> { "core.platform", "people", "organization", "documents", "attendance", "leave", "approvals", "payroll", "compliance", "settlement", "recruitment", "reports", "admin", "integrations", "notifications", "audit" }
     );
 });
 
 // PII Encryption Service (AES-256-GCM + Blind Indexing)
 builder.Services.AddSingleton<IPiiEncryptionService, AesPiiEncryptionService>();
 
-// Storage Provider for Documents
+// Storage Provider for Documents & Reports
 builder.Services.AddSingleton<IStorageProvider, LocalStorageProvider>();
 
 // Module Repositories
 builder.Services.AddScoped<OrganizationRepository>(_ => new OrganizationRepository(connectionString));
 builder.Services.AddScoped<PeopleRepository>(sp => new PeopleRepository(connectionString, sp.GetRequiredService<IPiiEncryptionService>()));
+builder.Services.AddScoped<Workforce.Modules.People.Application.Contracts.IPeopleHiringContract, Workforce.Modules.People.Application.PeopleHiringContract>();
 builder.Services.AddScoped<DocumentsRepository>(_ => new DocumentsRepository(connectionString));
+builder.Services.AddScoped<Workforce.Modules.Documents.Application.Contracts.IDocumentsApplicationContract, Workforce.Modules.Documents.Application.DocumentsApplicationContract>();
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<IApprovalsRepository, ApprovalsRepository>();
@@ -106,8 +128,40 @@ builder.Services.AddScoped<IPayrollCalculationEngine, DeterministicPayrollEngine
 builder.Services.AddScoped<ISettlementRepository, SettlementRepository>();
 builder.Services.AddScoped<IPaymentExportAdapter, NeutralCsvPaymentExportAdapter>();
 
+// Phase 5 Recruitment Services
+builder.Services.AddScoped<IRecruitmentRepository>(_ => new RecruitmentRepository(connectionString));
+builder.Services.AddScoped<RecruitmentRepository>(_ => new RecruitmentRepository(connectionString));
+
+// Phase 6 Services: Audit, Notifications, Integrations, Administration, Reporting
+builder.Services.AddScoped<IAuditRepository>(_ => new AuditRepository(connectionString));
+builder.Services.AddScoped<INotificationsRepository>(_ => new NotificationsRepository(connectionString));
+builder.Services.AddScoped<IIntegrationsRepository>(_ => new IntegrationsRepository(connectionString));
+builder.Services.AddScoped<IOutboundIntegrationAdapter, GenericWebhookAdapter>();
+builder.Services.AddScoped<IAdministrationRepository>(sp => new AdministrationRepository(connectionString, sp.GetRequiredService<IAuditRepository>()));
+builder.Services.AddScoped<IReportingRepository>(_ => new ReportingRepository(connectionString));
+builder.Services.AddScoped<IReportingExportEngine, ReportingExportEngine>();
+
 // Controllers
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    })
+    .AddApplicationPart(typeof(Workforce.Modules.People.Api.PeopleController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Organization.Api.OrganizationController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Documents.Api.DocumentsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Attendance.Api.AttendanceController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Leave.Api.LeaveController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Approvals.Api.ApprovalsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Payroll.Api.PayrollRunsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Settlement.Api.SettlementController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Compliance.Api.ComplianceRulesController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Recruitment.Api.RecruitmentRequisitionsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Audit.Api.AuditController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Notifications.Api.NotificationsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Integrations.Api.IntegrationsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Identity.Api.AdministrationRolesController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Reporting.Api.ReportsController).Assembly);
 
 // CORS for local web dev
 builder.Services.AddCors(options =>
@@ -135,6 +189,12 @@ try
     await ComplianceMigrations.ApplyAsync(dataSource);
     await PayrollMigrations.ApplyAsync(dataSource);
     await SettlementMigrations.ApplyAsync(dataSource);
+    await RecruitmentMigrations.ApplyAsync(connectionString);
+    await AuditMigrations.ApplyMigrationsAsync(connectionString);
+    await NotificationsMigrations.ApplyMigrationsAsync(connectionString);
+    await IntegrationsMigrations.ApplyMigrationsAsync(connectionString);
+    await AdministrationMigrations.ApplyMigrationsAsync(connectionString);
+    await ReportingMigrations.ApplyMigrationsAsync(connectionString);
 
     // Seed compliance rules
     using (var scope = app.Services.CreateScope())
@@ -143,7 +203,7 @@ try
         await complianceRepo.SeedDefaultEgyptRulesAsync();
     }
 
-    Console.WriteLine("[MIGRATIONS] Phase 1 - 4 Database schemas initialized successfully.");
+    Console.WriteLine("[MIGRATIONS] All 16 Phase 1 - 6 Database schemas initialized successfully.");
 }
 catch (Exception ex)
 {
@@ -171,11 +231,18 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 
 // Health Checks
 app.MapHealthChecks("/health");
+app.MapHealthChecks("/health/ready");
 
 // OpenAPI Specification Endpoint
 app.MapOpenApi();
 
 app.MapControllers();
+
+if (args.Contains("--run-db-benchmark"))
+{
+    var code = await Workforce.Host.Api.Testing.WorkforceDbBenchmark.RunAsync(app.Services);
+    Environment.Exit(code);
+}
 
 // Seed initial test data for Phase 4 if needed
 app.MapGet("/api/v1/seed/phase4", async (

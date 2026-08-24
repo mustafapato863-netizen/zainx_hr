@@ -60,7 +60,8 @@ public static class DocumentsMigrations
                 ('a2222222-2222-2222-2222-222222222222', 'PASSPORT', 'Passport', 'جواز السفر', false, true),
                 ('a3333333-3333-3333-3333-333333333333', 'CONTRACT', 'Employment Contract', 'عقد العمل', true, false),
                 ('a4444444-4444-4444-4444-444444444444', 'DEGREE', 'Degree / Diploma Certificate', 'المؤهل العلمي / الشهادة', false, false),
-                ('a5555555-5555-5555-5555-555555555555', 'OTHER', 'General Attachment', 'مرفق عام', false, false)
+                ('a5555555-5555-5555-5555-555555555555', 'OTHER', 'General Attachment', 'مرفق عام', false, false),
+                ('a6666666-6666-6666-6666-666666666666', 'RESUME', 'Candidate Resume / CV', 'السيرة الذاتية للمرشح', false, false)
             ON CONFLICT (code) DO NOTHING;
         ";
 

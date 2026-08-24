@@ -10,6 +10,9 @@ public static class ComplianceMigrations
         await using var cmd = dataSource.CreateCommand("""
             CREATE SCHEMA IF NOT EXISTS compliance;
 
+            -- Enable btree_gist for temporal exclusion constraints
+            CREATE EXTENSION IF NOT EXISTS btree_gist;
+
             -- 1. Statutory Rules
             CREATE TABLE IF NOT EXISTS compliance.statutory_rules (
                 id UUID PRIMARY KEY,
@@ -19,11 +22,12 @@ public static class ComplianceMigrations
                 name_en VARCHAR(200) NOT NULL,
                 name_ar VARCHAR(200) NOT NULL,
                 source_reference_law TEXT NOT NULL,
+                applicability_basis INT NOT NULL DEFAULT 1,
                 is_verified BOOLEAN NOT NULL DEFAULT TRUE,
                 created_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
 
-            -- 2. Statutory Rule Versions (Effective-Dated)
+            -- 2. Statutory Rule Versions (Effective-Dated with Temporal Exclusion Integrity)
             CREATE TABLE IF NOT EXISTS compliance.statutory_rule_versions (
                 id UUID PRIMARY KEY,
                 rule_id UUID NOT NULL REFERENCES compliance.statutory_rules(id) ON DELETE CASCADE,
@@ -36,6 +40,22 @@ public static class ComplianceMigrations
                 created_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 CONSTRAINT uq_rule_version UNIQUE (rule_id, version_number)
             );
+
+            -- Temporal Exclusion Constraint: Prevent overlapping VERIFIED versions for the same rule
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'uq_verified_rule_versions_no_overlap'
+                ) THEN
+                    ALTER TABLE compliance.statutory_rule_versions
+                    ADD CONSTRAINT uq_verified_rule_versions_no_overlap
+                    EXCLUDE USING gist (
+                        rule_id WITH =,
+                        daterange(effective_from, COALESCE(effective_to, 'infinity'::date), '[]') WITH &&
+                    )
+                    WHERE (status = 1);
+                END IF;
+            END $$;
 
             -- 3. Compliance Validations
             CREATE TABLE IF NOT EXISTS compliance.compliance_validations (

@@ -24,7 +24,7 @@ const sampleApprovals: ApprovalItemDto[] = [
     subjectEmployeeNameEn: 'Tariq Al-Mansoor',
     currentStepOrder: 1,
     totalSteps: 2,
-    status: ApprovalStatus.Pending,
+    status: 1,
     statusName: 'Pending',
     createdAtUtc: '2026-08-24T10:00:00Z',
     rowVersion: 1,

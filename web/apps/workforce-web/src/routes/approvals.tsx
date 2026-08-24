@@ -1,10 +1,7 @@
 import React, { useState, Suspense, lazy } from 'react';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root';
-import {
-  ApprovalItemDto,
-  ApprovalStatus
-} from '@zainx/contracts';
+import { ApprovalInboxItemDto } from '@zainx/contracts';
 
 // Lazy load approvals components with strict route-level chunk isolation
 const ApprovalInbox = lazy(() =>
@@ -14,57 +11,53 @@ const ApprovalDecisionDialog = lazy(() =>
   import('@zainx/approvals').then((m) => ({ default: m.ApprovalDecisionDialog }))
 );
 
-const initialApprovals: ApprovalItemDto[] = [
+const ApprovalStatus = {
+  Pending: 'Pending',
+  Approved: 'Approved',
+  Rejected: 'Rejected'
+} as const;
+
+const initialApprovals: ApprovalInboxItemDto[] = [
   {
     id: 'app-01',
     tenantId: '22222222-2222-2222-2222-222222222222',
     legalEntityId: '33333333-3333-3333-3333-333333333333',
-    domain: 'leave',
+    sourceModule: 'leave',
     sourceEntityId: 'req-01',
-    sourceEntityType: 'LeaveRequest',
+    workflowType: 'LeaveRequest',
     title: 'Annual Leave Request (5 Days)',
-    summary: 'Tariq Al-Mansoor requested 5 days annual leave from 2026-09-01 to 2026-09-05.',
     requesterUserId: 'usr-01',
-    subjectEmploymentId: '44444444-4444-4444-4444-444444444444',
-    subjectEmployeeNameEn: 'Tariq Al-Mansoor',
+    requesterEmploymentId: '44444444-4444-4444-4444-444444444444',
     currentStepOrder: 1,
     totalSteps: 2,
     status: ApprovalStatus.Pending,
-    statusName: 'Pending',
-    createdAtUtc: '2026-08-24T09:00:00Z',
-    rowVersion: 1,
-    assignedApproverId: 'mgr-current',
-    stepOrder: 1
+    createdAt: '2026-08-24T09:00:00Z',
+    rowVersion: 1
   },
   {
     id: 'app-02',
     tenantId: '22222222-2222-2222-2222-222222222222',
     legalEntityId: '33333333-3333-3333-3333-333333333333',
-    domain: 'attendance',
+    sourceModule: 'attendance',
     sourceEntityId: 'adj-01',
-    sourceEntityType: 'AttendanceAdjustment',
+    workflowType: 'AttendanceAdjustment',
     title: 'Attendance Regularisation (+60 mins)',
-    summary: 'Sara Al-Otaibi requested punch correction due to terminal biometric timeout.',
     requesterUserId: 'usr-02',
-    subjectEmploymentId: '55555555-5555-5555-5555-555555555555',
-    subjectEmployeeNameEn: 'Sara Al-Otaibi',
+    requesterEmploymentId: '55555555-5555-5555-5555-555555555555',
     currentStepOrder: 1,
     totalSteps: 1,
     status: ApprovalStatus.Pending,
-    statusName: 'Pending',
-    createdAtUtc: '2026-08-24T08:30:00Z',
-    rowVersion: 1,
-    assignedApproverId: 'mgr-current',
-    stepOrder: 1
+    createdAt: '2026-08-24T08:30:00Z',
+    rowVersion: 1
   }
 ];
 
 export function ApprovalsComponent() {
-  const [items, setItems] = useState<ApprovalItemDto[]>(initialApprovals);
-  const [selectedItemForDecision, setSelectedItemForDecision] = useState<ApprovalItemDto | null>(null);
+  const [items, setItems] = useState<ApprovalInboxItemDto[]>(initialApprovals);
+  const [selectedItemForDecision, setSelectedItemForDecision] = useState<ApprovalInboxItemDto | null>(null);
   const [selectedAction, setSelectedAction] = useState<'approve' | 'reject' | null>(null);
 
-  const handleSelectDecision = (item: ApprovalItemDto, action: 'approve' | 'reject') => {
+  const handleSelectDecision = (item: ApprovalInboxItemDto, action: 'approve' | 'reject') => {
     setSelectedItemForDecision(item);
     setSelectedAction(action);
   };
@@ -78,10 +71,12 @@ export function ApprovalsComponent() {
     setItems((prev) =>
       prev.map((i) => {
         if (i.id === requestId) {
-          if (i.rowVersion !== rowVersion) {
+          if (Number(i.rowVersion) !== rowVersion) {
             throw new Error('Concurrency conflict: Approval item was modified by another approver.');
           }
-          const isFinalStep = i.currentStepOrder >= i.totalSteps;
+          const currentOrder = Number(i.currentStepOrder);
+          const total = Number(i.totalSteps);
+          const isFinalStep = currentOrder >= total;
           return {
             ...i,
             status:
@@ -90,17 +85,11 @@ export function ApprovalsComponent() {
                   ? ApprovalStatus.Approved
                   : ApprovalStatus.Pending
                 : ApprovalStatus.Rejected,
-            statusName:
-              action === 'approve'
-                ? isFinalStep
-                  ? 'Approved'
-                  : 'Pending Next Step'
-                : 'Rejected',
             currentStepOrder:
               action === 'approve' && !isFinalStep
-                ? i.currentStepOrder + 1
-                : i.currentStepOrder,
-            rowVersion: i.rowVersion + 1
+                ? currentOrder + 1
+                : currentOrder,
+            rowVersion: Number(i.rowVersion || 0) + 1
           };
         }
         return i;
@@ -108,7 +97,7 @@ export function ApprovalsComponent() {
     );
   };
 
-  const handleBulkApprove = (selectedItems: ApprovalItemDto[]) => {
+  const handleBulkApprove = (selectedItems: ApprovalInboxItemDto[]) => {
     const selectedIds = selectedItems.map((i) => i.id);
     setItems((prev) => prev.filter((i) => !selectedIds.includes(i.id)));
   };

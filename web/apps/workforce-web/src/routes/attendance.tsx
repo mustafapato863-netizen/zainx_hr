@@ -3,7 +3,6 @@ import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root';
 import {
   AttendanceDayDto,
-  AttendanceStatus,
   AttendanceExceptionDto
 } from '@zainx/contracts';
 
@@ -18,6 +17,13 @@ const AttendanceAdjustmentModal = lazy(() =>
   import('@zainx/attendance').then((m) => ({ default: m.AttendanceAdjustmentModal }))
 );
 
+const AttendanceStatus = {
+  Locked: 'Locked',
+  Approved: 'Approved',
+  Reviewed: 'Reviewed',
+  Unreviewed: 'Unreviewed',
+} as const;
+
 // Initial fallback mock data for testing/offline rendering
 const initialRecords: AttendanceDayDto[] = [
   {
@@ -25,13 +31,9 @@ const initialRecords: AttendanceDayDto[] = [
     tenantId: '22222222-2222-2222-2222-222222222222',
     legalEntityId: '33333333-3333-3333-3333-333333333333',
     employmentId: '44444444-4444-4444-4444-444444444444',
-    employeeNumber: 'EMP-1001',
-    employeeNameEn: 'Tariq Al-Mansoor',
-    departmentNameEn: 'Human Resources',
     businessDate: '2026-08-24',
-    timezoneId: 'Asia/Riyadh',
+    timeZoneId: 'Asia/Riyadh',
     status: AttendanceStatus.Reviewed,
-    statusName: 'Reviewed',
     scheduledMinutes: 480,
     firstClockInUtc: '2026-08-24T05:00:00Z',
     lastClockOutUtc: '2026-08-24T13:30:00Z',
@@ -39,22 +41,16 @@ const initialRecords: AttendanceDayDto[] = [
     lateMinutes: 0,
     earlyDepartureMinutes: 0,
     isAbsent: false,
-    rowVersion: 1,
-    exceptions: [],
-    adjustments: []
+    rowVersion: 1
   },
   {
     id: '22222222-2222-2222-2222-222222222222',
     tenantId: '22222222-2222-2222-2222-222222222222',
     legalEntityId: '33333333-3333-3333-3333-333333333333',
     employmentId: '55555555-5555-5555-5555-555555555555',
-    employeeNumber: 'EMP-1002',
-    employeeNameEn: 'Sara Al-Otaibi',
-    departmentNameEn: 'Engineering',
     businessDate: '2026-08-24',
-    timezoneId: 'Asia/Riyadh',
+    timeZoneId: 'Asia/Riyadh',
     status: AttendanceStatus.Unreviewed,
-    statusName: 'Unreviewed',
     scheduledMinutes: 480,
     firstClockInUtc: '2026-08-24T05:15:00Z',
     lastClockOutUtc: null,
@@ -62,32 +58,33 @@ const initialRecords: AttendanceDayDto[] = [
     lateMinutes: 15,
     earlyDepartureMinutes: 0,
     isAbsent: false,
-    rowVersion: 1,
-    exceptions: [
-      {
-        id: 'ex-01',
-        attendanceDayId: '22222222-2222-2222-2222-222222222222',
-        tenantId: '22222222-2222-2222-2222-222222222222',
-        employmentId: '55555555-5555-5555-5555-555555555555',
-        employeeNameEn: 'Sara Al-Otaibi',
-        type: 1,
-        typeName: 'MissingClockOut',
-        status: 0,
-        statusName: 'Pending',
-        details: 'No clock-out recorded for shift ending at 16:30.',
-        createdAtUtc: '2026-08-24T14:00:00Z'
-      }
-    ],
-    adjustments: []
+    rowVersion: 1
+  }
+];
+
+const initialExceptions: AttendanceExceptionDto[] = [
+  {
+    id: 'ex-01',
+    attendanceDayId: '22222222-2222-2222-2222-222222222222',
+    tenantId: '22222222-2222-2222-2222-222222222222',
+    employmentId: '55555555-5555-5555-5555-555555555555',
+    type: 'MissingClockOut',
+    status: 'Pending',
+    details: 'No clock-out recorded for shift ending at 16:30.',
+    resolutionNotes: null,
+    resolvedByUserId: null,
+    resolvedAtUtc: null,
+    createdAtUtc: '2026-08-24T14:00:00Z'
   }
 ];
 
 export function AttendanceComponent() {
   const [records, setRecords] = useState<AttendanceDayDto[]>(initialRecords);
+  const [exceptions, setExceptions] = useState<AttendanceExceptionDto[]>(initialExceptions);
   const [selectedRecordForAdjustment, setSelectedRecordForAdjustment] = useState<AttendanceDayDto | null>(null);
   const [isExceptionsDrawerOpen, setIsExceptionsDrawerOpen] = useState(false);
 
-  const pendingExceptions = records.flatMap((r) => r.exceptions || []);
+  const pendingExceptions = exceptions.filter((e) => e.status === 'Pending');
 
   const handleAdjustRecord = (record: AttendanceDayDto) => {
     setSelectedRecordForAdjustment(record);
@@ -100,8 +97,7 @@ export function AttendanceComponent() {
           ? {
               ...r,
               status: AttendanceStatus.Approved,
-              statusName: 'Approved',
-              rowVersion: r.rowVersion + 1
+              rowVersion: Number(r.rowVersion || 0) + 1
             }
           : r
       )
@@ -117,29 +113,14 @@ export function AttendanceComponent() {
     setRecords((prev) =>
       prev.map((r) => {
         if (r.id === dayId) {
-          if (r.rowVersion !== rowVersion) {
+          if (Number(r.rowVersion) !== rowVersion) {
             throw new Error('Concurrency conflict: Record was updated by another process.');
           }
           return {
             ...r,
             totalWorkedMinutes: adjustedMinutes,
             status: AttendanceStatus.Reviewed,
-            statusName: 'Reviewed',
-            rowVersion: r.rowVersion + 1,
-            adjustments: [
-              ...(r.adjustments || []),
-              {
-                id: `adj-${Date.now()}`,
-                attendanceDayId: dayId,
-                employmentId: r.employmentId,
-                adjustedWorkedMinutes: adjustedMinutes,
-                beforeWorkedMinutes: r.totalWorkedMinutes,
-                afterWorkedMinutes: adjustedMinutes,
-                reason,
-                actorUserId: 'usr-current',
-                createdAtUtc: new Date().toISOString()
-              }
-            ]
+            rowVersion: Number(r.rowVersion || 0) + 1
           };
         }
         return r;
@@ -152,12 +133,7 @@ export function AttendanceComponent() {
     notes: string,
     waive: boolean
   ) => {
-    setRecords((prev) =>
-      prev.map((r) => ({
-        ...r,
-        exceptions: (r.exceptions || []).filter((e) => e.id !== exceptionId)
-      }))
-    );
+    setExceptions((prev) => prev.filter((e) => e.id !== exceptionId));
   };
 
   return (

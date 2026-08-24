@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -6,4 +6,21 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Workforce.SharedKernel\Workforce.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\Workforce.BuildingBlocks\Workforce.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\People\Workforce.Modules.People.csproj" />
+    <ProjectReference Include="..\Approvals\Workforce.Modules.Approvals.csproj" />
+    <ProjectReference Include="..\Documents\Workforce.Modules.Documents.csproj" />
+  </ItemGroup>
+
 </Project>
+

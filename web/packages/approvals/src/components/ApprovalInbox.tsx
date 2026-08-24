@@ -8,15 +8,22 @@ import {
   ErrorState,
   Skeleton
 } from '@zainx/design-system';
-import { ApprovalItemDto, ApprovalStatus } from '@zainx/contracts';
+import { ApprovalInboxItemDto } from '@zainx/contracts';
+
+export const ApprovalStatus = {
+  Pending: 'Pending',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+  Cancelled: 'Cancelled',
+} as const;
 
 export interface ApprovalInboxProps {
-  items?: ApprovalItemDto[];
+  items?: ApprovalInboxItemDto[];
   isLoading?: boolean;
   isError?: boolean;
   onRefresh?: () => void;
-  onSelectDecision?: (item: ApprovalItemDto, action: 'approve' | 'reject') => void;
-  onBulkApprove?: (items: ApprovalItemDto[]) => void;
+  onSelectDecision?: (item: ApprovalInboxItemDto, action: 'approve' | 'reject') => void;
+  onBulkApprove?: (items: ApprovalInboxItemDto[]) => void;
 }
 
 export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
@@ -33,13 +40,17 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
 
   const filteredItems = useMemo(() => {
     return items.filter((item) => {
+      const summary = (item as any).summary || item.title || '';
+      const subjectName = (item as any).subjectEmployeeNameEn || '';
+      const domain = (item as any).domain || item.sourceModule || '';
+
       const matchesSearch =
         !searchTerm ||
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.subjectEmployeeNameEn?.toLowerCase().includes(searchTerm.toLowerCase());
+        summary.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        subjectName.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesDomain =
-        domainFilter === 'all' || item.domain.toLowerCase() === domainFilter.toLowerCase();
+        domainFilter === 'all' || domain.toLowerCase() === domainFilter.toLowerCase();
       return matchesSearch && matchesDomain;
     });
   }, [items, searchTerm, domainFilter]);
@@ -53,11 +64,13 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
   const getDomainBadge = (domain: string) => {
     switch (domain.toLowerCase()) {
       case 'leave':
-        return <Badge variant="primary" label="Leave Request" />;
+        return <Badge variant="primary">Leave Request</Badge>;
       case 'attendance':
-        return <Badge variant="warning" label="Attendance Adj." />;
+        return <Badge variant="warning">Attendance Adj.</Badge>;
+      case 'recruitment':
+        return <Badge variant="info">Recruitment</Badge>;
       default:
-        return <Badge variant="secondary" label={domain} />;
+        return <Badge variant="neutral">{domain}</Badge>;
     }
   };
 
@@ -75,7 +88,7 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
                   const selectedItems = items.filter((i) => selectedIds.includes(i.id));
                   onBulkApprove?.(selectedItems);
                 }}
-                ariaLabel="Approve all selected requests"
+                aria-label="Approve all selected requests"
               >
                 Approve Selected ({selectedIds.length})
               </Button>
@@ -83,7 +96,7 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
             <Button
               variant="outline"
               onClick={onRefresh}
-              ariaLabel="Refresh approval queue"
+              aria-label="Refresh approval queue"
             >
               Refresh
             </Button>
@@ -105,7 +118,7 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
 
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-semibold text-text-secondary mr-1">Domain:</span>
-          {['all', 'leave', 'attendance'].map((d) => (
+          {['all', 'leave', 'attendance', 'recruitment'].map((d) => (
             <button
               key={d}
               type="button"
@@ -132,19 +145,18 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
       ) : isError ? (
         <ErrorState
           title="Failed to Load Approval Queue"
-          message="An error occurred while connecting to the Universal Approval engine."
+          description="An error occurred while connecting to the Universal Approval engine."
           onRetry={onRefresh}
         />
       ) : filteredItems.length === 0 ? (
         items.length === 0 ? (
           <EmptyState
             title="All Caught Up!"
-            message="You have no pending approvals in your queue."
+            description="You have no pending approvals in your queue."
           />
         ) : (
           <NoResults
-            searchTerm={searchTerm}
-            onClearSearch={() => {
+            onClearFilters={() => {
               setSearchTerm('');
               setDomainFilter('all');
             }}
@@ -154,6 +166,9 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
         <div className="space-y-3">
           {filteredItems.map((item) => {
             const isChecked = selectedIds.includes(item.id);
+            const domain = (item as any).domain || item.sourceModule || 'Workflow';
+            const summary = (item as any).summary || item.title;
+
             return (
               <div
                 key={item.id}
@@ -170,18 +185,20 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
                   />
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      {getDomainBadge(item.domain)}
+                      {getDomainBadge(domain)}
                       <span className="text-sm font-bold text-text-primary">{item.title}</span>
                       <span className="text-xs px-2 py-0.5 rounded-full bg-surface-tertiary font-mono text-text-secondary">
                         Step {item.currentStepOrder} of {item.totalSteps}
                       </span>
                     </div>
 
-                    <p className="text-xs text-text-secondary mt-1">{item.summary}</p>
+                    <p className="text-xs text-text-secondary mt-1">{summary}</p>
 
-                    <div className="mt-2 flex items-center gap-4 text-[11px] text-text-muted">
-                      <span>Employee: <strong className="text-text-secondary">{item.subjectEmployeeNameEn || 'Unknown'}</strong></span>
-                      <span>Requested: {new Date(item.createdAtUtc).toLocaleDateString()}</span>
+                    <div className="mt-2 flex items-center gap-3 text-[11px] text-text-muted">
+                      {(item as any).subjectEmployeeNameEn && (
+                        <span>For: {(item as any).subjectEmployeeNameEn}</span>
+                      )}
+                      <span>Created: {new Date(item.createdAt).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -191,7 +208,7 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
                     variant="outline"
                     size="sm"
                     onClick={() => onSelectDecision?.(item, 'reject')}
-                    ariaLabel={`Reject ${item.title}`}
+                    aria-label={`Reject ${item.title}`}
                   >
                     Reject
                   </Button>
@@ -199,7 +216,7 @@ export const ApprovalInbox: React.FC<ApprovalInboxProps> = ({
                     variant="primary"
                     size="sm"
                     onClick={() => onSelectDecision?.(item, 'approve')}
-                    ariaLabel={`Approve ${item.title}`}
+                    aria-label={`Approve ${item.title}`}
                   >
                     Approve
                   </Button>

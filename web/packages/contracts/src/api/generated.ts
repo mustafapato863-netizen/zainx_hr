@@ -24,28 +24,105 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  Application,
+  ApplicationDetailDto,
+  ApprovalCancellationInput,
+  ApprovalDecisionInput,
+  ApprovalRejectionInput,
+  ApprovalRequestDetailDto,
+  ApproveBatchRequest,
+  AttendanceDayDto,
+  BackgroundJobDto,
+  CalculateRunRequest,
+  Candidate,
   ChangeAssignmentRequest,
   ChangeContextRequest,
+  CheckDuplicateCandidatesRequest,
+  ConcurrencyActionRequest,
+  CreateApplicationRequest,
+  CreateCandidateRequest,
   CreateEmployeeRequest,
+  CreateLeaveRequestInput,
   CreateLocationRequest,
+  CreateOfferRequest,
   CreateOrganizationUnitRequest,
+  CreatePayrollPeriodRequest,
+  CreatePayrollRunRequest,
+  CreateRequisitionRequest,
   DocumentDetailDto,
   DocumentSummaryDto,
   DocumentTypeDto,
+  DuplicateCandidateMatchDto,
   EmployeeProfileDto,
+  FinalizeRunRequest,
+  GenerateSettlementBatchRequest,
+  GetApiV1ApprovalsInboxParams,
+  GetApiV1AttendanceDaysParams,
+  GetApiV1AttendanceExceptionsParams,
+  GetApiV1ComplianceRulesParams,
   GetApiV1DocumentsIdDownloadParams,
   GetApiV1DocumentsParams,
+  GetApiV1LeaveBalancesParams,
+  GetApiV1LeaveRequestsParams,
   GetApiV1OrganizationUnitsParams,
   GetApiV1PeopleEmployeesParams,
+  GetApiV1RecruitmentApplicationsParams,
+  GetApiV1RecruitmentCandidatesParams,
+  GetApiV1RecruitmentInterviewsParams,
+  GetApiV1RecruitmentOffersParams,
+  GetApiV1RecruitmentRequisitionsParams,
+  HireCandidateRequest,
+  Interview,
+  JobRequisition,
+  LeaveBalanceDto,
+  LeaveDecisionRequest,
+  LeaveRejectionRequest,
+  LeaveRequestDto,
+  LeaveTypeDto,
+  LoadInputsRequest,
   LocationDto,
+  MoveApplicationStageRequest,
+  OfferDetailDto,
   OrganizationUnitDto,
+  PagedApprovalInboxResponse,
+  PagedAttendanceDaysResponse,
+  PagedExceptionsResponse,
+  PagedLeaveRequestsResponse,
+  PagedRecruitmentResultOfApplication,
+  PagedRecruitmentResultOfCandidate,
+  PagedRecruitmentResultOfJobRequisition,
   PagedResultOfEmployeeSummaryDto,
+  PayrollEmployeeResultDetailDto,
+  PayrollEmployeeResultSummaryDto,
+  PayrollExceptionDto,
+  PayrollPeriodDto,
+  PayrollRunDto,
+  PipelineBoardDto,
   PostApiV1DocumentsIdVersionsBody,
   PostApiV1DocumentsUploadBody,
   ProblemDetails,
+  RecordClockRequest,
+  RecruitmentPipeline,
+  RecruitmentPipelineVersion,
+  RejectApplicationRequest,
+  RescheduleInterviewRequest,
+  ResolveExceptionRequest,
   RevealSensitiveFieldRequest,
+  ScheduleInterviewRequest,
+  ScorecardSubmission,
   SensitiveRevealResponse,
-  UpdateOrganizationUnitRequest
+  SettlementBatchDetailDto,
+  SettlementBatchDto,
+  StatutoryRuleDto,
+  SubmitAdjustmentRequest,
+  SubmitScorecardRequest,
+  UpdateCandidateRequest,
+  UpdateOfferTermsRequest,
+  UpdateOrganizationUnitRequest,
+  UpdateRequisitionRequest,
+  WaiveExceptionRequest,
+  WithdrawApplicationRequest,
+  WorkSchedule
 } from './generated.schemas';
 
 import { customInstance } from './axios-instance';
@@ -56,17 +133,14 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-/**
- * @summary System health and liveness probe
- */
-export const getHealth = (
+export const getApiV1SeedPhase4 = (
     
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
 ) => {
       
       
       return customInstance<void>(
-      {url: `/health`, method: 'GET', signal
+      {url: `/api/v1/seed/phase4`, method: 'GET', signal
     },
       options);
     }
@@ -74,162 +148,66 @@ export const getHealth = (
 
 
 
-export const getGetHealthQueryKey = () => {
+export const getGetApiV1SeedPhase4QueryKey = () => {
     return [
-    `/health`
+    `/api/v1/seed/phase4`
     ] as const;
     }
 
     
-export const getGetHealthQueryOptions = <TData = Awaited<ReturnType<typeof getHealth>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1SeedPhase4QueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetHealthQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SeedPhase4QueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHealth>>> = ({ signal }) => getHealth(requestOptions, signal);
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SeedPhase4>>> = ({ signal }) => getApiV1SeedPhase4(requestOptions, signal);
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetHealthQueryResult = NonNullable<Awaited<ReturnType<typeof getHealth>>>
-export type GetHealthQueryError = ErrorType<unknown>
+export type GetApiV1SeedPhase4QueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SeedPhase4>>>
+export type GetApiV1SeedPhase4QueryError = ErrorType<unknown>
 
 
-export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>> & Pick<
+export function useGetApiV1SeedPhase4<TData = Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHealth>>,
+          Awaited<ReturnType<typeof getApiV1SeedPhase4>>,
           TError,
-          Awaited<ReturnType<typeof getHealth>>
+          Awaited<ReturnType<typeof getApiV1SeedPhase4>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>> & Pick<
+export function useGetApiV1SeedPhase4<TData = Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHealth>>,
+          Awaited<ReturnType<typeof getApiV1SeedPhase4>>,
           TError,
-          Awaited<ReturnType<typeof getHealth>>
+          Awaited<ReturnType<typeof getApiV1SeedPhase4>>
         > , 'initialData'
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetApiV1SeedPhase4<TData = Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary System health and liveness probe
- */
 
-export function useGetHealth<TData = Awaited<ReturnType<typeof getHealth>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHealth>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export function useGetApiV1SeedPhase4<TData = Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SeedPhase4>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetHealthQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  query.queryKey = queryOptions.queryKey ;
-
-  return query;
-}
-
-
-
-
-
-/**
- * @summary System readiness probe verifying database connectivity
- */
-export const getReadiness = (
-    
- options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
-) => {
-      
-      
-      return customInstance<void>(
-      {url: `/health/ready`, method: 'GET', signal
-    },
-      options);
-    }
-  
-
-
-
-export const getGetReadinessQueryKey = () => {
-    return [
-    `/health/ready`
-    ] as const;
-    }
-
-    
-export const getGetReadinessQueryOptions = <TData = Awaited<ReturnType<typeof getReadiness>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
-) => {
-
-const {query: queryOptions, request: requestOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetReadinessQueryKey();
-
-  
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getReadiness>>> = ({ signal }) => getReadiness(requestOptions, signal);
-
-      
-
-      
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetReadinessQueryResult = NonNullable<Awaited<ReturnType<typeof getReadiness>>>
-export type GetReadinessQueryError = ErrorType<unknown>
-
-
-export function useGetReadiness<TData = Awaited<ReturnType<typeof getReadiness>>, TError = ErrorType<unknown>>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getReadiness>>,
-          TError,
-          Awaited<ReturnType<typeof getReadiness>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetReadiness<TData = Awaited<ReturnType<typeof getReadiness>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getReadiness>>,
-          TError,
-          Awaited<ReturnType<typeof getReadiness>>
-        > , 'initialData'
-      >, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetReadiness<TData = Awaited<ReturnType<typeof getReadiness>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary System readiness probe verifying database connectivity
- */
-
-export function useGetReadiness<TData = Awaited<ReturnType<typeof getReadiness>>, TError = ErrorType<unknown>>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getReadiness>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
- , queryClient?: QueryClient 
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetReadinessQueryOptions(options)
+  const queryOptions = getGetApiV1SeedPhase4QueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -475,6 +453,1038 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const getApiV1ApprovalsInbox = (
+    params?: GetApiV1ApprovalsInboxParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedApprovalInboxResponse>(
+      {url: `/api/v1/approvals/inbox`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1ApprovalsInboxQueryKey = (params?: GetApiV1ApprovalsInboxParams,) => {
+    return [
+    `/api/v1/approvals/inbox`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1ApprovalsInboxQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError = ErrorType<unknown>>(params?: GetApiV1ApprovalsInboxParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ApprovalsInboxQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>> = ({ signal }) => getApiV1ApprovalsInbox(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ApprovalsInboxQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>>
+export type GetApiV1ApprovalsInboxQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1ApprovalsInbox<TData = Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1ApprovalsInboxParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ApprovalsInbox<TData = Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ApprovalsInboxParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ApprovalsInbox<TData = Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ApprovalsInboxParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ApprovalsInbox<TData = Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ApprovalsInboxParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsInbox>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ApprovalsInboxQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1ApprovalsRequestsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ApprovalRequestDetailDto>(
+      {url: `/api/v1/approvals/requests/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1ApprovalsRequestsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/approvals/requests/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ApprovalsRequestsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ApprovalsRequestsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>> = ({ signal }) => getApiV1ApprovalsRequestsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ApprovalsRequestsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>>
+export type GetApiV1ApprovalsRequestsIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1ApprovalsRequestsId<TData = Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ApprovalsRequestsId<TData = Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ApprovalsRequestsId<TData = Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ApprovalsRequestsId<TData = Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ApprovalsRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ApprovalsRequestsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1ApprovalsRequestsIdApprove = (
+    id: string,
+    approvalDecisionInput: ApprovalDecisionInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/approvals/requests/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: approvalDecisionInput, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1ApprovalsRequestsIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>, TError,{id: string;data: ApprovalDecisionInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>, TError,{id: string;data: ApprovalDecisionInput}, TContext> => {
+
+const mutationKey = ['postApiV1ApprovalsRequestsIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>, {id: string;data: ApprovalDecisionInput}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1ApprovalsRequestsIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ApprovalsRequestsIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>>
+    export type PostApiV1ApprovalsRequestsIdApproveMutationBody = ApprovalDecisionInput
+    export type PostApiV1ApprovalsRequestsIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1ApprovalsRequestsIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>, TError,{id: string;data: ApprovalDecisionInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdApprove>>,
+        TError,
+        {id: string;data: ApprovalDecisionInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ApprovalsRequestsIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1ApprovalsRequestsIdReject = (
+    id: string,
+    approvalRejectionInput: ApprovalRejectionInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/approvals/requests/${id}/reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: approvalRejectionInput, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1ApprovalsRequestsIdRejectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>, TError,{id: string;data: ApprovalRejectionInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>, TError,{id: string;data: ApprovalRejectionInput}, TContext> => {
+
+const mutationKey = ['postApiV1ApprovalsRequestsIdReject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>, {id: string;data: ApprovalRejectionInput}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1ApprovalsRequestsIdReject(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ApprovalsRequestsIdRejectMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>>
+    export type PostApiV1ApprovalsRequestsIdRejectMutationBody = ApprovalRejectionInput
+    export type PostApiV1ApprovalsRequestsIdRejectMutationError = ErrorType<unknown>
+
+    export const usePostApiV1ApprovalsRequestsIdReject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>, TError,{id: string;data: ApprovalRejectionInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdReject>>,
+        TError,
+        {id: string;data: ApprovalRejectionInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ApprovalsRequestsIdRejectMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1ApprovalsRequestsIdCancel = (
+    id: string,
+    approvalCancellationInput: ApprovalCancellationInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/approvals/requests/${id}/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: approvalCancellationInput, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1ApprovalsRequestsIdCancelMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>, TError,{id: string;data: ApprovalCancellationInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>, TError,{id: string;data: ApprovalCancellationInput}, TContext> => {
+
+const mutationKey = ['postApiV1ApprovalsRequestsIdCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>, {id: string;data: ApprovalCancellationInput}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1ApprovalsRequestsIdCancel(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ApprovalsRequestsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>>
+    export type PostApiV1ApprovalsRequestsIdCancelMutationBody = ApprovalCancellationInput
+    export type PostApiV1ApprovalsRequestsIdCancelMutationError = ErrorType<unknown>
+
+    export const usePostApiV1ApprovalsRequestsIdCancel = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>, TError,{id: string;data: ApprovalCancellationInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdCancel>>,
+        TError,
+        {id: string;data: ApprovalCancellationInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ApprovalsRequestsIdCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1AttendanceClock = (
+    recordClockRequest: RecordClockRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/attendance/clock`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: recordClockRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1AttendanceClockMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceClock>>, TError,{data: RecordClockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceClock>>, TError,{data: RecordClockRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AttendanceClock'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AttendanceClock>>, {data: RecordClockRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1AttendanceClock(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AttendanceClockMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AttendanceClock>>>
+    export type PostApiV1AttendanceClockMutationBody = RecordClockRequest
+    export type PostApiV1AttendanceClockMutationError = ErrorType<unknown>
+
+    export const usePostApiV1AttendanceClock = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceClock>>, TError,{data: RecordClockRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AttendanceClock>>,
+        TError,
+        {data: RecordClockRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AttendanceClockMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AttendanceDays = (
+    params?: GetApiV1AttendanceDaysParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedAttendanceDaysResponse>(
+      {url: `/api/v1/attendance/days`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1AttendanceDaysQueryKey = (params?: GetApiV1AttendanceDaysParams,) => {
+    return [
+    `/api/v1/attendance/days`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AttendanceDaysQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError = ErrorType<unknown>>(params?: GetApiV1AttendanceDaysParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AttendanceDaysQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AttendanceDays>>> = ({ signal }) => getApiV1AttendanceDays(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AttendanceDaysQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AttendanceDays>>>
+export type GetApiV1AttendanceDaysQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1AttendanceDays<TData = Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1AttendanceDaysParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceDays>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceDays>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceDays<TData = Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceDaysParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceDays>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceDays>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceDays<TData = Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceDaysParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AttendanceDays<TData = Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceDaysParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDays>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AttendanceDaysQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AttendanceDaysId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<AttendanceDayDto>(
+      {url: `/api/v1/attendance/days/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1AttendanceDaysIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/attendance/days/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AttendanceDaysIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AttendanceDaysIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>> = ({ signal }) => getApiV1AttendanceDaysId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AttendanceDaysIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>>
+export type GetApiV1AttendanceDaysIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1AttendanceDaysId<TData = Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceDaysId<TData = Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceDaysId<TData = Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AttendanceDaysId<TData = Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceDaysId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AttendanceDaysIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AttendanceDaysIdAdjustments = (
+    id: string,
+    submitAdjustmentRequest: SubmitAdjustmentRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/attendance/days/${id}/adjustments`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: submitAdjustmentRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1AttendanceDaysIdAdjustmentsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>, TError,{id: string;data: SubmitAdjustmentRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>, TError,{id: string;data: SubmitAdjustmentRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AttendanceDaysIdAdjustments'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>, {id: string;data: SubmitAdjustmentRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AttendanceDaysIdAdjustments(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AttendanceDaysIdAdjustmentsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>>
+    export type PostApiV1AttendanceDaysIdAdjustmentsMutationBody = SubmitAdjustmentRequest
+    export type PostApiV1AttendanceDaysIdAdjustmentsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1AttendanceDaysIdAdjustments = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>, TError,{id: string;data: SubmitAdjustmentRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AttendanceDaysIdAdjustments>>,
+        TError,
+        {id: string;data: SubmitAdjustmentRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AttendanceDaysIdAdjustmentsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1AttendanceDaysIdApprove = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/attendance/days/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1AttendanceDaysIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AttendanceDaysIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AttendanceDaysIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AttendanceDaysIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>>
+    export type PostApiV1AttendanceDaysIdApproveMutationBody = ConcurrencyActionRequest
+    export type PostApiV1AttendanceDaysIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1AttendanceDaysIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AttendanceDaysIdApprove>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AttendanceDaysIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AttendanceSchedules = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<WorkSchedule[]>(
+      {url: `/api/v1/attendance/schedules`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1AttendanceSchedulesQueryKey = () => {
+    return [
+    `/api/v1/attendance/schedules`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AttendanceSchedulesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AttendanceSchedulesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>> = ({ signal }) => getApiV1AttendanceSchedules(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AttendanceSchedulesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>>
+export type GetApiV1AttendanceSchedulesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1AttendanceSchedules<TData = Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceSchedules<TData = Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceSchedules<TData = Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AttendanceSchedules<TData = Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceSchedules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AttendanceSchedulesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AttendanceExceptions = (
+    params?: GetApiV1AttendanceExceptionsParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedExceptionsResponse>(
+      {url: `/api/v1/attendance/exceptions`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1AttendanceExceptionsQueryKey = (params?: GetApiV1AttendanceExceptionsParams,) => {
+    return [
+    `/api/v1/attendance/exceptions`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AttendanceExceptionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError = ErrorType<unknown>>(params?: GetApiV1AttendanceExceptionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AttendanceExceptionsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>> = ({ signal }) => getApiV1AttendanceExceptions(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AttendanceExceptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>>
+export type GetApiV1AttendanceExceptionsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1AttendanceExceptions<TData = Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1AttendanceExceptionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceExceptions<TData = Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceExceptionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AttendanceExceptions<TData = Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceExceptionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AttendanceExceptions<TData = Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1AttendanceExceptionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AttendanceExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AttendanceExceptionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AttendanceExceptionsIdResolve = (
+    id: string,
+    resolveExceptionRequest: ResolveExceptionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/attendance/exceptions/${id}/resolve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: resolveExceptionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1AttendanceExceptionsIdResolveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>, TError,{id: string;data: ResolveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>, TError,{id: string;data: ResolveExceptionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AttendanceExceptionsIdResolve'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>, {id: string;data: ResolveExceptionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AttendanceExceptionsIdResolve(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AttendanceExceptionsIdResolveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>>
+    export type PostApiV1AttendanceExceptionsIdResolveMutationBody = ResolveExceptionRequest
+    export type PostApiV1AttendanceExceptionsIdResolveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1AttendanceExceptionsIdResolve = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>, TError,{id: string;data: ResolveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AttendanceExceptionsIdResolve>>,
+        TError,
+        {id: string;data: ResolveExceptionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AttendanceExceptionsIdResolveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1ComplianceRules = (
+    params?: GetApiV1ComplianceRulesParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<StatutoryRuleDto[]>(
+      {url: `/api/v1/compliance/rules`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1ComplianceRulesQueryKey = (params?: GetApiV1ComplianceRulesParams,) => {
+    return [
+    `/api/v1/compliance/rules`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1ComplianceRulesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError = ErrorType<unknown>>(params?: GetApiV1ComplianceRulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ComplianceRulesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ComplianceRules>>> = ({ signal }) => getApiV1ComplianceRules(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ComplianceRulesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ComplianceRules>>>
+export type GetApiV1ComplianceRulesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1ComplianceRules<TData = Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1ComplianceRulesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ComplianceRules>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ComplianceRules>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ComplianceRules<TData = Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ComplianceRulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ComplianceRules>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ComplianceRules>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ComplianceRules<TData = Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ComplianceRulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ComplianceRules<TData = Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1ComplianceRulesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ComplianceRules>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ComplianceRulesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
 export const getApiV1DocumentsTypes = (
     
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
@@ -974,6 +1984,535 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const getApiV1LeaveTypes = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<LeaveTypeDto[]>(
+      {url: `/api/v1/leave/types`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1LeaveTypesQueryKey = () => {
+    return [
+    `/api/v1/leave/types`
+    ] as const;
+    }
+
+    
+export const getGetApiV1LeaveTypesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1LeaveTypesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1LeaveTypes>>> = ({ signal }) => getApiV1LeaveTypes(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1LeaveTypesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1LeaveTypes>>>
+export type GetApiV1LeaveTypesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1LeaveTypes<TData = Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveTypes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveTypes<TData = Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveTypes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveTypes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveTypes<TData = Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1LeaveTypes<TData = Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveTypes>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1LeaveTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1LeaveBalances = (
+    params?: GetApiV1LeaveBalancesParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<LeaveBalanceDto[]>(
+      {url: `/api/v1/leave/balances`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1LeaveBalancesQueryKey = (params?: GetApiV1LeaveBalancesParams,) => {
+    return [
+    `/api/v1/leave/balances`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1LeaveBalancesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError = ErrorType<unknown>>(params?: GetApiV1LeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1LeaveBalancesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1LeaveBalances>>> = ({ signal }) => getApiV1LeaveBalances(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1LeaveBalancesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1LeaveBalances>>>
+export type GetApiV1LeaveBalancesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1LeaveBalances<TData = Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1LeaveBalancesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveBalances>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveBalances>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveBalances<TData = Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveBalances>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveBalances>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveBalances<TData = Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1LeaveBalances<TData = Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveBalances>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1LeaveBalancesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1LeaveRequests = (
+    params?: GetApiV1LeaveRequestsParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedLeaveRequestsResponse>(
+      {url: `/api/v1/leave/requests`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1LeaveRequestsQueryKey = (params?: GetApiV1LeaveRequestsParams,) => {
+    return [
+    `/api/v1/leave/requests`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1LeaveRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError = ErrorType<unknown>>(params?: GetApiV1LeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1LeaveRequestsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1LeaveRequests>>> = ({ signal }) => getApiV1LeaveRequests(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1LeaveRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1LeaveRequests>>>
+export type GetApiV1LeaveRequestsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1LeaveRequests<TData = Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1LeaveRequestsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveRequests>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveRequests<TData = Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveRequests>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveRequests<TData = Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1LeaveRequests<TData = Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1LeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequests>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1LeaveRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1LeaveRequests = (
+    createLeaveRequestInput: CreateLeaveRequestInput,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/leave/requests`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createLeaveRequestInput, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1LeaveRequestsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequests>>, TError,{data: CreateLeaveRequestInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequests>>, TError,{data: CreateLeaveRequestInput}, TContext> => {
+
+const mutationKey = ['postApiV1LeaveRequests'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1LeaveRequests>>, {data: CreateLeaveRequestInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1LeaveRequests(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1LeaveRequestsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1LeaveRequests>>>
+    export type PostApiV1LeaveRequestsMutationBody = CreateLeaveRequestInput
+    export type PostApiV1LeaveRequestsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1LeaveRequests = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequests>>, TError,{data: CreateLeaveRequestInput}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1LeaveRequests>>,
+        TError,
+        {data: CreateLeaveRequestInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1LeaveRequestsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1LeaveRequestsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<LeaveRequestDto>(
+      {url: `/api/v1/leave/requests/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1LeaveRequestsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/leave/requests/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1LeaveRequestsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1LeaveRequestsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>> = ({ signal }) => getApiV1LeaveRequestsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1LeaveRequestsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>>
+export type GetApiV1LeaveRequestsIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1LeaveRequestsId<TData = Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveRequestsId<TData = Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1LeaveRequestsId<TData = Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1LeaveRequestsId<TData = Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1LeaveRequestsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1LeaveRequestsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1LeaveRequestsIdApprove = (
+    id: string,
+    leaveDecisionRequest: LeaveDecisionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/leave/requests/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: leaveDecisionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1LeaveRequestsIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>, TError,{id: string;data: LeaveDecisionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>, TError,{id: string;data: LeaveDecisionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1LeaveRequestsIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>, {id: string;data: LeaveDecisionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1LeaveRequestsIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1LeaveRequestsIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>>
+    export type PostApiV1LeaveRequestsIdApproveMutationBody = LeaveDecisionRequest
+    export type PostApiV1LeaveRequestsIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1LeaveRequestsIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>, TError,{id: string;data: LeaveDecisionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1LeaveRequestsIdApprove>>,
+        TError,
+        {id: string;data: LeaveDecisionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1LeaveRequestsIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1LeaveRequestsIdReject = (
+    id: string,
+    leaveRejectionRequest: LeaveRejectionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/leave/requests/${id}/reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: leaveRejectionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1LeaveRequestsIdRejectMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>, TError,{id: string;data: LeaveRejectionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>, TError,{id: string;data: LeaveRejectionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1LeaveRequestsIdReject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>, {id: string;data: LeaveRejectionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1LeaveRequestsIdReject(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1LeaveRequestsIdRejectMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>>
+    export type PostApiV1LeaveRequestsIdRejectMutationBody = LeaveRejectionRequest
+    export type PostApiV1LeaveRequestsIdRejectMutationError = ErrorType<unknown>
+
+    export const usePostApiV1LeaveRequestsIdReject = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>, TError,{id: string;data: LeaveRejectionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1LeaveRequestsIdReject>>,
+        TError,
+        {id: string;data: LeaveRejectionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1LeaveRequestsIdRejectMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
 export const getApiV1OrganizationUnits = (
     params?: GetApiV1OrganizationUnitsParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
@@ -1413,6 +2952,1042 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const getApiV1PayrollRunsRunIdExceptions = (
+    runId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollExceptionDto[]>(
+      {url: `/api/v1/payroll/runs/${runId}/exceptions`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollRunsRunIdExceptionsQueryKey = (runId?: string,) => {
+    return [
+    `/api/v1/payroll/runs/${runId}/exceptions`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollRunsRunIdExceptionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError = ErrorType<unknown>>(runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollRunsRunIdExceptionsQueryKey(runId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>> = ({ signal }) => getApiV1PayrollRunsRunIdExceptions(runId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(runId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollRunsRunIdExceptionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>>
+export type GetApiV1PayrollRunsRunIdExceptionsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollRunsRunIdExceptions<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError = ErrorType<unknown>>(
+ runId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdExceptions<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdExceptions<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollRunsRunIdExceptions<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdExceptions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollRunsRunIdExceptionsQueryOptions(runId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve = (
+    runId: string,
+    exceptionId: string,
+    resolveExceptionRequest: ResolveExceptionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/payroll/runs/${runId}/exceptions/${exceptionId}/resolve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: resolveExceptionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsRunIdExceptionsExceptionIdResolveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>, TError,{runId: string;exceptionId: string;data: ResolveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>, TError,{runId: string;exceptionId: string;data: ResolveExceptionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>, {runId: string;exceptionId: string;data: ResolveExceptionRequest}> = (props) => {
+          const {runId,exceptionId,data} = props ?? {};
+
+          return  postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve(runId,exceptionId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdResolveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>>
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdResolveMutationBody = ResolveExceptionRequest
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdResolveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRunsRunIdExceptionsExceptionIdResolve = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>, TError,{runId: string;exceptionId: string;data: ResolveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdResolve>>,
+        TError,
+        {runId: string;exceptionId: string;data: ResolveExceptionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsRunIdExceptionsExceptionIdResolveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive = (
+    runId: string,
+    exceptionId: string,
+    waiveExceptionRequest: WaiveExceptionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/payroll/runs/${runId}/exceptions/${exceptionId}/waive`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: waiveExceptionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsRunIdExceptionsExceptionIdWaiveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>, TError,{runId: string;exceptionId: string;data: WaiveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>, TError,{runId: string;exceptionId: string;data: WaiveExceptionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>, {runId: string;exceptionId: string;data: WaiveExceptionRequest}> = (props) => {
+          const {runId,exceptionId,data} = props ?? {};
+
+          return  postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive(runId,exceptionId,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdWaiveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>>
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdWaiveMutationBody = WaiveExceptionRequest
+    export type PostApiV1PayrollRunsRunIdExceptionsExceptionIdWaiveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRunsRunIdExceptionsExceptionIdWaive = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>, TError,{runId: string;exceptionId: string;data: WaiveExceptionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRunsRunIdExceptionsExceptionIdWaive>>,
+        TError,
+        {runId: string;exceptionId: string;data: WaiveExceptionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsRunIdExceptionsExceptionIdWaiveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1PayrollRunsRunIdResults = (
+    runId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollEmployeeResultSummaryDto[]>(
+      {url: `/api/v1/payroll/runs/${runId}/results`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollRunsRunIdResultsQueryKey = (runId?: string,) => {
+    return [
+    `/api/v1/payroll/runs/${runId}/results`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollRunsRunIdResultsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError = ErrorType<unknown>>(runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollRunsRunIdResultsQueryKey(runId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>> = ({ signal }) => getApiV1PayrollRunsRunIdResults(runId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(runId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollRunsRunIdResultsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>>
+export type GetApiV1PayrollRunsRunIdResultsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollRunsRunIdResults<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError = ErrorType<unknown>>(
+ runId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdResults<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdResults<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollRunsRunIdResults<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError = ErrorType<unknown>>(
+ runId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResults>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollRunsRunIdResultsQueryOptions(runId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1PayrollRunsRunIdResultsEmploymentId = (
+    runId: string,
+    employmentId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollEmployeeResultDetailDto>(
+      {url: `/api/v1/payroll/runs/${runId}/results/${employmentId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollRunsRunIdResultsEmploymentIdQueryKey = (runId?: string,
+    employmentId?: string,) => {
+    return [
+    `/api/v1/payroll/runs/${runId}/results/${employmentId}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollRunsRunIdResultsEmploymentIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError = ErrorType<unknown>>(runId: string,
+    employmentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollRunsRunIdResultsEmploymentIdQueryKey(runId,employmentId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>> = ({ signal }) => getApiV1PayrollRunsRunIdResultsEmploymentId(runId,employmentId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(runId && employmentId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollRunsRunIdResultsEmploymentIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>>
+export type GetApiV1PayrollRunsRunIdResultsEmploymentIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollRunsRunIdResultsEmploymentId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError = ErrorType<unknown>>(
+ runId: string,
+    employmentId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdResultsEmploymentId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError = ErrorType<unknown>>(
+ runId: string,
+    employmentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsRunIdResultsEmploymentId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError = ErrorType<unknown>>(
+ runId: string,
+    employmentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollRunsRunIdResultsEmploymentId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError = ErrorType<unknown>>(
+ runId: string,
+    employmentId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsRunIdResultsEmploymentId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollRunsRunIdResultsEmploymentIdQueryOptions(runId,employmentId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1JobsJobId = (
+    jobId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<BackgroundJobDto>(
+      {url: `/api/v1/jobs/${jobId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1JobsJobIdQueryKey = (jobId?: string,) => {
+    return [
+    `/api/v1/jobs/${jobId}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1JobsJobIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError = ErrorType<unknown>>(jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1JobsJobIdQueryKey(jobId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1JobsJobId>>> = ({ signal }) => getApiV1JobsJobId(jobId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(jobId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1JobsJobIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1JobsJobId>>>
+export type GetApiV1JobsJobIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1JobsJobId<TData = Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError = ErrorType<unknown>>(
+ jobId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1JobsJobId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1JobsJobId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1JobsJobId<TData = Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError = ErrorType<unknown>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1JobsJobId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1JobsJobId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1JobsJobId<TData = Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError = ErrorType<unknown>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1JobsJobId<TData = Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError = ErrorType<unknown>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1JobsJobId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1JobsJobIdQueryOptions(jobId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1PayrollPeriods = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollPeriodDto[]>(
+      {url: `/api/v1/payroll/periods`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollPeriodsQueryKey = () => {
+    return [
+    `/api/v1/payroll/periods`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollPeriodsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollPeriodsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>> = ({ signal }) => getApiV1PayrollPeriods(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollPeriodsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>>
+export type GetApiV1PayrollPeriodsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollPeriods<TData = Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollPeriods>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollPeriods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollPeriods<TData = Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollPeriods>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollPeriods>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollPeriods<TData = Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollPeriods<TData = Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollPeriods>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollPeriodsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1PayrollPeriods = (
+    createPayrollPeriodRequest: CreatePayrollPeriodRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollPeriodDto>(
+      {url: `/api/v1/payroll/periods`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPayrollPeriodRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollPeriodsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollPeriods>>, TError,{data: CreatePayrollPeriodRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollPeriods>>, TError,{data: CreatePayrollPeriodRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollPeriods'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollPeriods>>, {data: CreatePayrollPeriodRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1PayrollPeriods(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollPeriodsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollPeriods>>>
+    export type PostApiV1PayrollPeriodsMutationBody = CreatePayrollPeriodRequest
+    export type PostApiV1PayrollPeriodsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollPeriods = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollPeriods>>, TError,{data: CreatePayrollPeriodRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollPeriods>>,
+        TError,
+        {data: CreatePayrollPeriodRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollPeriodsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1PayrollRuns = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollRunDto[]>(
+      {url: `/api/v1/payroll/runs`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollRunsQueryKey = () => {
+    return [
+    `/api/v1/payroll/runs`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollRunsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollRunsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollRuns>>> = ({ signal }) => getApiV1PayrollRuns(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollRunsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollRuns>>>
+export type GetApiV1PayrollRunsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollRuns<TData = Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRuns>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRuns>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRuns<TData = Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRuns>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRuns>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRuns<TData = Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollRuns<TData = Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRuns>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollRunsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1PayrollRuns = (
+    createPayrollRunRequest: CreatePayrollRunRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollRunDto>(
+      {url: `/api/v1/payroll/runs`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createPayrollRunRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRuns>>, TError,{data: CreatePayrollRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRuns>>, TError,{data: CreatePayrollRunRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRuns'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRuns>>, {data: CreatePayrollRunRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1PayrollRuns(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRuns>>>
+    export type PostApiV1PayrollRunsMutationBody = CreatePayrollRunRequest
+    export type PostApiV1PayrollRunsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRuns = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRuns>>, TError,{data: CreatePayrollRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRuns>>,
+        TError,
+        {data: CreatePayrollRunRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1PayrollRunsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PayrollRunDto>(
+      {url: `/api/v1/payroll/runs/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1PayrollRunsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/payroll/runs/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1PayrollRunsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1PayrollRunsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>> = ({ signal }) => getApiV1PayrollRunsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1PayrollRunsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>>
+export type GetApiV1PayrollRunsIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1PayrollRunsId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1PayrollRunsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1PayrollRunsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1PayrollRunsId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1PayrollRunsId<TData = Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1PayrollRunsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1PayrollRunsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1PayrollRunsIdLoadInputs = (
+    id: string,
+    loadInputsRequest: LoadInputsRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/payroll/runs/${id}/load-inputs`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: loadInputsRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsIdLoadInputsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>, TError,{id: string;data: LoadInputsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>, TError,{id: string;data: LoadInputsRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRunsIdLoadInputs'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>, {id: string;data: LoadInputsRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1PayrollRunsIdLoadInputs(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsIdLoadInputsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>>
+    export type PostApiV1PayrollRunsIdLoadInputsMutationBody = LoadInputsRequest
+    export type PostApiV1PayrollRunsIdLoadInputsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRunsIdLoadInputs = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>, TError,{id: string;data: LoadInputsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRunsIdLoadInputs>>,
+        TError,
+        {id: string;data: LoadInputsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsIdLoadInputsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1PayrollRunsIdCalculate = (
+    id: string,
+    calculateRunRequest: CalculateRunRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/payroll/runs/${id}/calculate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: calculateRunRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsIdCalculateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>, TError,{id: string;data: CalculateRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>, TError,{id: string;data: CalculateRunRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRunsIdCalculate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>, {id: string;data: CalculateRunRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1PayrollRunsIdCalculate(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsIdCalculateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>>
+    export type PostApiV1PayrollRunsIdCalculateMutationBody = CalculateRunRequest
+    export type PostApiV1PayrollRunsIdCalculateMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRunsIdCalculate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>, TError,{id: string;data: CalculateRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRunsIdCalculate>>,
+        TError,
+        {id: string;data: CalculateRunRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsIdCalculateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1PayrollRunsIdFinalize = (
+    id: string,
+    finalizeRunRequest: FinalizeRunRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/payroll/runs/${id}/finalize`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: finalizeRunRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1PayrollRunsIdFinalizeMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>, TError,{id: string;data: FinalizeRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>, TError,{id: string;data: FinalizeRunRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PayrollRunsIdFinalize'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>, {id: string;data: FinalizeRunRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1PayrollRunsIdFinalize(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PayrollRunsIdFinalizeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>>
+    export type PostApiV1PayrollRunsIdFinalizeMutationBody = FinalizeRunRequest
+    export type PostApiV1PayrollRunsIdFinalizeMutationError = ErrorType<unknown>
+
+    export const usePostApiV1PayrollRunsIdFinalize = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>, TError,{id: string;data: FinalizeRunRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PayrollRunsIdFinalize>>,
+        TError,
+        {id: string;data: FinalizeRunRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PayrollRunsIdFinalizeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
 export const getApiV1PeopleEmployees = (
     params?: GetApiV1PeopleEmployeesParams,
  options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
@@ -1763,6 +4338,3397 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1PeopleEmployeesIdRevealSensitiveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentApplications = (
+    params?: GetApiV1RecruitmentApplicationsParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedRecruitmentResultOfApplication>(
+      {url: `/api/v1/recruitment/applications`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentApplicationsQueryKey = (params?: GetApiV1RecruitmentApplicationsParams,) => {
+    return [
+    `/api/v1/recruitment/applications`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentApplicationsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError = ErrorType<unknown>>(params?: GetApiV1RecruitmentApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentApplicationsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>> = ({ signal }) => getApiV1RecruitmentApplications(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentApplicationsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>>
+export type GetApiV1RecruitmentApplicationsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentApplications<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1RecruitmentApplicationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplications<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplications<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentApplications<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentApplicationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplications>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentApplicationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentApplications = (
+    createApplicationRequest: CreateApplicationRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Application>(
+      {url: `/api/v1/recruitment/applications`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createApplicationRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentApplicationsMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>, TError,{data: CreateApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>, TError,{data: CreateApplicationRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentApplications'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>, {data: CreateApplicationRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentApplications(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentApplicationsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>>
+    export type PostApiV1RecruitmentApplicationsMutationBody = CreateApplicationRequest
+    export type PostApiV1RecruitmentApplicationsMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentApplications = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>, TError,{data: CreateApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentApplications>>,
+        TError,
+        {data: CreateApplicationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentApplicationsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentApplicationsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ApplicationDetailDto>(
+      {url: `/api/v1/recruitment/applications/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentApplicationsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/applications/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentApplicationsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError = ErrorType<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentApplicationsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>> = ({ signal }) => getApiV1RecruitmentApplicationsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentApplicationsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>>
+export type GetApiV1RecruitmentApplicationsIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentApplicationsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplicationsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplicationsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentApplicationsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentApplicationsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1RecruitmentApplicationsBoardRequisitionId = (
+    requisitionId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PipelineBoardDto>(
+      {url: `/api/v1/recruitment/applications/board/${requisitionId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentApplicationsBoardRequisitionIdQueryKey = (requisitionId?: string,) => {
+    return [
+    `/api/v1/recruitment/applications/board/${requisitionId}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentApplicationsBoardRequisitionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError = ErrorType<ProblemDetails>>(requisitionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentApplicationsBoardRequisitionIdQueryKey(requisitionId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>> = ({ signal }) => getApiV1RecruitmentApplicationsBoardRequisitionId(requisitionId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(requisitionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentApplicationsBoardRequisitionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>>
+export type GetApiV1RecruitmentApplicationsBoardRequisitionIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentApplicationsBoardRequisitionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError = ErrorType<ProblemDetails>>(
+ requisitionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplicationsBoardRequisitionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError = ErrorType<ProblemDetails>>(
+ requisitionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentApplicationsBoardRequisitionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError = ErrorType<ProblemDetails>>(
+ requisitionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentApplicationsBoardRequisitionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError = ErrorType<ProblemDetails>>(
+ requisitionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentApplicationsBoardRequisitionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentApplicationsBoardRequisitionIdQueryOptions(requisitionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentApplicationsIdMoveStage = (
+    id: string,
+    moveApplicationStageRequest: MoveApplicationStageRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Application>(
+      {url: `/api/v1/recruitment/applications/${id}/move-stage`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: moveApplicationStageRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentApplicationsIdMoveStageMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>, TError,{id: string;data: MoveApplicationStageRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>, TError,{id: string;data: MoveApplicationStageRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentApplicationsIdMoveStage'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>, {id: string;data: MoveApplicationStageRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentApplicationsIdMoveStage(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentApplicationsIdMoveStageMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>>
+    export type PostApiV1RecruitmentApplicationsIdMoveStageMutationBody = MoveApplicationStageRequest
+    export type PostApiV1RecruitmentApplicationsIdMoveStageMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentApplicationsIdMoveStage = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>, TError,{id: string;data: MoveApplicationStageRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdMoveStage>>,
+        TError,
+        {id: string;data: MoveApplicationStageRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentApplicationsIdMoveStageMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentApplicationsIdReject = (
+    id: string,
+    rejectApplicationRequest: RejectApplicationRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Application>(
+      {url: `/api/v1/recruitment/applications/${id}/reject`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: rejectApplicationRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentApplicationsIdRejectMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>, TError,{id: string;data: RejectApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>, TError,{id: string;data: RejectApplicationRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentApplicationsIdReject'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>, {id: string;data: RejectApplicationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentApplicationsIdReject(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentApplicationsIdRejectMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>>
+    export type PostApiV1RecruitmentApplicationsIdRejectMutationBody = RejectApplicationRequest
+    export type PostApiV1RecruitmentApplicationsIdRejectMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentApplicationsIdReject = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>, TError,{id: string;data: RejectApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdReject>>,
+        TError,
+        {id: string;data: RejectApplicationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentApplicationsIdRejectMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentApplicationsIdWithdraw = (
+    id: string,
+    withdrawApplicationRequest: WithdrawApplicationRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Application>(
+      {url: `/api/v1/recruitment/applications/${id}/withdraw`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: withdrawApplicationRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentApplicationsIdWithdrawMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>, TError,{id: string;data: WithdrawApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>, TError,{id: string;data: WithdrawApplicationRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentApplicationsIdWithdraw'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>, {id: string;data: WithdrawApplicationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentApplicationsIdWithdraw(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentApplicationsIdWithdrawMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>>
+    export type PostApiV1RecruitmentApplicationsIdWithdrawMutationBody = WithdrawApplicationRequest
+    export type PostApiV1RecruitmentApplicationsIdWithdrawMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentApplicationsIdWithdraw = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>, TError,{id: string;data: WithdrawApplicationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdWithdraw>>,
+        TError,
+        {id: string;data: WithdrawApplicationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentApplicationsIdWithdrawMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentApplicationsIdHire = (
+    id: string,
+    hireCandidateRequest: HireCandidateRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Application>(
+      {url: `/api/v1/recruitment/applications/${id}/hire`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: hireCandidateRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentApplicationsIdHireMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>, TError,{id: string;data: HireCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>, TError,{id: string;data: HireCandidateRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentApplicationsIdHire'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>, {id: string;data: HireCandidateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentApplicationsIdHire(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentApplicationsIdHireMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>>
+    export type PostApiV1RecruitmentApplicationsIdHireMutationBody = HireCandidateRequest
+    export type PostApiV1RecruitmentApplicationsIdHireMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentApplicationsIdHire = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>, TError,{id: string;data: HireCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentApplicationsIdHire>>,
+        TError,
+        {id: string;data: HireCandidateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentApplicationsIdHireMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentCandidates = (
+    params?: GetApiV1RecruitmentCandidatesParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedRecruitmentResultOfCandidate>(
+      {url: `/api/v1/recruitment/candidates`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentCandidatesQueryKey = (params?: GetApiV1RecruitmentCandidatesParams,) => {
+    return [
+    `/api/v1/recruitment/candidates`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentCandidatesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError = ErrorType<unknown>>(params?: GetApiV1RecruitmentCandidatesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentCandidatesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>> = ({ signal }) => getApiV1RecruitmentCandidates(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentCandidatesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>>
+export type GetApiV1RecruitmentCandidatesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentCandidates<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1RecruitmentCandidatesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentCandidates<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentCandidatesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentCandidates<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentCandidatesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentCandidates<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentCandidatesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidates>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentCandidatesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentCandidates = (
+    createCandidateRequest: CreateCandidateRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Candidate>(
+      {url: `/api/v1/recruitment/candidates`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createCandidateRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentCandidatesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>, TError,{data: CreateCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>, TError,{data: CreateCandidateRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentCandidates'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>, {data: CreateCandidateRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentCandidates(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentCandidatesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>>
+    export type PostApiV1RecruitmentCandidatesMutationBody = CreateCandidateRequest
+    export type PostApiV1RecruitmentCandidatesMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentCandidates = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>, TError,{data: CreateCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentCandidates>>,
+        TError,
+        {data: CreateCandidateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentCandidatesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentCandidatesId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Candidate>(
+      {url: `/api/v1/recruitment/candidates/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentCandidatesIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/candidates/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentCandidatesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError = ErrorType<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentCandidatesIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>> = ({ signal }) => getApiV1RecruitmentCandidatesId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentCandidatesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>>
+export type GetApiV1RecruitmentCandidatesIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentCandidatesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentCandidatesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentCandidatesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentCandidatesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentCandidatesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentCandidatesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1RecruitmentCandidatesId = (
+    id: string,
+    updateCandidateRequest: UpdateCandidateRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<Candidate>(
+      {url: `/api/v1/recruitment/candidates/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateCandidateRequest
+    },
+      options);
+    }
+  
+
+
+export const getPutApiV1RecruitmentCandidatesIdMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>, TError,{id: string;data: UpdateCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>, TError,{id: string;data: UpdateCandidateRequest}, TContext> => {
+
+const mutationKey = ['putApiV1RecruitmentCandidatesId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>, {id: string;data: UpdateCandidateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1RecruitmentCandidatesId(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1RecruitmentCandidatesIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>>
+    export type PutApiV1RecruitmentCandidatesIdMutationBody = UpdateCandidateRequest
+    export type PutApiV1RecruitmentCandidatesIdMutationError = ErrorType<ProblemDetails>
+
+    export const usePutApiV1RecruitmentCandidatesId = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>, TError,{id: string;data: UpdateCandidateRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1RecruitmentCandidatesId>>,
+        TError,
+        {id: string;data: UpdateCandidateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1RecruitmentCandidatesIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentCandidatesCheckDuplicates = (
+    checkDuplicateCandidatesRequest: CheckDuplicateCandidatesRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<DuplicateCandidateMatchDto[]>(
+      {url: `/api/v1/recruitment/candidates/check-duplicates`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: checkDuplicateCandidatesRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentCandidatesCheckDuplicatesMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>, TError,{data: CheckDuplicateCandidatesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>, TError,{data: CheckDuplicateCandidatesRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentCandidatesCheckDuplicates'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>, {data: CheckDuplicateCandidatesRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentCandidatesCheckDuplicates(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentCandidatesCheckDuplicatesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>>
+    export type PostApiV1RecruitmentCandidatesCheckDuplicatesMutationBody = CheckDuplicateCandidatesRequest
+    export type PostApiV1RecruitmentCandidatesCheckDuplicatesMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentCandidatesCheckDuplicates = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>, TError,{data: CheckDuplicateCandidatesRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentCandidatesCheckDuplicates>>,
+        TError,
+        {data: CheckDuplicateCandidatesRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentCandidatesCheckDuplicatesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentInterviews = (
+    params?: GetApiV1RecruitmentInterviewsParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview[]>(
+      {url: `/api/v1/recruitment/interviews`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentInterviewsQueryKey = (params?: GetApiV1RecruitmentInterviewsParams,) => {
+    return [
+    `/api/v1/recruitment/interviews`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentInterviewsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError = ErrorType<unknown>>(params?: GetApiV1RecruitmentInterviewsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentInterviewsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>> = ({ signal }) => getApiV1RecruitmentInterviews(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentInterviewsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>>
+export type GetApiV1RecruitmentInterviewsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentInterviews<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1RecruitmentInterviewsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviews<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentInterviewsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviews<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentInterviewsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentInterviews<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentInterviewsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviews>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentInterviewsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentInterviews = (
+    scheduleInterviewRequest: ScheduleInterviewRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview>(
+      {url: `/api/v1/recruitment/interviews`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: scheduleInterviewRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentInterviewsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>, TError,{data: ScheduleInterviewRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>, TError,{data: ScheduleInterviewRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentInterviews'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>, {data: ScheduleInterviewRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentInterviews(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentInterviewsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>>
+    export type PostApiV1RecruitmentInterviewsMutationBody = ScheduleInterviewRequest
+    export type PostApiV1RecruitmentInterviewsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentInterviews = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>, TError,{data: ScheduleInterviewRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentInterviews>>,
+        TError,
+        {data: ScheduleInterviewRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentInterviewsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentInterviewsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview>(
+      {url: `/api/v1/recruitment/interviews/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentInterviewsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/interviews/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentInterviewsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError = ErrorType<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentInterviewsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>> = ({ signal }) => getApiV1RecruitmentInterviewsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentInterviewsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>>
+export type GetApiV1RecruitmentInterviewsIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentInterviewsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviewsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviewsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentInterviewsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentInterviewsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentInterviewsIdReschedule = (
+    id: string,
+    rescheduleInterviewRequest: RescheduleInterviewRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview>(
+      {url: `/api/v1/recruitment/interviews/${id}/reschedule`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: rescheduleInterviewRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentInterviewsIdRescheduleMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>, TError,{id: string;data: RescheduleInterviewRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>, TError,{id: string;data: RescheduleInterviewRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentInterviewsIdReschedule'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>, {id: string;data: RescheduleInterviewRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentInterviewsIdReschedule(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentInterviewsIdRescheduleMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>>
+    export type PostApiV1RecruitmentInterviewsIdRescheduleMutationBody = RescheduleInterviewRequest
+    export type PostApiV1RecruitmentInterviewsIdRescheduleMutationError = ErrorType<ProblemDetails>
+
+    export const usePostApiV1RecruitmentInterviewsIdReschedule = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>, TError,{id: string;data: RescheduleInterviewRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdReschedule>>,
+        TError,
+        {id: string;data: RescheduleInterviewRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentInterviewsIdRescheduleMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentInterviewsIdComplete = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview>(
+      {url: `/api/v1/recruitment/interviews/${id}/complete`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentInterviewsIdCompleteMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentInterviewsIdComplete'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentInterviewsIdComplete(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentInterviewsIdCompleteMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>>
+    export type PostApiV1RecruitmentInterviewsIdCompleteMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentInterviewsIdCompleteMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentInterviewsIdComplete = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdComplete>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentInterviewsIdCompleteMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentInterviewsIdCancel = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<Interview>(
+      {url: `/api/v1/recruitment/interviews/${id}/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentInterviewsIdCancelMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentInterviewsIdCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentInterviewsIdCancel(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentInterviewsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>>
+    export type PostApiV1RecruitmentInterviewsIdCancelMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentInterviewsIdCancelMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentInterviewsIdCancel = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdCancel>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentInterviewsIdCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentInterviewsIdScorecard = (
+    id: string,
+    submitScorecardRequest: SubmitScorecardRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ScorecardSubmission>(
+      {url: `/api/v1/recruitment/interviews/${id}/scorecard`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: submitScorecardRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentInterviewsIdScorecardMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>, TError,{id: string;data: SubmitScorecardRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>, TError,{id: string;data: SubmitScorecardRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentInterviewsIdScorecard'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>, {id: string;data: SubmitScorecardRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentInterviewsIdScorecard(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentInterviewsIdScorecardMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>>
+    export type PostApiV1RecruitmentInterviewsIdScorecardMutationBody = SubmitScorecardRequest
+    export type PostApiV1RecruitmentInterviewsIdScorecardMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentInterviewsIdScorecard = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>, TError,{id: string;data: SubmitScorecardRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentInterviewsIdScorecard>>,
+        TError,
+        {id: string;data: SubmitScorecardRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentInterviewsIdScorecardMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentInterviewsIdScorecards = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<ScorecardSubmission[]>(
+      {url: `/api/v1/recruitment/interviews/${id}/scorecards`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentInterviewsIdScorecardsQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/interviews/${id}/scorecards`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentInterviewsIdScorecardsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentInterviewsIdScorecardsQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>> = ({ signal }) => getApiV1RecruitmentInterviewsIdScorecards(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentInterviewsIdScorecardsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>>
+export type GetApiV1RecruitmentInterviewsIdScorecardsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentInterviewsIdScorecards<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviewsIdScorecards<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentInterviewsIdScorecards<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentInterviewsIdScorecards<TData = Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentInterviewsIdScorecards>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentInterviewsIdScorecardsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1RecruitmentOffers = (
+    params?: GetApiV1RecruitmentOffersParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto[]>(
+      {url: `/api/v1/recruitment/offers`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentOffersQueryKey = (params?: GetApiV1RecruitmentOffersParams,) => {
+    return [
+    `/api/v1/recruitment/offers`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentOffersQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError = ErrorType<unknown>>(params?: GetApiV1RecruitmentOffersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentOffersQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>> = ({ signal }) => getApiV1RecruitmentOffers(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentOffersQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>>
+export type GetApiV1RecruitmentOffersQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentOffers<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1RecruitmentOffersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentOffers<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentOffersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentOffers<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentOffersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentOffers<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentOffersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffers>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentOffersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentOffers = (
+    createOfferRequest: CreateOfferRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createOfferRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>, TError,{data: CreateOfferRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>, TError,{data: CreateOfferRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffers'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>, {data: CreateOfferRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentOffers(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>>
+    export type PostApiV1RecruitmentOffersMutationBody = CreateOfferRequest
+    export type PostApiV1RecruitmentOffersMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffers = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>, TError,{data: CreateOfferRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffers>>,
+        TError,
+        {data: CreateOfferRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentOffersId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentOffersIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/offers/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentOffersIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError = ErrorType<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentOffersIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>> = ({ signal }) => getApiV1RecruitmentOffersId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentOffersIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>>
+export type GetApiV1RecruitmentOffersIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentOffersId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentOffersId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentOffersId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentOffersId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentOffersId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentOffersIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1RecruitmentOffersId = (
+    id: string,
+    updateOfferTermsRequest: UpdateOfferTermsRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateOfferTermsRequest
+    },
+      options);
+    }
+  
+
+
+export const getPutApiV1RecruitmentOffersIdMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>, TError,{id: string;data: UpdateOfferTermsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>, TError,{id: string;data: UpdateOfferTermsRequest}, TContext> => {
+
+const mutationKey = ['putApiV1RecruitmentOffersId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>, {id: string;data: UpdateOfferTermsRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1RecruitmentOffersId(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1RecruitmentOffersIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>>
+    export type PutApiV1RecruitmentOffersIdMutationBody = UpdateOfferTermsRequest
+    export type PutApiV1RecruitmentOffersIdMutationError = ErrorType<ProblemDetails>
+
+    export const usePutApiV1RecruitmentOffersId = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>, TError,{id: string;data: UpdateOfferTermsRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1RecruitmentOffersId>>,
+        TError,
+        {id: string;data: UpdateOfferTermsRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1RecruitmentOffersIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdSubmitApproval = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/submit-approval`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdSubmitApprovalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdSubmitApproval'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdSubmitApproval(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdSubmitApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>>
+    export type PostApiV1RecruitmentOffersIdSubmitApprovalMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdSubmitApprovalMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdSubmitApproval = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdSubmitApproval>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdSubmitApprovalMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdApprove = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>>
+    export type PostApiV1RecruitmentOffersIdApproveMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdApprove>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdIssue = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/issue`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdIssueMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdIssue'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdIssue(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdIssueMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>>
+    export type PostApiV1RecruitmentOffersIdIssueMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdIssueMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdIssue = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdIssue>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdIssueMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdAccept = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/accept`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdAcceptMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdAccept'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdAccept(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdAcceptMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>>
+    export type PostApiV1RecruitmentOffersIdAcceptMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdAcceptMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdAccept = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdAccept>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdAcceptMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdDecline = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/decline`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdDeclineMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdDecline'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdDecline(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdDeclineMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>>
+    export type PostApiV1RecruitmentOffersIdDeclineMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdDeclineMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdDecline = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdDecline>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdDeclineMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentOffersIdWithdraw = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<OfferDetailDto>(
+      {url: `/api/v1/recruitment/offers/${id}/withdraw`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentOffersIdWithdrawMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentOffersIdWithdraw'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentOffersIdWithdraw(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentOffersIdWithdrawMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>>
+    export type PostApiV1RecruitmentOffersIdWithdrawMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentOffersIdWithdrawMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentOffersIdWithdraw = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentOffersIdWithdraw>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentOffersIdWithdrawMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentPipelinesDefault = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<RecruitmentPipelineVersion>(
+      {url: `/api/v1/recruitment/pipelines/default`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentPipelinesDefaultQueryKey = () => {
+    return [
+    `/api/v1/recruitment/pipelines/default`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentPipelinesDefaultQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentPipelinesDefaultQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>> = ({ signal }) => getApiV1RecruitmentPipelinesDefault(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentPipelinesDefaultQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>>
+export type GetApiV1RecruitmentPipelinesDefaultQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentPipelinesDefault<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesDefault<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesDefault<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentPipelinesDefault<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesDefault>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentPipelinesDefaultQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1RecruitmentPipelinesId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<RecruitmentPipeline>(
+      {url: `/api/v1/recruitment/pipelines/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentPipelinesIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/pipelines/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentPipelinesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentPipelinesIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>> = ({ signal }) => getApiV1RecruitmentPipelinesId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentPipelinesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>>
+export type GetApiV1RecruitmentPipelinesIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentPipelinesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentPipelinesId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentPipelinesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1RecruitmentPipelinesVersionsVersionId = (
+    versionId: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<RecruitmentPipelineVersion>(
+      {url: `/api/v1/recruitment/pipelines/versions/${versionId}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentPipelinesVersionsVersionIdQueryKey = (versionId?: string,) => {
+    return [
+    `/api/v1/recruitment/pipelines/versions/${versionId}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentPipelinesVersionsVersionIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError = ErrorType<unknown>>(versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentPipelinesVersionsVersionIdQueryKey(versionId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>> = ({ signal }) => getApiV1RecruitmentPipelinesVersionsVersionId(versionId, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(versionId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentPipelinesVersionsVersionIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>>
+export type GetApiV1RecruitmentPipelinesVersionsVersionIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentPipelinesVersionsVersionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError = ErrorType<unknown>>(
+ versionId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesVersionsVersionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError = ErrorType<unknown>>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentPipelinesVersionsVersionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError = ErrorType<unknown>>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentPipelinesVersionsVersionId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError = ErrorType<unknown>>(
+ versionId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentPipelinesVersionsVersionId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentPipelinesVersionsVersionIdQueryOptions(versionId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1RecruitmentRequisitions = (
+    params?: GetApiV1RecruitmentRequisitionsParams,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<PagedRecruitmentResultOfJobRequisition>(
+      {url: `/api/v1/recruitment/requisitions`, method: 'GET',
+        params, signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentRequisitionsQueryKey = (params?: GetApiV1RecruitmentRequisitionsParams,) => {
+    return [
+    `/api/v1/recruitment/requisitions`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentRequisitionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError = ErrorType<unknown>>(params?: GetApiV1RecruitmentRequisitionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentRequisitionsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>> = ({ signal }) => getApiV1RecruitmentRequisitions(params, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentRequisitionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>>
+export type GetApiV1RecruitmentRequisitionsQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1RecruitmentRequisitions<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetApiV1RecruitmentRequisitionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentRequisitions<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentRequisitionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentRequisitions<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentRequisitionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentRequisitions<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError = ErrorType<unknown>>(
+ params?: GetApiV1RecruitmentRequisitionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitions>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentRequisitionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1RecruitmentRequisitions = (
+    createRequisitionRequest: CreateRequisitionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: createRequisitionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>, TError,{data: CreateRequisitionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>, TError,{data: CreateRequisitionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitions'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>, {data: CreateRequisitionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitions(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>>
+    export type PostApiV1RecruitmentRequisitionsMutationBody = CreateRequisitionRequest
+    export type PostApiV1RecruitmentRequisitionsMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>, TError,{data: CreateRequisitionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitions>>,
+        TError,
+        {data: CreateRequisitionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1RecruitmentRequisitionsId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1RecruitmentRequisitionsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/recruitment/requisitions/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1RecruitmentRequisitionsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError = ErrorType<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1RecruitmentRequisitionsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>> = ({ signal }) => getApiV1RecruitmentRequisitionsId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1RecruitmentRequisitionsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>>
+export type GetApiV1RecruitmentRequisitionsIdQueryError = ErrorType<ProblemDetails>
+
+
+export function useGetApiV1RecruitmentRequisitionsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentRequisitionsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1RecruitmentRequisitionsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1RecruitmentRequisitionsId<TData = Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError = ErrorType<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1RecruitmentRequisitionsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1RecruitmentRequisitionsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1RecruitmentRequisitionsId = (
+    id: string,
+    updateRequisitionRequest: UpdateRequisitionRequest,
+ options?: SecondParameter<typeof customInstance>,) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}`, method: 'PUT',
+      headers: {'Content-Type': 'application/json', },
+      data: updateRequisitionRequest
+    },
+      options);
+    }
+  
+
+
+export const getPutApiV1RecruitmentRequisitionsIdMutationOptions = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>, TError,{id: string;data: UpdateRequisitionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>, TError,{id: string;data: UpdateRequisitionRequest}, TContext> => {
+
+const mutationKey = ['putApiV1RecruitmentRequisitionsId'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>, {id: string;data: UpdateRequisitionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1RecruitmentRequisitionsId(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1RecruitmentRequisitionsIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>>
+    export type PutApiV1RecruitmentRequisitionsIdMutationBody = UpdateRequisitionRequest
+    export type PutApiV1RecruitmentRequisitionsIdMutationError = ErrorType<ProblemDetails>
+
+    export const usePutApiV1RecruitmentRequisitionsId = <TError = ErrorType<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>, TError,{id: string;data: UpdateRequisitionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1RecruitmentRequisitionsId>>,
+        TError,
+        {id: string;data: UpdateRequisitionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1RecruitmentRequisitionsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdSubmitApproval = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/submit-approval`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdSubmitApprovalMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdSubmitApproval'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdSubmitApproval(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdSubmitApprovalMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>>
+    export type PostApiV1RecruitmentRequisitionsIdSubmitApprovalMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdSubmitApprovalMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdSubmitApproval = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdSubmitApproval>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdSubmitApprovalMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdApprove = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>>
+    export type PostApiV1RecruitmentRequisitionsIdApproveMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdApprove>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdOpen = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/open`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdOpenMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdOpen'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdOpen(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdOpenMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>>
+    export type PostApiV1RecruitmentRequisitionsIdOpenMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdOpenMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdOpen = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdOpen>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdOpenMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdHold = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/hold`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdHoldMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdHold'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdHold(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdHoldMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>>
+    export type PostApiV1RecruitmentRequisitionsIdHoldMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdHoldMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdHold = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdHold>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdHoldMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdClose = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/close`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdCloseMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdClose'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdClose(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdCloseMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>>
+    export type PostApiV1RecruitmentRequisitionsIdCloseMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdCloseMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdClose = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdClose>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdCloseMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1RecruitmentRequisitionsIdCancel = (
+    id: string,
+    concurrencyActionRequest: ConcurrencyActionRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<JobRequisition>(
+      {url: `/api/v1/recruitment/requisitions/${id}/cancel`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: concurrencyActionRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1RecruitmentRequisitionsIdCancelMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1RecruitmentRequisitionsIdCancel'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>, {id: string;data: ConcurrencyActionRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1RecruitmentRequisitionsIdCancel(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1RecruitmentRequisitionsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>>
+    export type PostApiV1RecruitmentRequisitionsIdCancelMutationBody = ConcurrencyActionRequest
+    export type PostApiV1RecruitmentRequisitionsIdCancelMutationError = ErrorType<unknown>
+
+    export const usePostApiV1RecruitmentRequisitionsIdCancel = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>, TError,{id: string;data: ConcurrencyActionRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1RecruitmentRequisitionsIdCancel>>,
+        TError,
+        {id: string;data: ConcurrencyActionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1RecruitmentRequisitionsIdCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1SettlementBatchesGenerate = (
+    generateSettlementBatchRequest: GenerateSettlementBatchRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<SettlementBatchDto>(
+      {url: `/api/v1/settlement/batches/generate`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: generateSettlementBatchRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1SettlementBatchesGenerateMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>, TError,{data: GenerateSettlementBatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>, TError,{data: GenerateSettlementBatchRequest}, TContext> => {
+
+const mutationKey = ['postApiV1SettlementBatchesGenerate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>, {data: GenerateSettlementBatchRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1SettlementBatchesGenerate(data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1SettlementBatchesGenerateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>>
+    export type PostApiV1SettlementBatchesGenerateMutationBody = GenerateSettlementBatchRequest
+    export type PostApiV1SettlementBatchesGenerateMutationError = ErrorType<unknown>
+
+    export const usePostApiV1SettlementBatchesGenerate = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>, TError,{data: GenerateSettlementBatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1SettlementBatchesGenerate>>,
+        TError,
+        {data: GenerateSettlementBatchRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1SettlementBatchesGenerateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1SettlementBatches = (
+    
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<SettlementBatchDto[]>(
+      {url: `/api/v1/settlement/batches`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1SettlementBatchesQueryKey = () => {
+    return [
+    `/api/v1/settlement/batches`
+    ] as const;
+    }
+
+    
+export const getGetApiV1SettlementBatchesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SettlementBatchesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SettlementBatches>>> = ({ signal }) => getApiV1SettlementBatches(requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SettlementBatchesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SettlementBatches>>>
+export type GetApiV1SettlementBatchesQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1SettlementBatches<TData = Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SettlementBatches>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SettlementBatches>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SettlementBatches<TData = Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SettlementBatches>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SettlementBatches>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SettlementBatches<TData = Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SettlementBatches<TData = Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatches>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SettlementBatchesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1SettlementBatchesId = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<SettlementBatchDetailDto>(
+      {url: `/api/v1/settlement/batches/${id}`, method: 'GET', signal
+    },
+      options);
+    }
+  
+
+
+
+export const getGetApiV1SettlementBatchesIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/settlement/batches/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1SettlementBatchesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError = ErrorType<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SettlementBatchesIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>> = ({ signal }) => getApiV1SettlementBatchesId(id, requestOptions, signal);
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SettlementBatchesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>>
+export type GetApiV1SettlementBatchesIdQueryError = ErrorType<unknown>
+
+
+export function useGetApiV1SettlementBatchesId<TData = Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError = ErrorType<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SettlementBatchesId<TData = Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SettlementBatchesId<TData = Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SettlementBatchesId<TData = Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SettlementBatchesId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SettlementBatchesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1SettlementBatchesIdApprove = (
+    id: string,
+    approveBatchRequest: ApproveBatchRequest,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/settlement/batches/${id}/approve`, method: 'POST',
+      headers: {'Content-Type': 'application/json', },
+      data: approveBatchRequest, signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1SettlementBatchesIdApproveMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>, TError,{id: string;data: ApproveBatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>, TError,{id: string;data: ApproveBatchRequest}, TContext> => {
+
+const mutationKey = ['postApiV1SettlementBatchesIdApprove'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>, {id: string;data: ApproveBatchRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1SettlementBatchesIdApprove(id,data,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1SettlementBatchesIdApproveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>>
+    export type PostApiV1SettlementBatchesIdApproveMutationBody = ApproveBatchRequest
+    export type PostApiV1SettlementBatchesIdApproveMutationError = ErrorType<unknown>
+
+    export const usePostApiV1SettlementBatchesIdApprove = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>, TError,{id: string;data: ApproveBatchRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1SettlementBatchesIdApprove>>,
+        TError,
+        {id: string;data: ApproveBatchRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1SettlementBatchesIdApproveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1SettlementBatchesIdExport = (
+    id: string,
+ options?: SecondParameter<typeof customInstance>,signal?: AbortSignal
+) => {
+      
+      
+      return customInstance<void>(
+      {url: `/api/v1/settlement/batches/${id}/export`, method: 'POST', signal
+    },
+      options);
+    }
+  
+
+
+export const getPostApiV1SettlementBatchesIdExportMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postApiV1SettlementBatchesIdExport'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1SettlementBatchesIdExport(id,requestOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1SettlementBatchesIdExportMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>>
+    
+    export type PostApiV1SettlementBatchesIdExportMutationError = ErrorType<unknown>
+
+    export const usePostApiV1SettlementBatchesIdExport = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1SettlementBatchesIdExport>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1SettlementBatchesIdExportMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

@@ -16,10 +16,10 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
   onSubmitAdjustment
 }) => {
   const [adjustedHours, setAdjustedHours] = useState<number>(() =>
-    record ? Math.floor(record.totalWorkedMinutes / 60) : 8
+    record ? Math.floor(Number(record.totalWorkedMinutes || 0) / 60) : 8
   );
   const [adjustedMins, setAdjustedMins] = useState<number>(() =>
-    record ? record.totalWorkedMinutes % 60 : 0
+    record ? Number(record.totalWorkedMinutes || 0) % 60 : 0
   );
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,7 +27,7 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
 
   if (!isOpen || !record) return null;
 
-  const originalMinutes = record.totalWorkedMinutes;
+  const originalMinutes = Number(record.totalWorkedMinutes || 0);
   const newMinutes = adjustedHours * 60 + adjustedMins;
   const deltaMinutes = newMinutes - originalMinutes;
 
@@ -41,7 +41,7 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
     try {
       setIsSubmitting(true);
       setErrorMessage(null);
-      await onSubmitAdjustment?.(record.id, newMinutes, reason, record.rowVersion);
+      await onSubmitAdjustment?.(record.id, newMinutes, reason, Number(record.rowVersion));
       onClose();
     } catch (err: any) {
       setErrorMessage(err.message || 'Failed to apply adjustment. Please verify version concurrency.');
@@ -65,10 +65,10 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
               Adjust Attendance Record
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
-              {record.employeeNameEn} ({record.employeeNumber}) — {record.businessDate}
+              {(record as any).employeeNameEn || 'Employee'} ({(record as any).employeeNumber || 'EMP-XXXX'}) — {record.businessDate}
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} ariaLabel="Close adjustment modal">
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close adjustment modal">
             ✕
           </Button>
         </div>

@@ -31,4 +31,32 @@ public class BoundaryTests
             Assert.DoesNotContain("Workforce.Host.", assemblyName.Name ?? "");
         }
     }
+
+    [Fact]
+    public void Recruitment_ShouldNotReference_PeopleInfrastructure()
+    {
+        var recruitmentAssembly = typeof(Workforce.Modules.Recruitment.Api.RecruitmentApplicationsController).Assembly;
+        
+        foreach (var type in recruitmentAssembly.GetTypes())
+        {
+            // Check fields
+            var fields = type.GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var field in fields)
+            {
+                Assert.DoesNotContain("Workforce.Modules.People.Infrastructure", field.FieldType.FullName ?? "");
+                Assert.DoesNotContain("Workforce.Modules.People.Domain", field.FieldType.FullName ?? "");
+            }
+
+            // Check constructors
+            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            foreach (var ctor in constructors)
+            {
+                foreach (var param in ctor.GetParameters())
+                {
+                    Assert.DoesNotContain("Workforce.Modules.People.Infrastructure", param.ParameterType.FullName ?? "");
+                    Assert.DoesNotContain("Workforce.Modules.People.Domain", param.ParameterType.FullName ?? "");
+                }
+            }
+        }
+    }
 }

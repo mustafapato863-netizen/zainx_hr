@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ public record PayrollInputSnapshotDto(
     decimal UnpaidLeaveDays
 );
 
-public record CalculateRunRequest(uint ExpectedRowVersion);
+public record CalculateRunRequest(uint ExpectedRowVersion, string? IdempotencyKey = null);
 public record FinalizeRunRequest(uint ExpectedRowVersion);
 
 public record PayrollPeriodDto(
@@ -69,8 +70,17 @@ public record PayrollRunDto(
     uint RowVersion
 );
 
+public record BackgroundJobDto(
+    string JobId,
+    string Operation,
+    string Status,
+    DateTime StartedAtUtc,
+    DateTime? CompletedAtUtc,
+    string? Error
+);
+
 [ApiController]
-[Route("api/v1/payroll")]
+[Route("api/v1")]
 public class PayrollRunsController : ControllerBase
 {
     private readonly IPayrollRepository _repository;
@@ -90,7 +100,41 @@ public class PayrollRunsController : ControllerBase
         _userContext = userContext;
     }
 
-    [HttpGet("periods")]
+    [HttpGet("jobs/{jobId}")]
+    public async Task<ActionResult<BackgroundJobDto>> GetJobStatus(string jobId, CancellationToken ct)
+    {
+        if (!Guid.TryParse(jobId, out var id))
+        {
+            return BadRequest(new ProblemDetails { Title = "Invalid Job ID", Detail = "Job ID must be a valid GUID." });
+        }
+
+        var job = await _repository.GetJobByIdAsync(_userContext.TenantId, id, ct);
+        if (job != null)
+        {
+            var statusStr = job.Status switch
+            {
+                PayrollJobStatus.Queued => "queued",
+                PayrollJobStatus.Running => "running",
+                PayrollJobStatus.Completed => "completed",
+                PayrollJobStatus.CompletedWithWarnings => "completed_with_warnings",
+                PayrollJobStatus.Failed => "failed",
+                _ => job.Status.ToString().ToLowerInvariant()
+            };
+
+            return Ok(new BackgroundJobDto(
+                job.Id.ToString(),
+                job.Operation,
+                statusStr,
+                job.StartedAtUtc,
+                job.CompletedAtUtc,
+                job.ErrorMessage
+            ));
+        }
+
+        return NotFound(new ProblemDetails { Title = "Job Not Found", Detail = $"Job '{jobId}' was not found." });
+    }
+
+    [HttpGet("payroll/periods")]
     public async Task<ActionResult<IReadOnlyList<PayrollPeriodDto>>> GetPeriods(CancellationToken ct)
     {
         var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
@@ -103,7 +147,7 @@ public class PayrollRunsController : ControllerBase
         return Ok(dtos);
     }
 
-    [HttpPost("periods")]
+    [HttpPost("payroll/periods")]
     public async Task<ActionResult<PayrollPeriodDto>> CreatePeriod([FromBody] CreatePayrollPeriodRequest req, CancellationToken ct)
     {
         var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
@@ -118,7 +162,7 @@ public class PayrollRunsController : ControllerBase
         ));
     }
 
-    [HttpGet("runs")]
+    [HttpGet("payroll/runs")]
     public async Task<ActionResult<IReadOnlyList<PayrollRunDto>>> GetRuns(CancellationToken ct)
     {
         var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
@@ -135,7 +179,7 @@ public class PayrollRunsController : ControllerBase
         return Ok(dtos);
     }
 
-    [HttpGet("runs/{id:guid}")]
+    [HttpGet("payroll/runs/{id:guid}")]
     public async Task<ActionResult<PayrollRunDto>> GetRunById(Guid id, CancellationToken ct)
     {
         var r = await _repository.GetRunByIdAsync(_userContext.TenantId, id, ct);
@@ -148,7 +192,7 @@ public class PayrollRunsController : ControllerBase
         ));
     }
 
-    [HttpPost("runs")]
+    [HttpPost("payroll/runs")]
     public async Task<ActionResult<PayrollRunDto>> CreateRun([FromBody] CreatePayrollRunRequest req, CancellationToken ct)
     {
         var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
@@ -165,7 +209,7 @@ public class PayrollRunsController : ControllerBase
         ));
     }
 
-    [HttpPost("runs/{id:guid}/load-inputs")]
+    [HttpPost("payroll/runs/{id:guid}/load-inputs")]
     public async Task<IActionResult> LoadInputs(Guid id, [FromBody] LoadInputsRequest req, CancellationToken ct)
     {
         var run = await _repository.GetRunByIdAsync(_userContext.TenantId, id, ct);
@@ -194,9 +238,14 @@ public class PayrollRunsController : ControllerBase
         }
     }
 
-    [HttpPost("runs/{id:guid}/calculate")]
+    [HttpPost("payroll/runs/{id:guid}/calculate")]
     public async Task<IActionResult> Calculate(Guid id, [FromBody] CalculateRunRequest req, CancellationToken ct)
     {
+        if (!_userContext.HasPermission("payroll.run.calculate") && !_userContext.HasPermission("admin"))
+        {
+            return Forbid();
+        }
+
         var run = await _repository.GetRunByIdAsync(_userContext.TenantId, id, ct);
         if (run == null) return NotFound();
 
@@ -206,43 +255,69 @@ public class PayrollRunsController : ControllerBase
             return BadRequest(new ProblemDetails { Title = "Validation Error", Detail = "No input snapshots loaded for this run." });
         }
 
-        // Fetch active statutory compliance rules for the legal entity
-        var activeRules = new List<StatutoryRuleVersion>();
-        var gosi = await _complianceRepository.GetActiveRuleVersionAsync("EG_SOCIAL_INSURANCE", DateOnly.FromDateTime(DateTime.UtcNow), ct);
-        var tax = await _complianceRepository.GetActiveRuleVersionAsync("EG_INCOME_TAX", DateOnly.FromDateTime(DateTime.UtcNow), ct);
-        if (gosi != null) activeRules.Add(gosi);
-        if (tax != null) activeRules.Add(tax);
+        var idempotencyKey = string.IsNullOrWhiteSpace(req.IdempotencyKey)
+            ? $"calc_{run.TenantId.Value}_{run.Id}_{req.ExpectedRowVersion}"
+            : req.IdempotencyKey.Trim();
 
-        try
+        var existingJob = await _repository.GetJobByIdempotencyKeyAsync(_userContext.TenantId, idempotencyKey, ct);
+        if (existingJob != null)
         {
-            run.LoadInputs(snapshots, run.RowVersion);
-            run.Calculate(_calculationEngine, activeRules, req.ExpectedRowVersion);
-
-            await _repository.SaveResultsAndTracesAsync(run, ct);
+            var existingStatus = existingJob.Status switch
+            {
+                PayrollJobStatus.Queued => "queued",
+                PayrollJobStatus.Running => "running",
+                PayrollJobStatus.Completed => "completed",
+                PayrollJobStatus.CompletedWithWarnings => "completed_with_warnings",
+                PayrollJobStatus.Failed => "failed",
+                _ => existingJob.Status.ToString().ToLowerInvariant()
+            };
 
             return Accepted(new
             {
-                jobId = $"job_{Guid.NewGuid():N}",
-                operation = "payroll.calculate",
-                status = "completed",
-                totalGross = run.TotalGross,
-                totalNet = run.TotalNet,
-                employeeCount = run.EmployeeCount,
-                reproducibilityHash = run.ReproducibilityHash,
-                rowVersion = run.RowVersion
+                jobId = existingJob.Id.ToString(),
+                operation = existingJob.Operation,
+                status = existingStatus
             });
         }
-        catch (InvalidOperationException ex)
+
+        var job = new PayrollBackgroundJob(
+            Guid.NewGuid(),
+            _userContext.TenantId.Value,
+            run.Id,
+            idempotencyKey,
+            "payroll.calculate"
+        );
+
+        await _repository.CreateJobAsync(job, ct);
+
+        return Accepted(new
         {
-            return Conflict(new ProblemDetails { Title = "Conflict", Detail = ex.Message });
-        }
+            jobId = job.Id.ToString(),
+            operation = job.Operation,
+            status = "queued"
+        });
     }
 
-    [HttpPost("runs/{id:guid}/finalize")]
+    [HttpPost("payroll/runs/{id:guid}/finalize")]
     public async Task<IActionResult> FinalizeRun(Guid id, [FromBody] FinalizeRunRequest req, CancellationToken ct)
     {
+        if (!_userContext.HasPermission("payroll.run.finalize") && !_userContext.HasPermission("admin"))
+        {
+            return Forbid();
+        }
+
         var run = await _repository.GetRunByIdAsync(_userContext.TenantId, id, ct);
         if (run == null) return NotFound();
+
+        // Segregation of Duties Check: Finalizer cannot be the one who created/calculated the run if strict SoD is enforced
+        if (run.FinalizedByUserId.HasValue && run.FinalizedByUserId.Value == _userContext.UserId.Value)
+        {
+            return StatusCode(403, new ProblemDetails
+            {
+                Title = "Segregation of Duties Violation",
+                Detail = "Under active financial segregation of duties policy, the user who initiated the run cannot execute final approval."
+            });
+        }
 
         try
         {

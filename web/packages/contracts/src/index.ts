@@ -1,2 +1,73 @@
 export * from './api/generated';
 export * from './api/generated.schemas';
+
+import {
+  useGetApiV1RecruitmentRequisitions,
+  useGetApiV1RecruitmentRequisitionsId,
+  usePostApiV1RecruitmentRequisitions,
+  usePostApiV1RecruitmentRequisitionsIdSubmitApproval,
+  usePostApiV1RecruitmentRequisitionsIdApprove,
+  usePostApiV1RecruitmentRequisitionsIdOpen,
+  usePostApiV1RecruitmentRequisitionsIdHold,
+  usePostApiV1RecruitmentRequisitionsIdClose,
+  useGetApiV1RecruitmentCandidates,
+  useGetApiV1RecruitmentCandidatesId,
+  usePostApiV1RecruitmentCandidatesCheckDuplicates,
+  usePostApiV1RecruitmentCandidates,
+  useGetApiV1RecruitmentApplicationsBoardRequisitionId,
+  useGetApiV1RecruitmentApplicationsId,
+  usePostApiV1RecruitmentApplications,
+  usePostApiV1RecruitmentApplicationsIdMoveStage,
+  usePostApiV1RecruitmentApplicationsIdReject,
+  usePostApiV1RecruitmentApplicationsIdWithdraw,
+  usePostApiV1RecruitmentApplicationsIdHire,
+  useGetApiV1RecruitmentInterviews,
+  usePostApiV1RecruitmentInterviews,
+  usePostApiV1RecruitmentInterviewsIdReschedule,
+  usePostApiV1RecruitmentInterviewsIdScorecard,
+  useGetApiV1RecruitmentInterviewsIdScorecards,
+  useGetApiV1RecruitmentOffers,
+  usePostApiV1RecruitmentOffers,
+  usePostApiV1RecruitmentOffersIdSubmitApproval,
+  usePostApiV1RecruitmentOffersIdApprove,
+  usePostApiV1RecruitmentOffersIdIssue,
+  usePostApiV1RecruitmentOffersIdAccept,
+  useGetApiV1RecruitmentPipelinesDefault,
+} from './api/generated';
+
+export const useGetRequisitions = useGetApiV1RecruitmentRequisitions;
+export const useGetRequisitionById = useGetApiV1RecruitmentRequisitionsId;
+export const useCreateRequisition = usePostApiV1RecruitmentRequisitions;
+export const useSubmitRequisitionForApproval = usePostApiV1RecruitmentRequisitionsIdSubmitApproval;
+export const useApproveRequisition = usePostApiV1RecruitmentRequisitionsIdApprove;
+export const useOpenRequisition = usePostApiV1RecruitmentRequisitionsIdOpen;
+export const usePutRequisitionOnHold = usePostApiV1RecruitmentRequisitionsIdHold;
+export const useCloseRequisition = usePostApiV1RecruitmentRequisitionsIdClose;
+
+export const useGetCandidates = useGetApiV1RecruitmentCandidates;
+export const useGetCandidateById = useGetApiV1RecruitmentCandidatesId;
+export const useCheckDuplicateCandidates = usePostApiV1RecruitmentCandidatesCheckDuplicates;
+export const useCreateCandidate = usePostApiV1RecruitmentCandidates;
+
+export const useGetPipelineBoard = useGetApiV1RecruitmentApplicationsBoardRequisitionId;
+export const useGetApplicationById = useGetApiV1RecruitmentApplicationsId;
+export const useCreateApplication = usePostApiV1RecruitmentApplications;
+export const useMoveStage = usePostApiV1RecruitmentApplicationsIdMoveStage;
+export const useRejectApplication = usePostApiV1RecruitmentApplicationsIdReject;
+export const useWithdrawApplication = usePostApiV1RecruitmentApplicationsIdWithdraw;
+export const useHireCandidate = usePostApiV1RecruitmentApplicationsIdHire;
+
+export const useGetInterviewsForApplication = useGetApiV1RecruitmentInterviews;
+export const useScheduleInterview = usePostApiV1RecruitmentInterviews;
+export const useRescheduleInterview = usePostApiV1RecruitmentInterviewsIdReschedule;
+export const useSubmitScorecard = usePostApiV1RecruitmentInterviewsIdScorecard;
+export const useGetScorecards = useGetApiV1RecruitmentInterviewsIdScorecards;
+
+export const useGetOffersForApplication = useGetApiV1RecruitmentOffers;
+export const useCreateOffer = usePostApiV1RecruitmentOffers;
+export const useSubmitOfferForApproval = usePostApiV1RecruitmentOffersIdSubmitApproval;
+export const useApproveOffer = usePostApiV1RecruitmentOffersIdApprove;
+export const useIssueOffer = usePostApiV1RecruitmentOffersIdIssue;
+export const useAcceptOffer = usePostApiV1RecruitmentOffersIdAccept;
+
+export const useGetPipelines = useGetApiV1RecruitmentPipelinesDefault;

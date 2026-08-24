@@ -67,7 +67,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
             variant="primary"
             onPress={() => setIsGenerateOpen(true)}
           >
-            <Icon name="Plus" className="w-4 h-4 mr-2" />
+            <Icon name="plus" className="w-4 h-4 mr-2" />
             Generate Batch for {finalizedRunCode || 'Run'}
           </Button>
         )}
@@ -146,7 +146,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
                       variant="secondary"
                       onPress={() => onApproveBatch(batchDetail.id, batchDetail.rowVersion)}
                     >
-                      <Icon name="Check" className="w-4 h-4 mr-1.5" />
+                      <Icon name="check" className="w-4 h-4 mr-1.5" />
                       Approve Batch
                     </Button>
                   )}
@@ -156,7 +156,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
                     variant="primary"
                     onPress={() => onExportBatch(batchDetail.id)}
                   >
-                    <Icon name="Download" className="w-4 h-4 mr-1.5" />
+                    <Icon name="download" className="w-4 h-4 mr-1.5" />
                     Download Neutral CSV Export
                   </Button>
                 </div>
@@ -184,7 +184,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
                           {inst.bankCode}
                         </td>
                         <td className="px-3 py-2.5 font-mono text-neutral-700 dark:text-neutral-300">
-                          <SensitiveValue value={inst.accountMasked} mask="••••••••" />
+                          <SensitiveValue value={inst.accountMasked} maskedPlaceholder="••••••••" />
                         </td>
                         <td className="px-3 py-2.5 text-right font-semibold text-emerald-600 dark:text-emerald-400">
                           <Money amount={inst.amount} currency={batchDetail.currency} />

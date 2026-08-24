@@ -108,7 +108,7 @@ public class SettlementController : ControllerBase
                 Guid.NewGuid(), batch.Id, r.EmploymentId,
                 $"Employee-{r.EmploymentId.ToString()[..8]}",
                 "MISR",
-                $"EG123456789012345678901234",
+                Workforce.SharedKernel.Security.AesGcmEncryptionService.EncryptDefault($"EG123456789012345678901234"),
                 r.NetPay
             );
             batch.AddInstruction(inst);

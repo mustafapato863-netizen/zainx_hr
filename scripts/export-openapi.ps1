@@ -9,6 +9,7 @@ for ($i = 0; $i -lt 15; $i++) {
         if ($response.StatusCode -eq 200 -and $response.Content.Length -gt 100) {
             $response.Content | Out-File -FilePath "web/tooling/openapi/workforce.openapi.json" -Encoding utf8
             Write-Host "Successfully exported OpenAPI spec (Size: $($response.Content.Length) bytes)."
+            Write-Host "Contains recruitment: $($response.Content.Contains('recruitment'))"
             $exported = $true
             break
         }

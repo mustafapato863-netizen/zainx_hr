@@ -146,6 +146,26 @@ public static class PayrollMigrations
                 event_type VARCHAR(200) NOT NULL,
                 processed_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
+
+            -- 10. Background Jobs (Durable Calculation Queue & Execution State)
+            CREATE TABLE IF NOT EXISTS payroll.background_jobs (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                payroll_run_id UUID NOT NULL REFERENCES payroll.payroll_runs(id) ON DELETE CASCADE,
+                idempotency_key VARCHAR(128) NOT NULL,
+                operation VARCHAR(64) NOT NULL,
+                status VARCHAR(32) NOT NULL DEFAULT 'Queued',
+                started_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                completed_at_utc TIMESTAMPTZ,
+                error_message TEXT,
+                diagnostic_metadata JSONB,
+                row_version BIGINT NOT NULL DEFAULT 1,
+                created_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT uq_payroll_job_idempotency UNIQUE (tenant_id, idempotency_key)
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_payroll_jobs_status
+                ON payroll.background_jobs (status, created_at_utc);
         """);
 
         await cmd.ExecuteNonQueryAsync();

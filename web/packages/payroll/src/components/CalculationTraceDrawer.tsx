@@ -30,7 +30,7 @@ export const CalculationTraceDrawer: React.FC<CalculationTraceDrawerProps> = ({
           </span>
         </div>
         <Button id="btn-close-trace" variant="ghost" className="p-2" onPress={onClose} aria-label="Close Calculation Trace">
-          <Icon name="X" className="w-5 h-5" />
+          <Icon name="x" className="w-5 h-5" />
         </Button>
       </div>
 

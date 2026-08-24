@@ -91,7 +91,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
             onPress={onBack}
             aria-label="Back to Payroll Runs"
           >
-            <Icon name="ArrowLeft" className="w-5 h-5" />
+            <Icon name="arrow-left" className="w-5 h-5" />
           </Button>
           <div>
             <div className="flex items-center gap-2">
@@ -123,7 +123,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
                   variant="secondary"
                   onPress={onLoadInputs}
                 >
-                  <Icon name="Upload" className="w-4 h-4 mr-1.5" />
+                  <Icon name="upload" className="w-4 h-4 mr-1.5" />
                   Load Inputs
                 </Button>
               )}
@@ -135,7 +135,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
                   onPress={onCalculate}
                   isDisabled={isCalculating}
                 >
-                  <Icon name="RefreshCw" className={`w-4 h-4 mr-1.5 ${isCalculating ? 'animate-spin' : ''}`} />
+                  <Icon name="refresh" className={`w-4 h-4 mr-1.5 ${isCalculating ? 'animate-spin' : ''}`} />
                   {isCalculating ? 'Calculating...' : 'Calculate'}
                 </Button>
               )}
@@ -148,7 +148,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
                   onPress={() => setIsFinalizeOpen(true)}
                   isDisabled={openBlockingCount > 0}
                 >
-                  <Icon name="Lock" className="w-4 h-4 mr-1.5" />
+                  <Icon name="lock" className="w-4 h-4 mr-1.5" />
                   Finalize Run
                 </Button>
               )}
@@ -161,7 +161,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
             className="relative"
             onPress={() => setIsExceptionsOpen(true)}
           >
-            <Icon name="AlertCircle" className="w-4 h-4 mr-1.5" />
+            <Icon name="alert-circle" className="w-4 h-4 mr-1.5" />
             Exceptions
             {(openBlockingCount > 0 || openWarningCount > 0) && (
               <span className="ml-1.5 px-1.5 py-0.5 text-xs rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 font-semibold">
@@ -176,7 +176,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
               variant="primary"
               onPress={onNavigateSettlement}
             >
-              <Icon name="CreditCard" className="w-4 h-4 mr-1.5" />
+              <Icon name="dollar-sign" className="w-4 h-4 mr-1.5" />
               Disburse in Settlement
             </Button>
           )}
@@ -245,7 +245,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
             <span className="text-xl font-bold text-neutral-900 dark:text-neutral-100">
               {openBlockingCount} Blocking
             </span>
-            <Badge variant={openBlockingCount === 0 ? 'success' : 'error'}>
+            <Badge variant={openBlockingCount === 0 ? 'success' : 'danger'}>
               {openBlockingCount === 0 ? 'Clear to Finalize' : 'Blocked'}
             </Badge>
           </div>
@@ -295,8 +295,8 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
                   </td>
                   <td className="px-4 py-3 font-semibold text-emerald-600 dark:text-emerald-400">
                     <SensitiveValue
-                      value={<Money amount={res.netPay} currency={run.currency} />}
-                      mask="••••••"
+                      value={`${res.netPay} ${run.currency}`}
+                      maskedPlaceholder="••••••"
                     />
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -306,7 +306,7 @@ export const PayrollRunWorkspace: React.FC<PayrollRunWorkspaceProps> = ({
                       className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400"
                       onPress={() => handleOpenTrace(res.employmentId)}
                     >
-                      <Icon name="HelpCircle" className="w-3.5 h-3.5 mr-1" />
+                      <Icon name="help-circle" className="w-3.5 h-3.5 mr-1" />
                       Explain Calculation
                     </Button>
                   </td>

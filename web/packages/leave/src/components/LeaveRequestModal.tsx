@@ -65,7 +65,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
       setErrorMessage('Leave duration must be at least 1 day.');
       return;
     }
-    if (selectedBalance && calculatedDays > selectedBalance.availableDays) {
+    if (selectedBalance && calculatedDays > Number(selectedBalance.availableDays)) {
       setErrorMessage(
         `Insufficient available balance (${selectedBalance.availableDays} days available, ${calculatedDays} days requested).`
       );
@@ -106,7 +106,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
               Dates are validated against PostgreSQL exclusion constraints for non-overlapping integrity
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} ariaLabel="Close leave request modal">
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close leave request modal">
             ✕
           </Button>
         </div>
@@ -134,7 +134,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
             >
               {leaveTypes.map((t) => (
                 <option key={t.id} value={t.id}>
-                  {t.nameEn} ({t.categoryName || 'Paid'})
+                  {t.nameEn} ({(t as any).categoryName || t.category || 'Paid'})
                 </option>
               ))}
             </select>

@@ -21,7 +21,7 @@ const sampleRecords: AttendanceDayDto[] = [
     departmentNameEn: 'Human Resources',
     businessDate: '2026-08-24',
     timezoneId: 'Asia/Riyadh',
-    status: AttendanceStatus.Reviewed,
+    status: 2,
     statusName: 'Reviewed',
     scheduledMinutes: 480,
     firstClockInUtc: '2026-08-24T05:00:00Z',

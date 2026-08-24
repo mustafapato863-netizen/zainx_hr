@@ -2,14 +2,18 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   testDir: './src',
-  fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
-  reporter: 'html',
+  fullyParallel: false,
+  workers: 1,
+  reporter: 'line',
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'on-first-retry',
+  },
+  webServer: {
+    command: 'npx nx serve workforce-web --port=4200',
+    url: 'http://localhost:4200',
+    reuseExistingServer: true,
+    timeout: 120000,
   },
   projects: [
     {

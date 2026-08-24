@@ -4,6 +4,435 @@
  * Workforce.Host.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+export type ApplicationSource = null | string;
+
+export type ApplicationDisposedAtUtc = null | string;
+
+export type ApplicationDispositionReason = null | string;
+
+export type ApplicationDispositionNote = null | string;
+
+export type ApplicationHiredPersonId = null | string;
+
+export type ApplicationHiredEmploymentId = null | string;
+
+export type ApplicationHiredAtUtc = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApplicationRowVersion = number | string;
+
+export type ApplicationStageHistoryProperty = null | ApplicationStageHistory[];
+
+export interface Application {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: LegalEntityId;
+  requisitionId: string;
+  candidateId: string;
+  pipelineVersionId: string;
+  currentStageId?: string;
+  status?: ApplicationStatus;
+  source?: ApplicationSource;
+  appliedAtUtc?: string;
+  disposedAtUtc?: ApplicationDisposedAtUtc;
+  dispositionReason?: ApplicationDispositionReason;
+  dispositionNote?: ApplicationDispositionNote;
+  hiredPersonId?: ApplicationHiredPersonId;
+  hiredEmploymentId?: ApplicationHiredEmploymentId;
+  hiredAtUtc?: ApplicationHiredAtUtc;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: ApplicationRowVersion;
+  stageHistory?: ApplicationStageHistoryProperty;
+}
+
+export interface ApplicationDetailDto {
+  application: Application;
+  candidate: Candidate;
+  requisition: JobRequisition;
+  stageHistory: ApplicationStageHistory[];
+}
+
+export type ApplicationStageHistoryFromStageId = null | string;
+
+export type ApplicationStageHistoryReason = null | string;
+
+export type ApplicationStageHistoryIdempotencyKey = null | string;
+
+export interface ApplicationStageHistory {
+  id: string;
+  applicationId: string;
+  fromStageId: ApplicationStageHistoryFromStageId;
+  toStageId: string;
+  changedByUserId: string;
+  changedAtUtc: string;
+  reason: ApplicationStageHistoryReason;
+  idempotencyKey: ApplicationStageHistoryIdempotencyKey;
+}
+
+export type ApplicationStatus = number;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApplicationSummaryDtoRowVersion = number | string;
+
+export interface ApplicationSummaryDto {
+  id: string;
+  candidateId: string;
+  candidateNameEn: string;
+  candidateNameAr: string;
+  email: string;
+  phoneNumber: string;
+  currentStageId: string;
+  status: ApplicationStatus;
+  appliedAtUtc: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApplicationSummaryDtoRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalCancellationInputRowVersion = number | string;
+
+export interface ApprovalCancellationInput {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalCancellationInputRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalDecisionHistoryDtoStepOrder = number | string;
+
+export type ApprovalDecisionHistoryDtoReason = null | string;
+
+export interface ApprovalDecisionHistoryDto {
+  id: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  stepOrder: ApprovalDecisionHistoryDtoStepOrder;
+  actorUserId: string;
+  action: string;
+  reason: ApprovalDecisionHistoryDtoReason;
+  timestampUtc: string;
+}
+
+export type ApprovalDecisionInputNotes = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalDecisionInputRowVersion = number | string;
+
+export interface ApprovalDecisionInput {
+  notes: ApprovalDecisionInputNotes;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalDecisionInputRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalInboxItemDtoCurrentStepOrder = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalInboxItemDtoTotalSteps = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalInboxItemDtoRowVersion = number | string;
+
+export interface ApprovalInboxItemDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  sourceModule: string;
+  sourceEntityId: string;
+  workflowType: string;
+  title: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  currentStepOrder: ApprovalInboxItemDtoCurrentStepOrder;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalSteps: ApprovalInboxItemDtoTotalSteps;
+  status: string;
+  requesterUserId: string;
+  requesterEmploymentId: string;
+  createdAt: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalInboxItemDtoRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalRejectionInputRowVersion = number | string;
+
+export interface ApprovalRejectionInput {
+  reason: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalRejectionInputRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalRequestDetailDtoCurrentStepOrder = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalRequestDetailDtoTotalSteps = number | string;
+
+export type ApprovalRequestDetailDtoPayloadSnapshotJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalRequestDetailDtoRowVersion = number | string;
+
+export interface ApprovalRequestDetailDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  sourceModule: string;
+  sourceEntityId: string;
+  workflowType: string;
+  title: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  currentStepOrder: ApprovalRequestDetailDtoCurrentStepOrder;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalSteps: ApprovalRequestDetailDtoTotalSteps;
+  status: string;
+  requesterUserId: string;
+  requesterEmploymentId: string;
+  payloadSnapshotJson: ApprovalRequestDetailDtoPayloadSnapshotJson;
+  steps: ApprovalStepDto[];
+  history: ApprovalDecisionHistoryDto[];
+  createdAt: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalRequestDetailDtoRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalStepDtoStepOrder = number | string;
+
+export type ApprovalStepDtoAssignedApproverUserId = null | string;
+
+export type ApprovalStepDtoAssignedRole = null | string;
+
+export type ApprovalStepDtoDecidedAtUtc = null | string;
+
+export type ApprovalStepDtoDecidedByUserId = null | string;
+
+export type ApprovalStepDtoDecisionReason = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApprovalStepDtoRowVersion = number | string;
+
+export interface ApprovalStepDto {
+  id: string;
+  approvalRequestId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  stepOrder: ApprovalStepDtoStepOrder;
+  assignedApproverUserId: ApprovalStepDtoAssignedApproverUserId;
+  assignedRole: ApprovalStepDtoAssignedRole;
+  status: string;
+  decidedAtUtc: ApprovalStepDtoDecidedAtUtc;
+  decidedByUserId: ApprovalStepDtoDecidedByUserId;
+  decisionReason: ApprovalStepDtoDecisionReason;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ApprovalStepDtoRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ApproveBatchRequestExpectedRowVersion = number | string;
+
+export interface ApproveBatchRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: ApproveBatchRequestExpectedRowVersion;
+}
+
+export type AttendanceDayDtoFirstClockInUtc = null | string;
+
+export type AttendanceDayDtoLastClockOutUtc = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AttendanceDayDtoScheduledMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AttendanceDayDtoTotalWorkedMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AttendanceDayDtoLateMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AttendanceDayDtoEarlyDepartureMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AttendanceDayDtoRowVersion = number | string;
+
+export interface AttendanceDayDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  employmentId: string;
+  businessDate: string;
+  timeZoneId: string;
+  status: string;
+  firstClockInUtc: AttendanceDayDtoFirstClockInUtc;
+  lastClockOutUtc: AttendanceDayDtoLastClockOutUtc;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  scheduledMinutes: AttendanceDayDtoScheduledMinutes;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalWorkedMinutes: AttendanceDayDtoTotalWorkedMinutes;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  lateMinutes: AttendanceDayDtoLateMinutes;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  earlyDepartureMinutes: AttendanceDayDtoEarlyDepartureMinutes;
+  isAbsent: boolean;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: AttendanceDayDtoRowVersion;
+}
+
+export type AttendanceExceptionDtoResolutionNotes = null | string;
+
+export type AttendanceExceptionDtoResolvedByUserId = null | string;
+
+export type AttendanceExceptionDtoResolvedAtUtc = null | string;
+
+export interface AttendanceExceptionDto {
+  id: string;
+  attendanceDayId: string;
+  tenantId: string;
+  employmentId: string;
+  type: string;
+  status: string;
+  details: string;
+  resolutionNotes: AttendanceExceptionDtoResolutionNotes;
+  resolvedByUserId: AttendanceExceptionDtoResolvedByUserId;
+  resolvedAtUtc: AttendanceExceptionDtoResolvedAtUtc;
+  createdAtUtc: string;
+}
+
+export type BackgroundJobDtoCompletedAtUtc = null | string;
+
+export type BackgroundJobDtoError = null | string;
+
+export interface BackgroundJobDto {
+  jobId: string;
+  operation: string;
+  status: string;
+  startedAtUtc: string;
+  completedAtUtc: BackgroundJobDtoCompletedAtUtc;
+  error: BackgroundJobDtoError;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CalculateRunRequestExpectedRowVersion = number | string;
+
+export type CalculateRunRequestIdempotencyKey = null | string;
+
+export interface CalculateRunRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: CalculateRunRequestExpectedRowVersion;
+  idempotencyKey?: CalculateRunRequestIdempotencyKey;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CalculationTraceDtoStepOrder = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type CalculationTraceDtoIntermediateAmount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type CalculationTraceDtoRoundingDelta = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type CalculationTraceDtoFinalAmount = number | string;
+
+export interface CalculationTraceDto {
+  id: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  stepOrder: CalculationTraceDtoStepOrder;
+  ruleReference: string;
+  description: string;
+  formulaApplied: string;
+  inputValuesJson: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  intermediateAmount: CalculationTraceDtoIntermediateAmount;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  roundingDelta: CalculationTraceDtoRoundingDelta;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  finalAmount: CalculationTraceDtoFinalAmount;
+}
+
+export type CandidateLocation = null | string;
+
+export type CandidateHeadline = null | string;
+
+export type CandidateSource = null | string;
+
+export type CandidateResumeDocumentId = null | string;
+
+export type CandidateSkillsJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CandidateRowVersion = number | string;
+
+export interface Candidate {
+  id: string;
+  tenantId: TenantId;
+  firstNameEn: string;
+  lastNameEn: string;
+  firstNameAr: string;
+  lastNameAr: string;
+  email: string;
+  phoneNumber: string;
+  location?: CandidateLocation;
+  headline?: CandidateHeadline;
+  source?: CandidateSource;
+  resumeDocumentId?: CandidateResumeDocumentId;
+  skillsJson?: CandidateSkillsJson;
+  normalizedEmailHash?: string;
+  normalizedPhoneHash?: string;
+  createdAtUtc?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: CandidateRowVersion;
+}
+
 export type ChangeAssignmentRequestPositionId = null | string;
 
 export type ChangeAssignmentRequestLocationId = null | string;
@@ -32,6 +461,60 @@ export type ChangeContextRequestLegalEntityId = null | string;
 export interface ChangeContextRequest {
   tenantId: string;
   legalEntityId: ChangeContextRequestLegalEntityId;
+}
+
+export type CheckDuplicateCandidatesRequestExcludeCandidateId = null | string;
+
+export interface CheckDuplicateCandidatesRequest {
+  email: string;
+  phoneNumber: string;
+  excludeCandidateId: CheckDuplicateCandidatesRequestExcludeCandidateId;
+}
+
+export type ClockSource = number;
+
+export type ClockType = number;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ConcurrencyActionRequestRowVersion = number | string;
+
+export interface ConcurrencyActionRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: ConcurrencyActionRequestRowVersion;
+}
+
+export type CreateApplicationRequestSource = null | string;
+
+export interface CreateApplicationRequest {
+  requisitionId: string;
+  candidateId: string;
+  source: CreateApplicationRequestSource;
+}
+
+export type CreateCandidateRequestLocation = null | string;
+
+export type CreateCandidateRequestHeadline = null | string;
+
+export type CreateCandidateRequestSource = null | string;
+
+export type CreateCandidateRequestResumeDocumentId = null | string;
+
+export type CreateCandidateRequestSkillsJson = null | string;
+
+export interface CreateCandidateRequest {
+  firstNameEn: string;
+  lastNameEn: string;
+  firstNameAr: string;
+  lastNameAr: string;
+  email: string;
+  phoneNumber: string;
+  location: CreateCandidateRequestLocation;
+  headline: CreateCandidateRequestHeadline;
+  source: CreateCandidateRequestSource;
+  resumeDocumentId: CreateCandidateRequestResumeDocumentId;
+  skillsJson: CreateCandidateRequestSkillsJson;
 }
 
 export type CreateEmployeeRequestLegalEntityId = null | string;
@@ -74,6 +557,24 @@ export interface CreateEmployeeRequest {
   jobTitleAr?: string;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type CreateLeaveRequestInputDurationDays = number | string;
+
+export type CreateLeaveRequestInputAttachmentDocumentId = null | string;
+
+export interface CreateLeaveRequestInput {
+  employmentId: string;
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  durationDays: CreateLeaveRequestInputDurationDays;
+  reason: string;
+  attachmentDocumentId?: CreateLeaveRequestInputAttachmentDocumentId;
+}
+
 export type CreateLocationRequestCountry = null | string;
 
 export type CreateLocationRequestCity = null | string;
@@ -87,6 +588,34 @@ export interface CreateLocationRequest {
   country?: CreateLocationRequestCountry;
   city?: CreateLocationRequestCity;
   address?: CreateLocationRequestAddress;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type CreateOfferRequestBaseSalaryMonthly = number | string;
+
+export type CreateOfferRequestAllowancesJson = null | string;
+
+export type CreateOfferRequestConditionsNote = null | string;
+
+export type CreateOfferRequestExpiryDate = null | string;
+
+export type CreateOfferRequestOfferDocumentId = null | string;
+
+export interface CreateOfferRequest {
+  applicationId: string;
+  candidateId: string;
+  titleEn: string;
+  titleAr: string;
+  proposedStartDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  baseSalaryMonthly: CreateOfferRequestBaseSalaryMonthly;
+  currency: string;
+  allowancesJson: CreateOfferRequestAllowancesJson;
+  conditionsNote: CreateOfferRequestConditionsNote;
+  expiryDate: CreateOfferRequestExpiryDate;
+  offerDocumentId: CreateOfferRequestOfferDocumentId;
 }
 
 export type CreateOrganizationUnitRequestLegalEntityId = null | string;
@@ -107,6 +636,51 @@ export interface CreateOrganizationUnitRequest {
   managerPositionId?: CreateOrganizationUnitRequestManagerPositionId;
   effectiveFrom?: string;
   effectiveTo?: CreateOrganizationUnitRequestEffectiveTo;
+}
+
+export interface CreatePayrollPeriodRequest {
+  code: string;
+  periodStart: string;
+  periodEnd: string;
+  paymentDate: string;
+}
+
+export interface CreatePayrollRunRequest {
+  periodId: string;
+  code: string;
+  currency: string;
+}
+
+export type CreateRequisitionRequestPositionId = null | string;
+
+export type CreateRequisitionRequestLocationId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CreateRequisitionRequestOpeningsCount = number | string;
+
+export type CreateRequisitionRequestPipelineId = null | string;
+
+export type CreateRequisitionRequestRequisitionReason = null | string;
+
+export type CreateRequisitionRequestTargetStartDate = null | string;
+
+export interface CreateRequisitionRequest {
+  organizationUnitId: string;
+  positionId: CreateRequisitionRequestPositionId;
+  locationId: CreateRequisitionRequestLocationId;
+  hiringManagerId: string;
+  recruiterId: string;
+  requisitionNumber: string;
+  titleEn: string;
+  titleAr: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  openingsCount: CreateRequisitionRequestOpeningsCount;
+  employmentType: string;
+  pipelineId: CreateRequisitionRequestPipelineId;
+  requisitionReason: CreateRequisitionRequestRequisitionReason;
+  targetStartDate: CreateRequisitionRequestTargetStartDate;
 }
 
 export type DocumentDetailDtoExpiryDate = null | string;
@@ -219,6 +793,22 @@ export interface DocumentVersionDto {
   uploadedBy?: string;
 }
 
+export interface DuplicateCandidateMatchDto {
+  candidateId: string;
+  firstNameEn: string;
+  lastNameEn: string;
+  email: string;
+  phoneNumber: string;
+  matchType: string;
+}
+
+export type EffectivePeriodEffectiveTo = null | string;
+
+export interface EffectivePeriod {
+  effectiveFrom: string;
+  effectiveTo?: EffectivePeriodEffectiveTo;
+}
+
 export type EmployeeAssignmentDtoPositionId = null | string;
 
 export type EmployeeAssignmentDtoLocationId = null | string;
@@ -319,7 +909,317 @@ export interface EmployeeSummaryDto {
   rowVersion?: EmployeeSummaryDtoRowVersion;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type FinalizeRunRequestExpectedRowVersion = number | string;
+
+export interface FinalizeRunRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: FinalizeRunRequestExpectedRowVersion;
+}
+
+export interface GenerateSettlementBatchRequest {
+  payrollRunId: string;
+  batchNumber: string;
+  paymentDate: string;
+}
+
+export type HireCandidateRequestEmployeeNumber = null | string;
+
+export type HireCandidateRequestNationalIdentifier = null | string;
+
+export type HireCandidateRequestDateOfBirth = null | string;
+
+export type HireCandidateRequestGender = null | string;
+
+export type HireCandidateRequestNationality = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type HireCandidateRequestExpectedRowVersion = number | string;
+
+export interface HireCandidateRequest {
+  hireDate: string;
+  employeeNumber: HireCandidateRequestEmployeeNumber;
+  nationalIdentifier: HireCandidateRequestNationalIdentifier;
+  dateOfBirth: HireCandidateRequestDateOfBirth;
+  gender: HireCandidateRequestGender;
+  nationality: HireCandidateRequestNationality;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: HireCandidateRequestExpectedRowVersion;
+}
+
 export type IFormFile = Blob;
+
+export type InterviewLocationOrMeetingUrl = null | string;
+
+export type InterviewInterviewKitJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type InterviewRowVersion = number | string;
+
+export type InterviewParticipants = null | InterviewParticipant[];
+
+export type InterviewScorecards = null | ScorecardSubmission[];
+
+export interface Interview {
+  id: string;
+  tenantId: TenantId;
+  applicationId: string;
+  stageId: string;
+  title: string;
+  interviewType: InterviewType;
+  scheduledStartUtc: string;
+  scheduledEndUtc: string;
+  timezone: string;
+  locationOrMeetingUrl?: InterviewLocationOrMeetingUrl;
+  status?: InterviewStatus;
+  interviewKitJson?: InterviewInterviewKitJson;
+  createdAtUtc?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: InterviewRowVersion;
+  participants?: InterviewParticipants;
+  scorecards?: InterviewScorecards;
+}
+
+export type InterviewerRole = number;
+
+export interface InterviewParticipant {
+  id: string;
+  interviewId: string;
+  interviewerUserId: string;
+  role: InterviewerRole;
+  isRequired?: boolean;
+}
+
+export interface InterviewParticipantDto {
+  interviewerUserId: string;
+  role: InterviewerRole;
+  isRequired: boolean;
+}
+
+export type InterviewStatus = number;
+
+export type InterviewType = number;
+
+export type JobRequisitionPositionId = null | string;
+
+export type JobRequisitionLocationId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type JobRequisitionOpeningsCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type JobRequisitionPipelineVersion = number | string;
+
+export type JobRequisitionApprovalRequestId = null | string;
+
+export type JobRequisitionRequisitionReason = null | string;
+
+export type JobRequisitionTargetStartDate = null | string;
+
+export type JobRequisitionOpenedAtUtc = null | string;
+
+export type JobRequisitionClosedAtUtc = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type JobRequisitionRowVersion = number | string;
+
+export interface JobRequisition {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: LegalEntityId;
+  organizationUnitId: string;
+  positionId: JobRequisitionPositionId;
+  locationId: JobRequisitionLocationId;
+  hiringManagerId: string;
+  recruiterId: string;
+  requisitionNumber: string;
+  titleEn: string;
+  titleAr: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  openingsCount: JobRequisitionOpeningsCount;
+  employmentType: string;
+  pipelineId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pipelineVersion: JobRequisitionPipelineVersion;
+  status?: RequisitionStatus;
+  approvalRequestId?: JobRequisitionApprovalRequestId;
+  requisitionReason?: JobRequisitionRequisitionReason;
+  targetStartDate?: JobRequisitionTargetStartDate;
+  openedAtUtc?: JobRequisitionOpenedAtUtc;
+  closedAtUtc?: JobRequisitionClosedAtUtc;
+  createdAtUtc?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: JobRequisitionRowVersion;
+}
+
+export type Jurisdiction = number;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveBalanceDtoYear = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveBalanceDtoEntitledDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveBalanceDtoAccruedDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveBalanceDtoUsedDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveBalanceDtoPendingDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveBalanceDtoAvailableDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveBalanceDtoRowVersion = number | string;
+
+export interface LeaveBalanceDto {
+  id: string;
+  tenantId: string;
+  employmentId: string;
+  leaveTypeId: string;
+  leaveTypeCode: string;
+  leaveTypeNameEn: string;
+  leaveTypeNameAr: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  year: LeaveBalanceDtoYear;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  entitledDays: LeaveBalanceDtoEntitledDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  accruedDays: LeaveBalanceDtoAccruedDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  usedDays: LeaveBalanceDtoUsedDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  pendingDays: LeaveBalanceDtoPendingDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  availableDays: LeaveBalanceDtoAvailableDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LeaveBalanceDtoRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveDecisionRequestRowVersion = number | string;
+
+export interface LeaveDecisionRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LeaveDecisionRequestRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveRejectionRequestRowVersion = number | string;
+
+export interface LeaveRejectionRequest {
+  reason: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LeaveRejectionRequestRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type LeaveRequestDtoDurationDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveRequestDtoDurationMinutes = number | string;
+
+export type LeaveRequestDtoAttachmentDocumentId = null | string;
+
+export type LeaveRequestDtoApprovalRequestId = null | string;
+
+export type LeaveRequestDtoRejectionReason = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LeaveRequestDtoRowVersion = number | string;
+
+export interface LeaveRequestDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  employmentId: string;
+  leaveTypeId: string;
+  leaveTypeCode: string;
+  leaveTypeNameEn: string;
+  leaveTypeNameAr: string;
+  startDate: string;
+  endDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  durationDays: LeaveRequestDtoDurationDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  durationMinutes: LeaveRequestDtoDurationMinutes;
+  status: string;
+  reason: string;
+  attachmentDocumentId: LeaveRequestDtoAttachmentDocumentId;
+  approvalRequestId: LeaveRequestDtoApprovalRequestId;
+  rejectionReason: LeaveRequestDtoRejectionReason;
+  createdAt: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LeaveRequestDtoRowVersion;
+}
+
+export interface LeaveTypeDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  category: string;
+  isPaid: boolean;
+  requiresAttachment: boolean;
+  allowHalfDay: boolean;
+  isActive: boolean;
+}
+
+export interface LegalEntityId {
+  value?: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LoadInputsRequestExpectedRowVersion = number | string;
+
+export interface LoadInputsRequest {
+  snapshots: PayrollInputSnapshotDto[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: LoadInputsRequestExpectedRowVersion;
+}
 
 export interface LocationDto {
   id?: string;
@@ -333,6 +1233,81 @@ export interface LocationDto {
   address?: string;
   isActive?: boolean;
 }
+
+export type MoveApplicationStageRequestReason = null | string;
+
+export type MoveApplicationStageRequestIdempotencyKey = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type MoveApplicationStageRequestExpectedRowVersion = number | string;
+
+export interface MoveApplicationStageRequest {
+  targetStageId: string;
+  reason: MoveApplicationStageRequestReason;
+  idempotencyKey: MoveApplicationStageRequestIdempotencyKey;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: MoveApplicationStageRequestExpectedRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type OfferDetailDtoOfferVersionNumber = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type OfferDetailDtoBaseSalaryMonthly = null | number | string;
+
+export type OfferDetailDtoAllowancesJson = null | string;
+
+export type OfferDetailDtoConditionsNote = null | string;
+
+export type OfferDetailDtoApprovalRequestId = null | string;
+
+export type OfferDetailDtoIssuedAtUtc = null | string;
+
+export type OfferDetailDtoAcceptedAtUtc = null | string;
+
+export type OfferDetailDtoExpiryDate = null | string;
+
+export type OfferDetailDtoOfferDocumentId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type OfferDetailDtoRowVersion = number | string;
+
+export interface OfferDetailDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  applicationId: string;
+  candidateId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  offerVersionNumber: OfferDetailDtoOfferVersionNumber;
+  titleEn: string;
+  titleAr: string;
+  proposedStartDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  baseSalaryMonthly: OfferDetailDtoBaseSalaryMonthly;
+  currency: string;
+  allowancesJson: OfferDetailDtoAllowancesJson;
+  conditionsNote: OfferDetailDtoConditionsNote;
+  status: OfferStatus;
+  approvalRequestId: OfferDetailDtoApprovalRequestId;
+  issuedAtUtc: OfferDetailDtoIssuedAtUtc;
+  acceptedAtUtc: OfferDetailDtoAcceptedAtUtc;
+  expiryDate: OfferDetailDtoExpiryDate;
+  offerDocumentId: OfferDetailDtoOfferDocumentId;
+  createdAtUtc: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: OfferDetailDtoRowVersion;
+}
+
+export type OfferStatus = number;
 
 export type OrganizationUnitDtoParentUnitId = null | string;
 
@@ -368,6 +1343,181 @@ export interface OrganizationUnitDto {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
+export type PagedApprovalInboxResponseTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedApprovalInboxResponsePage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedApprovalInboxResponsePageSize = number | string;
+
+export interface PagedApprovalInboxResponse {
+  items: ApprovalInboxItemDto[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedApprovalInboxResponseTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedApprovalInboxResponsePage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedApprovalInboxResponsePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedAttendanceDaysResponseTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedAttendanceDaysResponsePage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedAttendanceDaysResponsePageSize = number | string;
+
+export interface PagedAttendanceDaysResponse {
+  items: AttendanceDayDto[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedAttendanceDaysResponseTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedAttendanceDaysResponsePage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedAttendanceDaysResponsePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedExceptionsResponseTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedExceptionsResponsePage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedExceptionsResponsePageSize = number | string;
+
+export interface PagedExceptionsResponse {
+  items: AttendanceExceptionDto[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedExceptionsResponseTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedExceptionsResponsePage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedExceptionsResponsePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedLeaveRequestsResponseTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedLeaveRequestsResponsePage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedLeaveRequestsResponsePageSize = number | string;
+
+export interface PagedLeaveRequestsResponse {
+  items: LeaveRequestDto[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedLeaveRequestsResponseTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedLeaveRequestsResponsePage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedLeaveRequestsResponsePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfApplicationTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfApplicationPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfApplicationPageSize = number | string;
+
+export interface PagedRecruitmentResultOfApplication {
+  items: Application[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedRecruitmentResultOfApplicationTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedRecruitmentResultOfApplicationPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedRecruitmentResultOfApplicationPageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfCandidateTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfCandidatePage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfCandidatePageSize = number | string;
+
+export interface PagedRecruitmentResultOfCandidate {
+  items: Candidate[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedRecruitmentResultOfCandidateTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedRecruitmentResultOfCandidatePage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedRecruitmentResultOfCandidatePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfJobRequisitionTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfJobRequisitionPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedRecruitmentResultOfJobRequisitionPageSize = number | string;
+
+export interface PagedRecruitmentResultOfJobRequisition {
+  items: JobRequisition[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedRecruitmentResultOfJobRequisitionTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedRecruitmentResultOfJobRequisitionPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedRecruitmentResultOfJobRequisitionPageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
 export type PagedResultOfEmployeeSummaryDtoTotalCount = number | string;
 
 /**
@@ -397,6 +1547,267 @@ export interface PagedResultOfEmployeeSummaryDto {
   totalPages?: PagedResultOfEmployeeSummaryDtoTotalPages;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PaymentInstructionDtoAmount = number | string;
+
+export interface PaymentInstructionDto {
+  id: string;
+  employmentId: string;
+  beneficiaryName: string;
+  bankCode: string;
+  accountMasked: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  amount: PaymentInstructionDtoAmount;
+  status: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultDetailDtoGrossPay = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultDetailDtoNetPay = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultDetailDtoTotalEarnings = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultDetailDtoTotalDeductions = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultDetailDtoEmployerContributions = number | string;
+
+export interface PayrollEmployeeResultDetailDto {
+  id: string;
+  payrollRunId: string;
+  employmentId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  grossPay: PayrollEmployeeResultDetailDtoGrossPay;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  netPay: PayrollEmployeeResultDetailDtoNetPay;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalEarnings: PayrollEmployeeResultDetailDtoTotalEarnings;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalDeductions: PayrollEmployeeResultDetailDtoTotalDeductions;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  employerContributions: PayrollEmployeeResultDetailDtoEmployerContributions;
+  lines: PayrollLineDto[];
+  traces: CalculationTraceDto[];
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultSummaryDtoGrossPay = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultSummaryDtoNetPay = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultSummaryDtoTotalEarnings = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultSummaryDtoTotalDeductions = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollEmployeeResultSummaryDtoEmployerContributions = number | string;
+
+export interface PayrollEmployeeResultSummaryDto {
+  id: string;
+  payrollRunId: string;
+  employmentId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  grossPay: PayrollEmployeeResultSummaryDtoGrossPay;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  netPay: PayrollEmployeeResultSummaryDtoNetPay;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalEarnings: PayrollEmployeeResultSummaryDtoTotalEarnings;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalDeductions: PayrollEmployeeResultSummaryDtoTotalDeductions;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  employerContributions: PayrollEmployeeResultSummaryDtoEmployerContributions;
+}
+
+export type PayrollExceptionDtoResolvedByUserId = null | string;
+
+export type PayrollExceptionDtoResolutionNote = null | string;
+
+export interface PayrollExceptionDto {
+  id: string;
+  payrollRunId: string;
+  employmentId: string;
+  severity: string;
+  category: string;
+  reason: string;
+  resolutionGuidance: string;
+  status: string;
+  resolvedByUserId: PayrollExceptionDtoResolvedByUserId;
+  resolutionNote: PayrollExceptionDtoResolutionNote;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollInputSnapshotDtoBaseSalaryMonthly = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PayrollInputSnapshotDtoScheduledDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PayrollInputSnapshotDtoVerifiedWorkedMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollInputSnapshotDtoApprovedAbsenceDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollInputSnapshotDtoApprovedLeaveDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollInputSnapshotDtoUnpaidLeaveDays = number | string;
+
+export interface PayrollInputSnapshotDto {
+  employmentId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  baseSalaryMonthly: PayrollInputSnapshotDtoBaseSalaryMonthly;
+  allowancesJson: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  scheduledDays: PayrollInputSnapshotDtoScheduledDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  verifiedWorkedMinutes: PayrollInputSnapshotDtoVerifiedWorkedMinutes;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  approvedAbsenceDays: PayrollInputSnapshotDtoApprovedAbsenceDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  approvedLeaveDays: PayrollInputSnapshotDtoApprovedLeaveDays;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  unpaidLeaveDays: PayrollInputSnapshotDtoUnpaidLeaveDays;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollLineDtoAmount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollLineDtoRate = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollLineDtoHoursOrDays = number | string;
+
+export type PayrollLineDtoTraceId = null | string;
+
+export interface PayrollLineDto {
+  id: string;
+  componentCode: string;
+  nameEn: string;
+  nameAr: string;
+  category: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  amount: PayrollLineDtoAmount;
+  calculationType: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  rate: PayrollLineDtoRate;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  hoursOrDays: PayrollLineDtoHoursOrDays;
+  traceId: PayrollLineDtoTraceId;
+}
+
+export interface PayrollPeriodDto {
+  id: string;
+  code: string;
+  periodStart: string;
+  periodEnd: string;
+  paymentDate: string;
+  isActive: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollRunDtoTotalGross = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollRunDtoTotalNet = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type PayrollRunDtoTotalEmployerContributions = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PayrollRunDtoEmployeeCount = number | string;
+
+export type PayrollRunDtoFinalizedAtUtc = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PayrollRunDtoRowVersion = number | string;
+
+export interface PayrollRunDto {
+  id: string;
+  periodId: string;
+  code: string;
+  status: string;
+  currency: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalGross: PayrollRunDtoTotalGross;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalNet: PayrollRunDtoTotalNet;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalEmployerContributions: PayrollRunDtoTotalEmployerContributions;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  employeeCount: PayrollRunDtoEmployeeCount;
+  reproducibilityHash: string;
+  finalizedAtUtc: PayrollRunDtoFinalizedAtUtc;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: PayrollRunDtoRowVersion;
+}
+
+export interface PipelineBoardDto {
+  requisitionId: string;
+  requisitionTitleEn: string;
+  requisitionTitleAr: string;
+  stages: RecruitmentStage[];
+  applications: ApplicationSummaryDto[];
+}
+
 export type ProblemDetailsType = null | string;
 
 export type ProblemDetailsTitle = null | string;
@@ -419,9 +1830,169 @@ export interface ProblemDetails {
   instance?: ProblemDetailsInstance;
 }
 
+export type RecordClockRequestCapturedAtUtc = null | string;
+
+export type RecordClockRequestSourceDeviceId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+ */
+export type RecordClockRequestLatitude = null | number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$
+ */
+export type RecordClockRequestLongitude = null | number | string;
+
+export interface RecordClockRequest {
+  employmentId: string;
+  type: ClockType;
+  source: ClockSource;
+  capturedAtUtc?: RecordClockRequestCapturedAtUtc;
+  sourceDeviceId?: RecordClockRequestSourceDeviceId;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$ */
+  latitude?: RecordClockRequestLatitude;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$ */
+  longitude?: RecordClockRequestLongitude;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RecruitmentPipelineRowVersion = number | string;
+
+export type RecruitmentPipelineVersions = null | RecruitmentPipelineVersion[];
+
+export interface RecruitmentPipeline {
+  id: string;
+  tenantId: TenantId;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  isActive?: boolean;
+  createdAtUtc?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: RecruitmentPipelineRowVersion;
+  versions?: RecruitmentPipelineVersions;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RecruitmentPipelineVersionVersionNumber = number | string;
+
+export type RecruitmentPipelineVersionStages = null | RecruitmentStage[];
+
+export interface RecruitmentPipelineVersion {
+  id: string;
+  pipelineId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  versionNumber: RecruitmentPipelineVersionVersionNumber;
+  isImmutable?: boolean;
+  createdAtUtc?: string;
+  stages?: RecruitmentPipelineVersionStages;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RecruitmentStageStageOrder = number | string;
+
+export interface RecruitmentStage {
+  id: string;
+  pipelineVersionId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  stageOrder: RecruitmentStageStageOrder;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  stageKind: StageKind;
+}
+
+export type RejectApplicationRequestReasonNote = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RejectApplicationRequestExpectedRowVersion = number | string;
+
+export interface RejectApplicationRequest {
+  reasonCode: string;
+  reasonNote: RejectApplicationRequestReasonNote;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: RejectApplicationRequestExpectedRowVersion;
+}
+
+export type RequisitionStatus = number;
+
+export type RescheduleInterviewRequestLocationOrMeetingUrl = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RescheduleInterviewRequestExpectedRowVersion = number | string;
+
+export interface RescheduleInterviewRequest {
+  newStartUtc: string;
+  newEndUtc: string;
+  timezone: string;
+  locationOrMeetingUrl: RescheduleInterviewRequestLocationOrMeetingUrl;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: RescheduleInterviewRequestExpectedRowVersion;
+}
+
+export interface ResolveExceptionRequest {
+  notes: string;
+}
+
 export interface RevealSensitiveFieldRequest {
   fieldName?: string;
   purpose?: string;
+}
+
+export type ScheduleInterviewRequestLocationOrMeetingUrl = null | string;
+
+export type ScheduleInterviewRequestInterviewKitJson = null | string;
+
+export type ScheduleInterviewRequestParticipants = null | InterviewParticipantDto[];
+
+export interface ScheduleInterviewRequest {
+  applicationId: string;
+  stageId: string;
+  title: string;
+  interviewType: InterviewType;
+  scheduledStartUtc: string;
+  scheduledEndUtc: string;
+  timezone: string;
+  locationOrMeetingUrl: ScheduleInterviewRequestLocationOrMeetingUrl;
+  interviewKitJson: ScheduleInterviewRequestInterviewKitJson;
+  participants: ScheduleInterviewRequestParticipants;
+}
+
+export type ScorecardRecommendation = number;
+
+export type ScorecardSubmissionStrengths = null | string;
+
+export type ScorecardSubmissionConcerns = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ScorecardSubmissionRowVersion = number | string;
+
+export interface ScorecardSubmission {
+  id: string;
+  interviewId: string;
+  applicationId: string;
+  interviewerUserId: string;
+  ratingsJson: string;
+  strengths: ScorecardSubmissionStrengths;
+  concerns: ScorecardSubmissionConcerns;
+  recommendation: ScorecardRecommendation;
+  isFinalized?: boolean;
+  submittedAtUtc?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: ScorecardSubmissionRowVersion;
 }
 
 /**
@@ -435,6 +2006,179 @@ export interface SensitiveRevealResponse {
   revealedAt?: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   expirySeconds?: SensitiveRevealResponseExpirySeconds;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type SettlementBatchDetailDtoTotalAmount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SettlementBatchDetailDtoRowVersion = number | string;
+
+export interface SettlementBatchDetailDto {
+  id: string;
+  payrollRunId: string;
+  batchNumber: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalAmount: SettlementBatchDetailDtoTotalAmount;
+  currency: string;
+  paymentDate: string;
+  status: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: SettlementBatchDetailDtoRowVersion;
+  instructions: PaymentInstructionDto[];
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type SettlementBatchDtoTotalAmount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SettlementBatchDtoInstructionCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SettlementBatchDtoRowVersion = number | string;
+
+export interface SettlementBatchDto {
+  id: string;
+  payrollRunId: string;
+  batchNumber: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  totalAmount: SettlementBatchDtoTotalAmount;
+  currency: string;
+  paymentDate: string;
+  status: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  instructionCount: SettlementBatchDtoInstructionCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: SettlementBatchDtoRowVersion;
+}
+
+export type StageKind = number;
+
+export interface StatutoryRuleDto {
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  jurisdiction: string;
+  category: string;
+  sourceReferenceLaw: string;
+  isVerified: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SubmitAdjustmentRequestAdjustedWorkedMinutes = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SubmitAdjustmentRequestRowVersion = number | string;
+
+export type SubmitAdjustmentRequestApprovalRequestId = null | string;
+
+export interface SubmitAdjustmentRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  adjustedWorkedMinutes: SubmitAdjustmentRequestAdjustedWorkedMinutes;
+  reason: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: SubmitAdjustmentRequestRowVersion;
+  approvalRequestId?: SubmitAdjustmentRequestApprovalRequestId;
+}
+
+export type SubmitScorecardRequestStrengths = null | string;
+
+export type SubmitScorecardRequestConcerns = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SubmitScorecardRequestExpectedRowVersion = number | string;
+
+export interface SubmitScorecardRequest {
+  ratingsJson: string;
+  strengths: SubmitScorecardRequestStrengths;
+  concerns: SubmitScorecardRequestConcerns;
+  recommendation: ScorecardRecommendation;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: SubmitScorecardRequestExpectedRowVersion;
+}
+
+export interface TenantId {
+  value?: string;
+}
+
+export type UpdateCandidateRequestLocation = null | string;
+
+export type UpdateCandidateRequestHeadline = null | string;
+
+export type UpdateCandidateRequestSource = null | string;
+
+export type UpdateCandidateRequestResumeDocumentId = null | string;
+
+export type UpdateCandidateRequestSkillsJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateCandidateRequestExpectedRowVersion = number | string;
+
+export interface UpdateCandidateRequest {
+  firstNameEn: string;
+  lastNameEn: string;
+  firstNameAr: string;
+  lastNameAr: string;
+  email: string;
+  phoneNumber: string;
+  location: UpdateCandidateRequestLocation;
+  headline: UpdateCandidateRequestHeadline;
+  source: UpdateCandidateRequestSource;
+  resumeDocumentId: UpdateCandidateRequestResumeDocumentId;
+  skillsJson: UpdateCandidateRequestSkillsJson;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: UpdateCandidateRequestExpectedRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$
+ */
+export type UpdateOfferTermsRequestBaseSalaryMonthly = number | string;
+
+export type UpdateOfferTermsRequestAllowancesJson = null | string;
+
+export type UpdateOfferTermsRequestConditionsNote = null | string;
+
+export type UpdateOfferTermsRequestExpiryDate = null | string;
+
+export type UpdateOfferTermsRequestOfferDocumentId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateOfferTermsRequestExpectedRowVersion = number | string;
+
+export interface UpdateOfferTermsRequest {
+  titleEn: string;
+  titleAr: string;
+  proposedStartDate: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
+  baseSalaryMonthly: UpdateOfferTermsRequestBaseSalaryMonthly;
+  currency: string;
+  allowancesJson: UpdateOfferTermsRequestAllowancesJson;
+  conditionsNote: UpdateOfferTermsRequestConditionsNote;
+  expiryDate: UpdateOfferTermsRequestExpiryDate;
+  offerDocumentId: UpdateOfferTermsRequestOfferDocumentId;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: UpdateOfferTermsRequestExpectedRowVersion;
 }
 
 export type UpdateOrganizationUnitRequestParentUnitId = null | string;
@@ -459,6 +2203,131 @@ export interface UpdateOrganizationUnitRequest {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   rowVersion?: UpdateOrganizationUnitRequestRowVersion;
 }
+
+export type UpdateRequisitionRequestPositionId = null | string;
+
+export type UpdateRequisitionRequestLocationId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateRequisitionRequestOpeningsCount = number | string;
+
+export type UpdateRequisitionRequestRequisitionReason = null | string;
+
+export type UpdateRequisitionRequestTargetStartDate = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateRequisitionRequestExpectedRowVersion = number | string;
+
+export interface UpdateRequisitionRequest {
+  organizationUnitId: string;
+  positionId: UpdateRequisitionRequestPositionId;
+  locationId: UpdateRequisitionRequestLocationId;
+  hiringManagerId: string;
+  recruiterId: string;
+  titleEn: string;
+  titleAr: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  openingsCount: UpdateRequisitionRequestOpeningsCount;
+  employmentType: string;
+  requisitionReason: UpdateRequisitionRequestRequisitionReason;
+  targetStartDate: UpdateRequisitionRequestTargetStartDate;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: UpdateRequisitionRequestExpectedRowVersion;
+}
+
+export interface WaiveExceptionRequest {
+  justification: string;
+}
+
+export type WithdrawApplicationRequestReason = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type WithdrawApplicationRequestExpectedRowVersion = number | string;
+
+export interface WithdrawApplicationRequest {
+  reason: WithdrawApplicationRequestReason;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: WithdrawApplicationRequestExpectedRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type WorkScheduleGracePeriodMinutes = number | string;
+
+export interface WorkSchedule {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: LegalEntityId;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  shiftStartTime: string;
+  shiftEndTime: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  gracePeriodMinutes: WorkScheduleGracePeriodMinutes;
+  timeZoneId: string;
+  crossesMidnight?: boolean;
+  effectivePeriod: EffectivePeriod;
+  isActive?: boolean;
+}
+
+export type GetApiV1ApprovalsInboxParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+status?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
+export type GetApiV1AttendanceDaysParams = {
+fromDate?: string;
+toDate?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+status?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
+export type GetApiV1AttendanceExceptionsParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+status?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
+export type GetApiV1ComplianceRulesParams = {
+jurisdiction?: Jurisdiction;
+};
 
 export type GetApiV1DocumentsParams = {
 ownerType?: string;
@@ -485,292 +2354,95 @@ export type PostApiV1DocumentsIdVersionsBody = {
   File?: IFormFile;
 };
 
+export type GetApiV1LeaveBalancesParams = {
+employmentId?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+year?: number | string;
+};
+
+export type GetApiV1LeaveRequestsParams = {
+employmentId?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+status?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
 export type GetApiV1OrganizationUnitsParams = {
 legalEntityId?: string;
 };
 
 export type GetApiV1PeopleEmployeesParams = {
-  search?: string;
-  departmentId?: string;
-  status?: string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  page?: number | string;
-  /**
-   * @pattern ^-?(?:0|[1-9]\d*)$
-   */
-  pageSize?: number | string;
+search?: string;
+departmentId?: string;
+status?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
 };
 
-// ==========================================
-// Phase 3 — Attendance Module Contracts
-// ==========================================
+export type GetApiV1RecruitmentApplicationsParams = {
+requisitionId?: string;
+candidateId?: string;
+stageId?: string;
+status?: ApplicationStatus;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
 
-export enum ClockType {
-  In = 0,
-  Out = 1,
-  BreakStart = 2,
-  BreakEnd = 3
-}
+export type GetApiV1RecruitmentCandidatesParams = {
+search?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
 
-export enum ClockSource {
-  WebPortal = 0,
-  MobileApp = 1,
-  BiometricDevice = 2,
-  Kiosk = 3,
-  SystemGenerated = 4
-}
+export type GetApiV1RecruitmentInterviewsParams = {
+startUtc?: string;
+endUtc?: string;
+interviewerUserId?: string;
+};
 
-export enum AttendanceStatus {
-  Unreviewed = 0,
-  Reviewed = 1,
-  Approved = 2,
-  Locked = 3
-}
+export type GetApiV1RecruitmentOffersParams = {
+applicationId?: string;
+};
 
-export enum AttendanceExceptionType {
-  MissingClockIn = 0,
-  MissingClockOut = 1,
-  LateArrival = 2,
-  EarlyDeparture = 3,
-  UnexpectedAbsence = 4,
-  OvertimeUnscheduled = 5
-}
-
-export enum AttendanceExceptionStatus {
-  Pending = 0,
-  Resolved = 1,
-  Waived = 2,
-  Escalated = 3
-}
-
-export interface ClockEventDto {
-  id: string;
-  employmentId: string;
-  type: number;
-  source: number;
-  capturedAtUtc: string;
-  receivedAtUtc: string;
-  sourceDeviceId?: string | null;
-  correlationId?: string | null;
-  actorUserId?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-}
-
-export interface AttendanceExceptionDto {
-  id: string;
-  attendanceDayId: string;
-  tenantId: string;
-  employmentId: string;
-  employeeNameEn?: string;
-  employeeNameAr?: string;
-  type: number;
-  typeName: string;
-  status: number;
-  statusName: string;
-  details: string;
-  resolutionNotes?: string | null;
-  resolvedByUserId?: string | null;
-  resolvedAtUtc?: string | null;
-  createdAtUtc: string;
-}
-
-export interface AttendanceAdjustmentDto {
-  id: string;
-  attendanceDayId: string;
-  employmentId: string;
-  adjustedWorkedMinutes: number;
-  beforeWorkedMinutes: number;
-  afterWorkedMinutes: number;
-  reason: string;
-  actorUserId: string;
-  createdAtUtc: string;
-  approvalRequestId?: string | null;
-}
-
-export interface AttendanceDayDto {
-  id: string;
-  tenantId: string;
-  legalEntityId: string;
-  employmentId: string;
-  employeeNameEn?: string;
-  employeeNameAr?: string;
-  employeeNumber?: string;
-  departmentNameEn?: string;
-  businessDate: string;
-  timezoneId: string;
-  status: number;
-  statusName: string;
-  scheduledStartUtc?: string | null;
-  scheduledEndUtc?: string | null;
-  scheduledMinutes: number;
-  firstClockInUtc?: string | null;
-  lastClockOutUtc?: string | null;
-  totalWorkedMinutes: number;
-  lateMinutes: number;
-  earlyDepartureMinutes: number;
-  isAbsent: boolean;
-  rowVersion: number;
-  exceptions?: AttendanceExceptionDto[];
-  adjustments?: AttendanceAdjustmentDto[];
-}
-
-export interface CaptureClockRequest {
-  employmentId: string;
-  type: number;
-  source: number;
-  capturedAtUtc?: string | null;
-  sourceDeviceId?: string | null;
-  correlationId?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-}
-
-export interface AdjustAttendanceRequest {
-  adjustedWorkedMinutes: number;
-  reason: string;
-  rowVersion: number;
-}
-
-export interface ResolveExceptionRequest {
-  resolutionNotes: string;
-  waive?: boolean;
-}
-
-// ==========================================
-// Phase 3 — Leave Module Contracts
-// ==========================================
-
-export enum LeaveCategory {
-  Annual = 0,
-  Sick = 1,
-  Maternity = 2,
-  Paternity = 3,
-  Bereavement = 4,
-  Hajj = 5,
-  Marriage = 6,
-  Unpaid = 7,
-  Emergency = 8
-}
-
-export enum LeaveRequestStatus {
-  Draft = 0,
-  PendingApproval = 1,
-  Approved = 2,
-  Rejected = 3,
-  Cancelled = 4
-}
-
-export interface LeaveTypeDto {
-  id: string;
-  tenantId: string;
-  legalEntityId: string;
-  code: string;
-  nameEn: string;
-  nameAr: string;
-  category: number;
-  categoryName: string;
-  isPaid: boolean;
-  requiresAttachment: boolean;
-  allowHalfDay: boolean;
-  isActive: boolean;
-}
-
-export interface LeaveBalanceDto {
-  id: string;
-  employmentId: string;
-  leaveTypeId: string;
-  leaveTypeNameEn: string;
-  leaveTypeNameAr: string;
-  year: number;
-  entitledDays: number;
-  accruedDays: number;
-  usedDays: number;
-  pendingDays: number;
-  availableDays: number;
-  rowVersion: number;
-}
-
-export interface LeaveRequestDto {
-  id: string;
-  tenantId: string;
-  legalEntityId: string;
-  employmentId: string;
-  employeeNameEn?: string;
-  employeeNameAr?: string;
-  employeeNumber?: string;
-  departmentNameEn?: string;
-  leaveTypeId: string;
-  leaveTypeNameEn: string;
-  leaveTypeNameAr: string;
-  startDate: string;
-  endDate: string;
-  durationDays: number;
-  durationMinutes: number;
-  status: number;
-  statusName: string;
-  reason: string;
-  attachmentDocumentId?: string | null;
-  approvalRequestId?: string | null;
-  rejectionReason?: string | null;
-  createdAt: string;
-  rowVersion: number;
-}
-
-export interface CreateLeaveRequest {
-  employmentId: string;
-  leaveTypeId: string;
-  startDate: string;
-  endDate: string;
-  durationDays?: number;
-  reason: string;
-  attachmentDocumentId?: string | null;
-}
-
-export interface RejectLeaveRequest {
-  rejectionReason: string;
-  rowVersion: number;
-}
-
-// ==========================================
-// Phase 3 — Approvals Module Contracts
-// ==========================================
-
-export enum ApprovalStatus {
-  Pending = 0,
-  Approved = 1,
-  Rejected = 2,
-  Cancelled = 3
-}
-
-export interface ApprovalItemDto {
-  id: string;
-  tenantId: string;
-  legalEntityId: string;
-  domain: string;
-  sourceEntityId: string;
-  sourceEntityType: string;
-  title: string;
-  summary: string;
-  requesterUserId: string;
-  subjectEmploymentId: string;
-  subjectEmployeeNameEn?: string;
-  subjectEmployeeNameAr?: string;
-  currentStepOrder: number;
-  totalSteps: number;
-  status: number;
-  statusName: string;
-  createdAtUtc: string;
-  rowVersion: number;
-  assignedApproverId: string;
-  stepOrder: number;
-}
-
-export interface ApprovalDecisionRequest {
-  comments?: string | null;
-  rowVersion: number;
-}
-
+export type GetApiV1RecruitmentRequisitionsParams = {
+status?: RequisitionStatus;
+search?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
 

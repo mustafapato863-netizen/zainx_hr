@@ -22,7 +22,7 @@ export const FinalizeRunDialog: React.FC<FinalizeRunDialogProps> = ({
       >
         <div className="flex items-start gap-4">
           <div className="p-3 rounded-full bg-amber-100 text-amber-600 dark:bg-amber-950/50 dark:text-amber-400">
-            <Icon name="AlertTriangle" className="w-6 h-6" />
+            <Icon name="alert-triangle" className="w-6 h-6" />
           </div>
           <div>
             <h3 id="finalize-dialog-title" className="text-lg font-bold text-neutral-900 dark:text-neutral-100">

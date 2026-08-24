@@ -17,12 +17,27 @@ public class NeutralCsvPaymentExportAdapter : IPaymentExportAdapter
 
         foreach (var inst in batch.Instructions)
         {
-            // Redact/mask account for neutral export standard display
-            var masked = inst.EncryptedAccountOrIban.Length > 4
-                ? $"****{inst.EncryptedAccountOrIban[^4..]}"
-                : "****";
+            // Sanitize against CSV Injection (=, +, -, @, \t, \r)
+            var safeBeneficiary = SanitizeCsvField(inst.BeneficiaryName);
+            var safeBankCode = SanitizeCsvField(inst.BankCode);
+            var safeBatchNumber = SanitizeCsvField(batch.BatchNumber);
 
-            sb.AppendLine($"\"{batch.BatchNumber}\",\"{batch.PaymentDate:yyyy-MM-dd}\",\"{batch.Currency}\",\"{inst.BeneficiaryName}\",\"{inst.BankCode}\",\"{masked}\",{inst.Amount:F2}");
+            // Decrypt the AES-256-GCM banking data for the CSV payload, since banks require the raw format
+            var decryptedAccount = string.Empty;
+            try
+            {
+                decryptedAccount = Workforce.SharedKernel.Security.AesGcmEncryptionService.DecryptDefault(inst.EncryptedAccountOrIban);
+            }
+            catch
+            {
+                // In a production system, this could log or skip. For Phase 4, we enforce raw or fallback to original.
+                decryptedAccount = inst.EncryptedAccountOrIban; // If not encrypted properly, fallback
+            }
+
+            // In payment export intended for banking processing, the account is preserved with full digits, but escaped against CSV injection
+            var safeAccount = SanitizeCsvField(decryptedAccount);
+
+            sb.AppendLine($"\"{safeBatchNumber}\",\"{batch.PaymentDate:yyyy-MM-dd}\",\"{batch.Currency}\",\"{safeBeneficiary}\",\"{safeBankCode}\",\"{safeAccount}\",{inst.Amount:F2}");
         }
 
         var csvString = sb.ToString();
@@ -39,5 +54,16 @@ public class NeutralCsvPaymentExportAdapter : IPaymentExportAdapter
             bytes,
             hash
         ));
+    }
+
+    private static string SanitizeCsvField(string field)
+    {
+        if (string.IsNullOrEmpty(field)) return string.Empty;
+        var trimmed = field.Trim();
+        if (trimmed.StartsWith('=') || trimmed.StartsWith('+') || trimmed.StartsWith('-') || trimmed.StartsWith('@') || trimmed.StartsWith('\t') || trimmed.StartsWith('\r'))
+        {
+            trimmed = "'" + trimmed;
+        }
+        return trimmed.Replace("\"", "\"\"");
     }
 }

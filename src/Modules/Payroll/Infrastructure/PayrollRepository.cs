@@ -28,6 +28,12 @@ public interface IPayrollRepository
 
     Task<IReadOnlyList<PayrollException>> GetExceptionsByRunAsync(Guid runId, CancellationToken ct = default);
     Task UpdateExceptionAsync(PayrollException exception, CancellationToken ct = default);
+
+    Task CreateJobAsync(PayrollBackgroundJob job, CancellationToken ct = default);
+    Task<PayrollBackgroundJob?> GetJobByIdAsync(TenantId tenantId, Guid jobId, CancellationToken ct = default);
+    Task<PayrollBackgroundJob?> GetJobByIdempotencyKeyAsync(TenantId tenantId, string idempotencyKey, CancellationToken ct = default);
+    Task<PayrollBackgroundJob?> ClaimNextQueuedJobAsync(CancellationToken ct = default);
+    Task UpdateJobAsync(PayrollBackgroundJob job, CancellationToken ct = default);
 }
 
 public class PayrollRepository : IPayrollRepository
@@ -664,5 +670,145 @@ public class PayrollRepository : IPayrollRepository
         cmd.Parameters.AddWithValue(exception.Id);
 
         await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    public async Task CreateJobAsync(PayrollBackgroundJob job, CancellationToken ct = default)
+    {
+        await using var cmd = _dataSource.CreateCommand("""
+            INSERT INTO payroll.background_jobs (
+                id, tenant_id, payroll_run_id, idempotency_key, operation, status, started_at_utc,
+                completed_at_utc, error_message, diagnostic_metadata, row_version, created_at_utc
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10::jsonb, $11, $12);
+        """);
+
+        cmd.Parameters.AddWithValue(job.Id);
+        cmd.Parameters.AddWithValue(job.TenantId);
+        cmd.Parameters.AddWithValue(job.PayrollRunId);
+        cmd.Parameters.AddWithValue(job.IdempotencyKey);
+        cmd.Parameters.AddWithValue(job.Operation);
+        cmd.Parameters.AddWithValue(job.Status.ToString());
+        cmd.Parameters.AddWithValue(job.StartedAtUtc);
+        cmd.Parameters.AddWithValue((object?)job.CompletedAtUtc ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((object?)job.ErrorMessage ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((object?)job.DiagnosticMetadata ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((long)job.RowVersion);
+        cmd.Parameters.AddWithValue(job.CreatedAtUtc);
+
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    public async Task<PayrollBackgroundJob?> GetJobByIdAsync(TenantId tenantId, Guid jobId, CancellationToken ct = default)
+    {
+        await using var cmd = _dataSource.CreateCommand("""
+            SELECT id, tenant_id, payroll_run_id, idempotency_key, operation, status, started_at_utc,
+                   completed_at_utc, error_message, diagnostic_metadata, row_version, created_at_utc
+            FROM payroll.background_jobs
+            WHERE tenant_id = $1 AND id = $2;
+        """);
+        cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(jobId);
+
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (await reader.ReadAsync(ct))
+        {
+            return MapJob(reader);
+        }
+
+        return null;
+    }
+
+    public async Task<PayrollBackgroundJob?> GetJobByIdempotencyKeyAsync(TenantId tenantId, string idempotencyKey, CancellationToken ct = default)
+    {
+        await using var cmd = _dataSource.CreateCommand("""
+            SELECT id, tenant_id, payroll_run_id, idempotency_key, operation, status, started_at_utc,
+                   completed_at_utc, error_message, diagnostic_metadata, row_version, created_at_utc
+            FROM payroll.background_jobs
+            WHERE tenant_id = $1 AND idempotency_key = $2;
+        """);
+        cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(idempotencyKey);
+
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (await reader.ReadAsync(ct))
+        {
+            return MapJob(reader);
+        }
+
+        return null;
+    }
+
+    public async Task<PayrollBackgroundJob?> ClaimNextQueuedJobAsync(CancellationToken ct = default)
+    {
+        await using var cmd = _dataSource.CreateCommand("""
+            UPDATE payroll.background_jobs
+            SET status = 'Running',
+                started_at_utc = CURRENT_TIMESTAMP,
+                row_version = row_version + 1
+            WHERE id = (
+                SELECT id FROM payroll.background_jobs
+                WHERE status = 'Queued'
+                ORDER BY created_at_utc ASC
+                FOR UPDATE SKIP LOCKED
+                LIMIT 1
+            )
+            RETURNING id, tenant_id, payroll_run_id, idempotency_key, operation, status, started_at_utc,
+                      completed_at_utc, error_message, diagnostic_metadata, row_version, created_at_utc;
+        """);
+
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (await reader.ReadAsync(ct))
+        {
+            return MapJob(reader);
+        }
+
+        return null;
+    }
+
+    public async Task UpdateJobAsync(PayrollBackgroundJob job, CancellationToken ct = default)
+    {
+        await using var cmd = _dataSource.CreateCommand("""
+            UPDATE payroll.background_jobs
+            SET status = $1,
+                started_at_utc = $2,
+                completed_at_utc = $3,
+                error_message = $4,
+                diagnostic_metadata = $5::jsonb,
+                row_version = $6
+            WHERE tenant_id = $7 AND id = $8;
+        """);
+
+        cmd.Parameters.AddWithValue(job.Status.ToString());
+        cmd.Parameters.AddWithValue(job.StartedAtUtc);
+        cmd.Parameters.AddWithValue((object?)job.CompletedAtUtc ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((object?)job.ErrorMessage ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((object?)job.DiagnosticMetadata ?? DBNull.Value);
+        cmd.Parameters.AddWithValue((long)job.RowVersion);
+        cmd.Parameters.AddWithValue(job.TenantId);
+        cmd.Parameters.AddWithValue(job.Id);
+
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    private static PayrollBackgroundJob MapJob(NpgsqlDataReader reader)
+    {
+        var id = reader.GetGuid(0);
+        var tenantId = reader.GetGuid(1);
+        var payrollRunId = reader.GetGuid(2);
+        var idempotencyKey = reader.GetString(3);
+        var operation = reader.GetString(4);
+        var statusStr = reader.GetString(5);
+        var startedAt = reader.GetDateTime(6);
+        var completedAt = reader.IsDBNull(7) ? (DateTime?)null : reader.GetDateTime(7);
+        var errorMessage = reader.IsDBNull(8) ? null : reader.GetString(8);
+        var diagnosticMetadata = reader.IsDBNull(9) ? null : reader.GetString(9);
+        var rowVersion = (uint)reader.GetInt64(10);
+        var createdAt = reader.GetDateTime(11);
+
+        Enum.TryParse<PayrollJobStatus>(statusStr, true, out var status);
+
+        return PayrollBackgroundJob.Reconstitute(
+            id, tenantId, payrollRunId, idempotencyKey, operation, status,
+            startedAt, completedAt, errorMessage, diagnosticMetadata, rowVersion, createdAt
+        );
     }
 }

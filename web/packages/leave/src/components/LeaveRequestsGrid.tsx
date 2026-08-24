@@ -17,7 +17,16 @@ import {
   Skeleton,
   ICellRendererParams
 } from '@zainx/design-system';
-import { LeaveRequestDto, LeaveRequestStatus } from '@zainx/contracts';
+import { LeaveRequestDto } from '@zainx/contracts';
+
+export const LeaveRequestStatus = {
+  Draft: 'Draft',
+  Submitted: 'Submitted',
+  PendingApproval: 'PendingApproval',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+  Cancelled: 'Cancelled',
+} as const;
 
 export interface LeaveRequestsGridProps {
   requests?: LeaveRequestDto[];
@@ -54,19 +63,13 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
     actions: true
   });
 
-  const getStatusBadge = (status: number, statusName: string) => {
-    switch (status) {
-      case LeaveRequestStatus.Approved:
-        return <Badge variant="success" label={statusName || 'Approved'} />;
-      case LeaveRequestStatus.PendingApproval:
-        return <Badge variant="warning" label={statusName || 'Pending'} />;
-      case LeaveRequestStatus.Rejected:
-        return <Badge variant="danger" label={statusName || 'Rejected'} />;
-      case LeaveRequestStatus.Cancelled:
-        return <Badge variant="secondary" label={statusName || 'Cancelled'} />;
-      default:
-        return <Badge variant="default" label={statusName || 'Draft'} />;
-    }
+  const getStatusBadge = (status: any, statusName?: string) => {
+    const s = String(status);
+    if (s === 'Approved' || s === '3') return <Badge variant="success">{statusName || 'Approved'}</Badge>;
+    if (s === 'PendingApproval' || s === '1' || s === '2') return <Badge variant="warning">{statusName || 'Pending'}</Badge>;
+    if (s === 'Rejected' || s === '4') return <Badge variant="danger">{statusName || 'Rejected'}</Badge>;
+    if (s === 'Cancelled' || s === '5') return <Badge variant="neutral">{statusName || 'Cancelled'}</Badge>;
+    return <Badge variant="neutral">{statusName || s || 'Draft'}</Badge>;
   };
 
   const columnDefs: ZainXColumnDef[] = useMemo(() => [
@@ -79,10 +82,10 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
       cellRenderer: (params: ICellRendererParams<LeaveRequestDto>) => (
         <div className="flex flex-col py-1">
           <span className="text-sm font-semibold text-text-primary">
-            {params.data?.employeeNameEn || 'Employee'}
+            {(params.data as any)?.employeeNameEn || 'Employee'}
           </span>
           <span className="text-xs text-text-muted">
-            {params.data?.employeeNumber || 'EMP-XXXX'}
+            {(params.data as any)?.employeeNumber || 'EMP-XXXX'}
           </span>
         </div>
       )
@@ -150,7 +153,7 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
       cellRenderer: (params: ICellRendererParams<LeaveRequestDto>) => {
         const d = params.data;
         if (!d) return null;
-        return getStatusBadge(d.status, d.statusName);
+        return getStatusBadge(d.status, (d as any).statusName);
       }
     },
     {
@@ -162,14 +165,15 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
       cellRenderer: (params: ICellRendererParams<LeaveRequestDto>) => {
         const d = params.data;
         if (!d) return null;
-        if (d.status === LeaveRequestStatus.PendingApproval) {
+        const s = String(d.status);
+        if (s === 'PendingApproval' || s === '1' || s === '2') {
           return (
             <div className="flex items-center gap-1.5 py-1">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => onApproveRequest?.(d)}
-                ariaLabel={`Approve leave for ${d.employeeNameEn}`}
+                aria-label={`Approve leave for ${(d as any).employeeNameEn || 'employee'}`}
               >
                 Approve
               </Button>
@@ -177,7 +181,7 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
                 variant="ghost"
                 size="sm"
                 onClick={() => onRejectRequest?.(d)}
-                ariaLabel={`Reject leave for ${d.employeeNameEn}`}
+                aria-label={`Reject leave for ${(d as any).employeeNameEn || 'employee'}`}
               >
                 Reject
               </Button>
@@ -186,7 +190,7 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
         }
         return (
           <span className="text-xs text-text-muted">
-            {d.statusName || 'Finalized'}
+            {(d as any).statusName || 'Finalized'}
           </span>
         );
       }
@@ -197,39 +201,17 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
     return requests.filter((r) => {
       const matchesSearch =
         !searchTerm ||
-        r.employeeNameEn?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (r as any).employeeNameEn?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.leaveTypeNameEn?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus =
-        !statusFilter || r.status.toString() === statusFilter || r.statusName === statusFilter;
+        !statusFilter || r.status.toString() === statusFilter || (r as any).statusName === statusFilter;
       return matchesSearch && matchesStatus;
     });
   }, [requests, searchTerm, statusFilter]);
 
-  const filterItems: FilterItem[] = [
-    {
-      id: 'search',
-      type: 'search',
-      label: 'Search',
-      placeholder: 'Search employee or leave type...',
-      value: searchTerm,
-      onChange: (val) => setSearchTerm(val as string)
-    },
-    {
-      id: 'status',
-      type: 'select',
-      label: 'Status',
-      placeholder: 'All Statuses',
-      value: statusFilter,
-      options: [
-        { label: 'All Statuses', value: '' },
-        { label: 'Pending Approval', value: LeaveRequestStatus.PendingApproval.toString() },
-        { label: 'Approved', value: LeaveRequestStatus.Approved.toString() },
-        { label: 'Rejected', value: LeaveRequestStatus.Rejected.toString() },
-        { label: 'Cancelled', value: LeaveRequestStatus.Cancelled.toString() }
-      ],
-      onChange: (val) => setStatusFilter(val as string)
-    }
-  ];
+  const filterItems: FilterItem[] = statusFilter
+    ? [{ id: 'status', label: 'Status', value: statusFilter }]
+    : [];
 
   const columnItems: ColumnItem[] = Object.keys(visibleColumns).map((key) => ({
     id: key,
@@ -251,14 +233,14 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
             <Button
               variant="outline"
               onClick={onRefresh}
-              ariaLabel="Refresh leave requests"
+              aria-label="Refresh leave requests"
             >
               Refresh
             </Button>
             <Button
               variant="primary"
               onClick={onRequestLeave}
-              ariaLabel="Submit leave request"
+              aria-label="Submit leave request"
             >
               + Submit Request
             </Button>
@@ -269,14 +251,16 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
       <div className="flex flex-wrap items-center justify-between gap-3 bg-surface-secondary/50 p-3 rounded-lg border border-border-secondary">
         <FilterBar
           filters={filterItems}
-          onReset={() => {
+          searchValue={searchTerm}
+          onSearchChange={setSearchTerm}
+          onClearAll={() => {
             setSearchTerm('');
             setStatusFilter('');
           }}
         />
         <div className="flex items-center gap-2">
-          <DensitySwitcher currentDensity={density} onDensityChange={setDensity} />
-          <ColumnChooser columns={columnItems} onColumnToggle={handleColumnToggle} />
+          <DensitySwitcher density={density} onChange={setDensity} />
+          <ColumnChooser columns={columnItems} onToggleColumn={handleColumnToggle} />
         </div>
       </div>
 
@@ -289,19 +273,18 @@ export const LeaveRequestsGrid: React.FC<LeaveRequestsGridProps> = ({
       ) : isError ? (
         <ErrorState
           title="Failed to Load Leave Requests"
-          message="An error occurred while communicating with the leave engine."
+          description="An error occurred while communicating with the leave engine."
           onRetry={onRefresh}
         />
       ) : filteredRequests.length === 0 ? (
         requests.length === 0 ? (
           <EmptyState
             title="No Leave Requests Found"
-            message="Submitted leave requests will appear here."
+            description="Submitted leave requests will appear here."
           />
         ) : (
           <NoResults
-            searchTerm={searchTerm}
-            onClearSearch={() => {
+            onClearFilters={() => {
               setSearchTerm('');
               setStatusFilter('');
             }}

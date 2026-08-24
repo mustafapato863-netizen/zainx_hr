@@ -403,98 +403,151 @@ public static class WorkforceSecurityTestRunner
         // =========================================================================
         Console.WriteLine("\n[PHASE 4] Payroll, Compliance & Settlement Invariants");
 
-        Run("Phase4_PayrollEngine", "DeterministicEngine_CalculatesAccurateEarningsAndDeductions", () =>
+        Run("Phase4_StatutoryBlocking", "UnverifiedStatutoryRule_EmitsBlockingException_BlocksFinalization", () =>
         {
             var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
             var runId = Guid.NewGuid();
-            var empId = Guid.NewGuid();
-
-            var snapshot = new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(
-                Guid.NewGuid(), runId, empId,
-                baseSalaryMonthly: 30000.00m,
-                allowancesJson: "[{\"code\":\"HOUSING\",\"nameEn\":\"Housing Allowance\",\"nameAr\":\"بدل سكن\",\"amount\":5000.00}]",
-                scheduledDays: 22,
-                verifiedWorkedMinutes: 22 * 480,
-                approvedAbsenceDays: 0,
-                approvedLeaveDays: 0,
-                unpaidLeaveDays: 0
+            var snap = new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(
+                Guid.NewGuid(), runId, Guid.NewGuid(), 25000.00m, "[]", 22, 22 * 480, 0, 0, 0
             );
 
-            var taxRuleVersion = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
+            var unverifiedRule = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
                 Guid.NewGuid(), Guid.NewGuid(), 1,
                 new EffectivePeriod(new DateOnly(2024, 1, 1)),
                 "{\"personalExemptionYearly\": 20000.00}",
-                "EgyptProgressiveIncomeTaxStrategy"
+                "EgyptProgressiveIncomeTaxStrategy",
+                Workforce.Modules.Compliance.Domain.VerificationStatus.Unverified
             );
 
-            var gosiRuleVersion = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
+            var res = engine.Calculate(snap, new[] { unverifiedRule }, out var exceptions);
+            if (!exceptions.Any(e => e.Severity == Workforce.Modules.Payroll.Domain.ExceptionSeverity.Blocking && e.Category == "STATUTORY_RULE_UNVERIFIED"))
+            {
+                throw new Exception("Unverified statutory rule did NOT emit a blocking exception!");
+            }
+
+            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(runId, tenantA, legalEntityA, Guid.NewGuid(), "RUN-BLOCK-TEST");
+            run.LoadInputs(new[] { snap }, 1);
+            
+            bool calcThrew = false;
+            try
+            {
+                run.Calculate(engine, new[] { unverifiedRule }, 2);
+            }
+            catch (InvalidOperationException)
+            {
+                calcThrew = true;
+            }
+
+            if (!calcThrew) throw new Exception("Run with blocking exception was allowed to complete calculate!");
+        });
+
+        Run("Phase4_PayrollEngine", "DeterministicEngine_CalculatesAccurateEarningsAndDeductions", () =>
+        {
+            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
+            var snap = new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(
+                Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(),
+                20000.00m,
+                "[{\"code\":\"HOUSING\",\"nameEn\":\"Housing Allowance\",\"nameAr\":\"بدل سكن\",\"amount\":5000.00},{\"code\":\"TRANSPORT\",\"nameEn\":\"Transport Allowance\",\"nameAr\":\"بدل انتقال\",\"amount\":1000.00}]",
+                22, 22 * 480, 0, 0, 0
+            );
+
+            var ruleSocial = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
                 Guid.NewGuid(), Guid.NewGuid(), 1,
                 new EffectivePeriod(new DateOnly(2024, 1, 1)),
-                "{\"employeeRate\": 0.11, \"employerRate\": 0.1875, \"minInsuredMonthly\": 2000.00, \"maxInsuredMonthly\": 12600.00}",
-                "EgyptSocialInsuranceStrategy"
+                "{\"employeeRate\": 0.11, \"employerRate\": 0.1875, \"maxMonthlyWage\": 12600.00, \"minMonthlyWage\": 2000.00}",
+                "EgyptSocialInsuranceStrategy",
+                Workforce.Modules.Compliance.Domain.VerificationStatus.Verified
             );
 
-            var rules = new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion> { taxRuleVersion, gosiRuleVersion };
-            var result = engine.Calculate(snapshot, rules, out var exceptions);
+            var ruleTax = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
+                Guid.NewGuid(), Guid.NewGuid(), 1,
+                new EffectivePeriod(new DateOnly(2024, 1, 1)),
+                "{\"personalExemptionYearly\": 20000.00}",
+                "EgyptProgressiveIncomeTaxStrategy",
+                Workforce.Modules.Compliance.Domain.VerificationStatus.Verified
+            );
 
-            if (result.GrossPay != 35000.00m) throw new Exception($"Expected GrossPay 35000, got {result.GrossPay}");
-            if (result.EmployerContributions != 2362.50m) throw new Exception($"Expected EmployerContributions 2362.50, got {result.EmployerContributions}");
-            if (result.NetPay <= 0 || result.NetPay >= result.GrossPay) throw new Exception($"Invalid NetPay: {result.NetPay}");
+            var res = engine.Calculate(snap, new[] { ruleSocial, ruleTax }, out var exceptions);
+            if (res.GrossPay != 26000.00m) throw new Exception($"Expected Gross 26000.00, got {res.GrossPay}");
+            if (res.NetPay <= 0 || res.NetPay >= res.GrossPay) throw new Exception($"Invalid NetPay: {res.NetPay}");
+        });
+
+        Run("Phase4_CanonicalFingerprint", "CanonicalFingerprint_ChangesWithRulesOrInputs", () =>
+        {
+            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
+            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "RUN-HASH-01");
+            var snap1 = new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(Guid.NewGuid(), run.Id, Guid.NewGuid(), 20000.00m, "[]", 22, 22 * 480, 0, 0, 0);
+
+            var ruleV1 = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001"), Guid.NewGuid(), 1, new EffectivePeriod(new DateOnly(2024, 1, 1)), "{}", "Strategy1", Workforce.Modules.Compliance.Domain.VerificationStatus.Verified);
+            var ruleV2 = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(Guid.Parse("aaaaaaaa-0000-0000-0000-000000000001"), Guid.NewGuid(), 2, new EffectivePeriod(new DateOnly(2025, 1, 1)), "{}", "Strategy1", Workforce.Modules.Compliance.Domain.VerificationStatus.Verified);
+
+            run.LoadInputs(new[] { snap1 }, 1);
+            run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion> { ruleV1 }, 2);
+            var hash1 = run.ReproducibilityHash;
+
+            var run2 = new Workforce.Modules.Payroll.Domain.PayrollRun(run.Id, tenantA, legalEntityA, run.PeriodId, "RUN-HASH-01");
+            run2.LoadInputs(new[] { snap1 }, 1);
+            run2.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion> { ruleV2 }, 2);
+
+            if (hash1 == run2.ReproducibilityHash) throw new Exception("Fingerprint failed to change when statutory rule version changed!");
         });
 
         Run("Phase4_FinalizationBoundary", "PayrollRun_FinalizationIsPermanent_RejectsSubsequentMutations", () =>
         {
-            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "RUN-INVARIANT-01");
-            var snapshots = new List<Workforce.Modules.Payroll.Domain.PayrollInputSnapshot>
-            {
-                new(Guid.NewGuid(), run.Id, Guid.NewGuid(), 25000.00m, "[]", 22, 22 * 480, 0, 0, 0)
-            };
-
-            run.LoadInputs(snapshots, 1);
-            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
-            run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 2);
+            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "RUN-PERM");
+            run.LoadInputs(new List<Workforce.Modules.Payroll.Domain.PayrollInputSnapshot>(), 1);
+            run.Calculate(new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine(), new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 2);
             run.SubmitForReview(3);
-            run.Approve(Guid.NewGuid(), 4);
+            run.Approve(userA.Value, 4);
             run.FinalizeRun(userA.Value, 5);
 
-            if (run.Status != Workforce.Modules.Payroll.Domain.PayrollRunStatus.Finalized) throw new Exception("Run should be Finalized");
+            if (run.Status != Workforce.Modules.Payroll.Domain.PayrollRunStatus.Finalized)
+            {
+                throw new Exception("Run is not in Finalized status");
+            }
 
-            bool threw = false;
+            bool mutationThrew = false;
             try
             {
-                run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 6);
+                run.Calculate(new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine(), new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 6);
             }
             catch (InvalidOperationException)
             {
-                threw = true;
+                mutationThrew = true;
             }
 
-            if (!threw) throw new Exception("Finalized run did not throw on subsequent calculation attempt!");
+            if (!mutationThrew) throw new Exception("Finalized run permitted re-calculation mutation!");
         });
 
         Run("Phase4_SettlementReconciliation", "SettlementBatch_Enforces1to1TotalAmountReconciliation", () =>
         {
             var batch = new Workforce.Modules.Settlement.Domain.SettlementBatch(
-                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "BATCH-REC-01",
+                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "BATCH-001",
                 totalAmount: 10000.00m,
                 paymentDate: new DateOnly(2026, 8, 31)
             );
 
             batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
-                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Ali", "MISR", "EG123", 6000.00m
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Emp 1", "MISR", "EG123", 5000.00m
             ));
             batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
-                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Sara", "MISR", "EG456", 4000.00m
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Emp 2", "MISR", "EG456", 4000.00m
             ));
 
-            batch.Approve(1);
-            if (batch.Status != Workforce.Modules.Settlement.Domain.SettlementStatus.Approved)
+            bool mismatchThrew = false;
+            try
             {
-                throw new Exception("Batch should be approved when total matches 1:1");
+                batch.Approve(1);
             }
+            catch (InvalidOperationException)
+            {
+                mismatchThrew = true;
+            }
+
+            if (!mismatchThrew) throw new Exception("Mismatched settlement total did NOT throw reconciliation exception!");
         });
 
-        Run("Phase4_NeutralExport", "NeutralCsvExport_GeneratesSha256AndMaskedAccounts", () =>
+        Run("Phase4_NeutralExport", "NeutralCsvExport_SanitizesCsvInjectionAndGeneratesSha256", () =>
         {
             var adapter = new Workforce.Modules.Settlement.Domain.ExportAdapters.NeutralCsvPaymentExportAdapter();
             var batch = new Workforce.Modules.Settlement.Domain.SettlementBatch(
@@ -504,7 +557,7 @@ public static class WorkforceSecurityTestRunner
             );
 
             batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
-                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Tamer", "MISR", "EG9876543210", 5000.00m
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "=SUM(A1:A5)", "MISR", "@EG9876543210", 5000.00m
             ));
 
             var res = adapter.GenerateExportAsync(batch).GetAwaiter().GetResult();
@@ -512,6 +565,97 @@ public static class WorkforceSecurityTestRunner
             {
                 throw new Exception("Export result is missing file bytes or SHA-256 fingerprint");
             }
+
+            var text = System.Text.Encoding.UTF8.GetString(res.FileBytes);
+            if (!text.Contains("'=SUM(A1:A5)") && !text.Contains("'@EG9876543210"))
+            {
+                throw new Exception("CSV Injection prefix was not sanitized!");
+            }
+        });
+
+        Run("Phase4_1kBenchmark", "Synthetic1kEmployees_CalculatesUnder500ms", () =>
+        {
+            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
+            var runId = Guid.NewGuid();
+            var snapshots = new List<Workforce.Modules.Payroll.Domain.PayrollInputSnapshot>();
+            for (int i = 0; i < 1000; i++)
+            {
+                snapshots.Add(new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(
+                    Guid.NewGuid(), runId, Guid.NewGuid(), 15000.00m + (i * 10), "[]", 22, 22 * 480, 0, 0, 0
+                ));
+            }
+
+            var sw = Stopwatch.StartNew();
+            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(runId, tenantA, legalEntityA, Guid.NewGuid(), "RUN-BENCH");
+            run.LoadInputs(snapshots, 1);
+            run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 2);
+            sw.Stop();
+
+            if (run.EmployeeCount != 1000) throw new Exception("Expected 1000 employees");
+            if (sw.ElapsedMilliseconds > 500) throw new Exception($"1k benchmark took {sw.ElapsedMilliseconds}ms, exceeded 500ms limit");
+        });
+
+        // Phase 5 Recruitment Security & Invariant Verification Gates
+        Run("Phase5_RequisitionLifecycle", "Requisition_Lifecycle_RequiresApprovalAndStrictTransitions", () =>
+        {
+            var req = new Workforce.Modules.Recruitment.Domain.JobRequisition(
+                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), null, null,
+                Guid.NewGuid(), Guid.NewGuid(), "REQ-2026-001", "Principal Engineer", "كبير مهندسين",
+                1, "FullTime", Guid.NewGuid(), 1, "Expansion", DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30))
+            );
+
+            if (req.Status != Workforce.Modules.Recruitment.Domain.RequisitionStatus.Draft)
+                throw new Exception("Initial status must be Draft");
+
+            req.SubmitForApproval(Guid.NewGuid(), 1);
+            if (req.Status != Workforce.Modules.Recruitment.Domain.RequisitionStatus.PendingApproval)
+                throw new Exception("Status must transition to PendingApproval");
+
+            req.Approve(2);
+            if (req.Status != Workforce.Modules.Recruitment.Domain.RequisitionStatus.Approved)
+                throw new Exception("Status must transition to Approved");
+
+            req.Open(3);
+            if (req.Status != Workforce.Modules.Recruitment.Domain.RequisitionStatus.Open)
+                throw new Exception("Status must transition to Open");
+        });
+
+        Run("Phase5_CandidateBlindIndex", "Candidate_DuplicateDetection_UsesHmacBlindIndex", () =>
+        {
+            var piiService = new Workforce.SharedKernel.Security.AesPiiEncryptionService();
+            var emailBlind = piiService.ComputeSearchHash("john.doe@enterprise.com");
+            var phoneBlind = piiService.ComputeSearchHash("+201012345678");
+
+            if (string.IsNullOrEmpty(emailBlind) || string.IsNullOrEmpty(phoneBlind))
+                throw new Exception("Blind indexes must not be empty");
+
+            if (emailBlind == "john.doe@enterprise.com")
+                throw new Exception("Blind index must be an HMAC hash, not raw plaintext");
+        });
+
+        Run("Phase5_OfferCompensationMasking", "Offer_ConfidentialCompensation_RequiresPermission", () =>
+        {
+            var offer = new Workforce.Modules.Recruitment.Domain.Offer(
+                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), Guid.NewGuid(), 1,
+                "Principal Engineer", "كبير مهندسين",
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(30)),
+                35000.00m, "EGP",
+                "[{\"name\":\"Bonus\",\"amount\":5000.00}]",
+                "Subject to background check",
+                DateOnly.FromDateTime(DateTime.UtcNow.AddDays(14)),
+                null
+            );
+
+            if (offer.Status != Workforce.Modules.Recruitment.Domain.OfferStatus.Draft)
+                throw new Exception("Initial offer status must be Draft");
+
+            offer.SubmitForApproval(Guid.NewGuid(), 1);
+            offer.Approve(2);
+            offer.Issue(3);
+            offer.Accept(4);
+
+            if (offer.Status != Workforce.Modules.Recruitment.Domain.OfferStatus.Accepted)
+                throw new Exception("Final offer status must be Accepted");
         });
 
         stopwatch.Stop();

@@ -68,7 +68,7 @@ export const PayrollRunsGrid: React.FC<PayrollRunsGridProps> = ({
           variant="primary"
           onPress={() => setIsCreateOpen(true)}
         >
-          <Icon name="Plus" className="w-4 h-4 mr-2" />
+          <Icon name="plus" className="w-4 h-4 mr-2" />
           Create Run
         </Button>
       </div>
@@ -130,7 +130,7 @@ export const PayrollRunsGrid: React.FC<PayrollRunsGridProps> = ({
 
         {runs.length === 0 && !isLoading && (
           <div className="col-span-full p-12 text-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl">
-            <Icon name="FileText" className="w-12 h-12 mx-auto text-neutral-400 mb-3" />
+            <Icon name="table" className="w-12 h-12 mx-auto text-neutral-400 mb-3" />
             <h3 className="text-base font-medium text-neutral-900 dark:text-neutral-100">
               No Payroll Runs Created
             </h3>

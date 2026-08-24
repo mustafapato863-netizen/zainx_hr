@@ -99,6 +99,15 @@ public static class PeopleMigrations
             CREATE INDEX IF NOT EXISTS ix_sensitive_audit_tenant ON people.sensitive_pii_audit(tenant_id, employment_id, timestamp);
             CREATE INDEX IF NOT EXISTS ix_outbox_unprocessed ON people.outbox_messages(tenant_id, processed_at) WHERE processed_at IS NULL;
 
+            CREATE TABLE IF NOT EXISTS people.hire_idempotency (
+                idempotency_key UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                person_id UUID NOT NULL,
+                employment_id UUID NOT NULL,
+                assignment_id UUID NOT NULL,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
             -- Database Integrity: Unique index for single active current assignment
             CREATE UNIQUE INDEX IF NOT EXISTS uq_assignments_single_current ON people.employment_assignments (employment_id) WHERE is_current = TRUE;
 

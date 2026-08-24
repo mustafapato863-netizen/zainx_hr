@@ -4,7 +4,6 @@ import { Route as rootRoute } from './__root';
 import {
   LeaveBalanceDto,
   LeaveRequestDto,
-  LeaveRequestStatus,
   LeaveTypeDto
 } from '@zainx/contracts';
 
@@ -22,6 +21,13 @@ const LeaveCalendar = lazy(() =>
   import('@zainx/leave').then((m) => ({ default: m.LeaveCalendar }))
 );
 
+const LeaveRequestStatus = {
+  PendingApproval: 'PendingApproval',
+  Approved: 'Approved',
+  Rejected: 'Rejected',
+  Cancelled: 'Cancelled'
+} as const;
+
 const initialLeaveTypes: LeaveTypeDto[] = [
   {
     id: 'type-annual',
@@ -30,8 +36,7 @@ const initialLeaveTypes: LeaveTypeDto[] = [
     code: 'ANNUAL',
     nameEn: 'Annual Leave',
     nameAr: 'الإجازة السنوية',
-    category: 0,
-    categoryName: 'Annual',
+    category: 'Annual',
     isPaid: true,
     requiresAttachment: false,
     allowHalfDay: true,
@@ -44,8 +49,7 @@ const initialLeaveTypes: LeaveTypeDto[] = [
     code: 'SICK',
     nameEn: 'Sick Leave',
     nameAr: 'إجازة مرضية',
-    category: 1,
-    categoryName: 'Sick',
+    category: 'Sick',
     isPaid: true,
     requiresAttachment: true,
     allowHalfDay: false,
@@ -56,8 +60,10 @@ const initialLeaveTypes: LeaveTypeDto[] = [
 const initialBalances: LeaveBalanceDto[] = [
   {
     id: 'bal-01',
+    tenantId: '22222222-2222-2222-2222-222222222222',
     employmentId: '44444444-4444-4444-4444-444444444444',
     leaveTypeId: 'type-annual',
+    leaveTypeCode: 'ANNUAL',
     leaveTypeNameEn: 'Annual Leave',
     leaveTypeNameAr: 'الإجازة السنوية',
     year: 2026,
@@ -70,8 +76,10 @@ const initialBalances: LeaveBalanceDto[] = [
   },
   {
     id: 'bal-02',
+    tenantId: '22222222-2222-2222-2222-222222222222',
     employmentId: '44444444-4444-4444-4444-444444444444',
     leaveTypeId: 'type-sick',
+    leaveTypeCode: 'SICK',
     leaveTypeNameEn: 'Sick Leave',
     leaveTypeNameAr: 'إجازة مرضية',
     year: 2026,
@@ -90,10 +98,8 @@ const initialRequests: LeaveRequestDto[] = [
     tenantId: '22222222-2222-2222-2222-222222222222',
     legalEntityId: '33333333-3333-3333-3333-333333333333',
     employmentId: '44444444-4444-4444-4444-444444444444',
-    employeeNumber: 'EMP-1001',
-    employeeNameEn: 'Tariq Al-Mansoor',
-    departmentNameEn: 'Human Resources',
     leaveTypeId: 'type-annual',
+    leaveTypeCode: 'ANNUAL',
     leaveTypeNameEn: 'Annual Leave',
     leaveTypeNameAr: 'الإجازة السنوية',
     startDate: '2026-09-01',
@@ -101,8 +107,10 @@ const initialRequests: LeaveRequestDto[] = [
     durationDays: 5,
     durationMinutes: 2400,
     status: LeaveRequestStatus.PendingApproval,
-    statusName: 'PendingApproval',
     reason: 'Annual family travel',
+    attachmentDocumentId: null,
+    approvalRequestId: null,
+    rejectionReason: null,
     createdAt: '2026-08-24T09:00:00Z',
     rowVersion: 1
   }
@@ -143,10 +151,8 @@ export function LeaveComponent() {
       tenantId: '22222222-2222-2222-2222-222222222222',
       legalEntityId: '33333333-3333-3333-3333-333333333333',
       employmentId: '44444444-4444-4444-4444-444444444444',
-      employeeNumber: 'EMP-1001',
-      employeeNameEn: 'Tariq Al-Mansoor',
-      departmentNameEn: 'Human Resources',
       leaveTypeId,
+      leaveTypeCode: type?.code || 'LEAVE',
       leaveTypeNameEn: type?.nameEn || 'Leave',
       leaveTypeNameAr: type?.nameAr || 'إجازة',
       startDate,
@@ -154,8 +160,10 @@ export function LeaveComponent() {
       durationDays,
       durationMinutes: durationDays * 480,
       status: LeaveRequestStatus.PendingApproval,
-      statusName: 'PendingApproval',
       reason,
+      attachmentDocumentId: null,
+      approvalRequestId: null,
+      rejectionReason: null,
       createdAt: new Date().toISOString(),
       rowVersion: 1
     };
@@ -168,9 +176,9 @@ export function LeaveComponent() {
         b.leaveTypeId === leaveTypeId
           ? {
               ...b,
-              pendingDays: b.pendingDays + durationDays,
-              availableDays: b.availableDays - durationDays,
-              rowVersion: b.rowVersion + 1
+              pendingDays: Number(b.pendingDays || 0) + Number(durationDays || 0),
+              availableDays: Number(b.availableDays || 0) - Number(durationDays || 0),
+              rowVersion: Number(b.rowVersion || 0) + 1
             }
           : b
       )
@@ -181,7 +189,7 @@ export function LeaveComponent() {
     setRequests((prev) =>
       prev.map((r) =>
         r.id === request.id
-          ? { ...r, status: LeaveRequestStatus.Approved, statusName: 'Approved', rowVersion: r.rowVersion + 1 }
+          ? { ...r, status: LeaveRequestStatus.Approved, statusName: 'Approved', rowVersion: Number(r.rowVersion || 0) + 1 }
           : r
       )
     );
@@ -191,7 +199,7 @@ export function LeaveComponent() {
     setRequests((prev) =>
       prev.map((r) =>
         r.id === request.id
-          ? { ...r, status: LeaveRequestStatus.Rejected, statusName: 'Rejected', rowVersion: r.rowVersion + 1 }
+          ? { ...r, status: LeaveRequestStatus.Rejected, statusName: 'Rejected', rowVersion: Number(r.rowVersion || 0) + 1 }
           : r
       )
     );
@@ -202,9 +210,9 @@ export function LeaveComponent() {
         b.leaveTypeId === request.leaveTypeId
           ? {
               ...b,
-              pendingDays: Math.max(0, b.pendingDays - request.durationDays),
-              availableDays: b.availableDays + request.durationDays,
-              rowVersion: b.rowVersion + 1
+              pendingDays: Math.max(0, Number(b.pendingDays || 0) - Number(request.durationDays || 0)),
+              availableDays: Number(b.availableDays || 0) + Number(request.durationDays || 0),
+              rowVersion: Number(b.rowVersion || 0) + 1
             }
           : b
       )

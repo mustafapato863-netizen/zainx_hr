@@ -9,5 +9,19 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Workforce.SharedKernel\Workforce.SharedKernel.csproj" />
+    <ProjectReference Include="..\Workforce.BuildingBlocks\Workforce.BuildingBlocks.csproj" />
+    <ProjectReference Include="..\Modules\Documents\Workforce.Modules.Documents.csproj" />
+    <ProjectReference Include="..\Modules\Compliance\Workforce.Modules.Compliance.csproj" />
+    <ProjectReference Include="..\Modules\Payroll\Workforce.Modules.Payroll.csproj" />
+    <ProjectReference Include="..\Modules\Audit\Workforce.Modules.Audit.csproj" />
+    <ProjectReference Include="..\Modules\Notifications\Workforce.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\Modules\Integrations\Workforce.Modules.Integrations.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Workforce.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Modules\Reporting\Workforce.Modules.Reporting.csproj" />
   </ItemGroup>
 </Project>

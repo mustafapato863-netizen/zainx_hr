@@ -27,6 +27,12 @@
     <ProjectReference Include="..\Modules\Compliance\Workforce.Modules.Compliance.csproj" />
     <ProjectReference Include="..\Modules\Payroll\Workforce.Modules.Payroll.csproj" />
     <ProjectReference Include="..\Modules\Settlement\Workforce.Modules.Settlement.csproj" />
+    <ProjectReference Include="..\Modules\Recruitment\Workforce.Modules.Recruitment.csproj" />
+    <ProjectReference Include="..\Modules\Audit\Workforce.Modules.Audit.csproj" />
+    <ProjectReference Include="..\Modules\Notifications\Workforce.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\Modules\Integrations\Workforce.Modules.Integrations.csproj" />
+    <ProjectReference Include="..\Modules\Identity\Workforce.Modules.Identity.csproj" />
+    <ProjectReference Include="..\Modules\Reporting\Workforce.Modules.Reporting.csproj" />
   </ItemGroup>
 
 </Project>

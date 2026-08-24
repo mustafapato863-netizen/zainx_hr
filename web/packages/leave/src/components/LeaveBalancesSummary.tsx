@@ -23,7 +23,7 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="primary" label="Engine Managed" />
+          <Badge variant="primary">Engine Managed</Badge>
           <button
             type="button"
             onClick={() => onRequestLeave?.()}
@@ -47,9 +47,9 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {balances.map((b) => {
-            const total = b.entitledDays || 21;
-            const available = b.availableDays;
-            const percentUsed = Math.min(100, Math.round(((b.usedDays + b.pendingDays) / total) * 100));
+            const total = Number(b.entitledDays || 21);
+            const available = Number(b.availableDays || 0);
+            const percentUsed = Math.min(100, Math.round(((Number(b.usedDays || 0) + Number(b.pendingDays || 0)) / total) * 100));
 
             return (
               <div

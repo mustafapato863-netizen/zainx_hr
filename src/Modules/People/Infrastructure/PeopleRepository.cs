@@ -415,6 +415,192 @@ public class PeopleRepository
         }
     }
 
+    public class IdempotencyResult
+    {
+        public Guid PersonId { get; set; }
+        public Guid EmploymentId { get; set; }
+        public Guid AssignmentId { get; set; }
+    }
+
+    public async Task<IdempotencyResult?> GetHireIdempotencyAsync(string tenantId, Guid idempotencyKey, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        
+        var sql = @"SELECT person_id, employment_id, assignment_id 
+                    FROM people.hire_idempotency 
+                    WHERE tenant_id = @tenantId AND idempotency_key = @key";
+                    
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", Guid.Parse(tenantId));
+        cmd.Parameters.AddWithValue("key", idempotencyKey);
+        
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (await reader.ReadAsync(ct))
+        {
+            return new IdempotencyResult
+            {
+                PersonId = reader.GetGuid(0),
+                EmploymentId = reader.GetGuid(1),
+                AssignmentId = reader.GetGuid(2)
+            };
+        }
+        return null;
+    }
+
+    public async Task CreateEmployeeWithIdempotencyAsync(
+        Person person,
+        Employment employment,
+        EmploymentAssignment assignment,
+        Guid idempotencyKey,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        try
+        {
+            // Insert Idempotency Record First
+            const string idempSql = @"
+                INSERT INTO people.hire_idempotency (
+                    idempotency_key, tenant_id, person_id, employment_id, assignment_id, created_at
+                ) VALUES (
+                    @idempKey, @tenantId, @personId, @employmentId, @assignmentId, NOW()
+                ) ON CONFLICT DO NOTHING;
+            ";
+            await using var idempCmd = new NpgsqlCommand(idempSql, conn, tx);
+            idempCmd.Parameters.AddWithValue("idempKey", idempotencyKey);
+            idempCmd.Parameters.AddWithValue("tenantId", person.TenantId.Value);
+            idempCmd.Parameters.AddWithValue("personId", person.Id);
+            idempCmd.Parameters.AddWithValue("employmentId", employment.Id);
+            idempCmd.Parameters.AddWithValue("assignmentId", assignment.Id);
+            var affected = await idempCmd.ExecuteNonQueryAsync(ct);
+
+            // If affected == 0, it means it already exists, so we should skip or throw
+            if (affected == 0)
+            {
+                throw new InvalidOperationException("Idempotency key already exists.");
+            }
+
+            // Insert Person with encrypted PII persistence
+            const string personSql = @"
+                INSERT INTO people.persons (
+                    id, tenant_id, first_name_en, last_name_en, first_name_ar, last_name_ar,
+                    date_of_birth, gender, nationality, national_identifier_encrypted, national_identifier_hash, masked_national_identifier,
+                    primary_email, phone_number, created_at, updated_at
+                ) VALUES (
+                    @id, @tenantId, @fnEn, @lnEn, @fnAr, @lnAr,
+                    @dob, @gender, @nationality, @natEnc, @natHash, @natMask,
+                    @email, @phone, @createdAt, @updatedAt
+                );
+            ";
+            await using var personCmd = new NpgsqlCommand(personSql, conn, tx);
+            personCmd.Parameters.AddWithValue("id", person.Id);
+            personCmd.Parameters.AddWithValue("tenantId", person.TenantId.Value);
+            personCmd.Parameters.AddWithValue("fnEn", person.FirstNameEn);
+            personCmd.Parameters.AddWithValue("lnEn", person.LastNameEn);
+            personCmd.Parameters.AddWithValue("fnAr", person.FirstNameAr);
+            personCmd.Parameters.AddWithValue("lnAr", person.LastNameAr);
+            personCmd.Parameters.AddWithValue("dob", person.DateOfBirth.ToDateTime(TimeOnly.MinValue));
+            personCmd.Parameters.AddWithValue("gender", person.Gender);
+            personCmd.Parameters.AddWithValue("nationality", person.Nationality);
+            personCmd.Parameters.AddWithValue("natEnc", person.NationalIdentifierEncrypted);
+            personCmd.Parameters.AddWithValue("natHash", person.NationalIdentifierHash);
+            personCmd.Parameters.AddWithValue("natMask", person.MaskedNationalIdentifier);
+            personCmd.Parameters.AddWithValue("email", person.PrimaryEmail);
+            personCmd.Parameters.AddWithValue("phone", person.PhoneNumber);
+            personCmd.Parameters.AddWithValue("createdAt", person.CreatedAt);
+            personCmd.Parameters.AddWithValue("updatedAt", person.UpdatedAt);
+            await personCmd.ExecuteNonQueryAsync(ct);
+
+            // Insert Employment
+            const string empSql = @"
+                INSERT INTO people.employments (
+                    id, tenant_id, person_id, legal_entity_id, employee_number,
+                    hire_date, probation_end_date, status, created_at, updated_at, row_version
+                ) VALUES (
+                    @id, @tenantId, @personId, @legalEntityId, @empNo,
+                    @hireDate, @probationEnd, @status, @createdAt, @updatedAt, @rowVersion
+                );
+            ";
+            await using var empCmd = new NpgsqlCommand(empSql, conn, tx);
+            empCmd.Parameters.AddWithValue("id", employment.Id);
+            empCmd.Parameters.AddWithValue("tenantId", employment.TenantId.Value);
+            empCmd.Parameters.AddWithValue("personId", employment.PersonId);
+            empCmd.Parameters.AddWithValue("legalEntityId", employment.LegalEntityId.Value);
+            empCmd.Parameters.AddWithValue("empNo", employment.EmployeeNumber);
+            empCmd.Parameters.AddWithValue("hireDate", employment.HireDate.ToDateTime(TimeOnly.MinValue));
+            empCmd.Parameters.AddWithValue("probationEnd", employment.ProbationEndDate.HasValue ? employment.ProbationEndDate.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
+            empCmd.Parameters.AddWithValue("status", (int)employment.Status);
+            empCmd.Parameters.AddWithValue("createdAt", employment.CreatedAt);
+            empCmd.Parameters.AddWithValue("updatedAt", employment.UpdatedAt);
+            empCmd.Parameters.AddWithValue("rowVersion", (int)employment.RowVersion);
+            await empCmd.ExecuteNonQueryAsync(ct);
+
+            // Insert Initial Assignment
+            const string assignSql = @"
+                INSERT INTO people.employment_assignments (
+                    id, employment_id, organization_unit_id, position_id, location_id, manager_employment_id,
+                    job_title_en, job_title_ar, effective_from, effective_to, is_current, created_at
+                ) VALUES (
+                    @id, @empId, @unitId, @posId, @locId, @mgrId,
+                    @jobEn, @jobAr, @effFrom, @effTo, @isCurrent, @createdAt
+                );
+            ";
+            await using var assignCmd = new NpgsqlCommand(assignSql, conn, tx);
+            assignCmd.Parameters.AddWithValue("id", assignment.Id);
+            assignCmd.Parameters.AddWithValue("empId", assignment.EmploymentId);
+            assignCmd.Parameters.AddWithValue("unitId", assignment.OrganizationUnitId);
+            assignCmd.Parameters.AddWithValue("posId", (object?)assignment.PositionId ?? DBNull.Value);
+            assignCmd.Parameters.AddWithValue("locId", (object?)assignment.LocationId ?? DBNull.Value);
+            assignCmd.Parameters.AddWithValue("mgrId", (object?)assignment.ManagerEmploymentId ?? DBNull.Value);
+            assignCmd.Parameters.AddWithValue("jobEn", assignment.JobTitleEn);
+            assignCmd.Parameters.AddWithValue("jobAr", assignment.JobTitleAr);
+            assignCmd.Parameters.AddWithValue("effFrom", assignment.EffectiveFrom.ToDateTime(TimeOnly.MinValue));
+            assignCmd.Parameters.AddWithValue("effTo", assignment.EffectiveTo.HasValue ? assignment.EffectiveTo.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
+            assignCmd.Parameters.AddWithValue("isCurrent", assignment.IsCurrent);
+            assignCmd.Parameters.AddWithValue("createdAt", assignment.CreatedAt);
+            await assignCmd.ExecuteNonQueryAsync(ct);
+
+            // Atomic Outbox Domain Event
+            var createdEvent = new EmployeeCreatedEvent(
+                Guid.NewGuid(),
+                employment.Id,
+                employment.TenantId,
+                employment.LegalEntityId,
+                employment.EmployeeNumber,
+                $"{person.FirstNameEn} {person.LastNameEn}",
+                $"{person.FirstNameAr} {person.LastNameAr}",
+                DateTime.UtcNow
+            );
+
+            const string outboxSql = @"
+                INSERT INTO people.outbox_messages (
+                    id, tenant_id, event_type, aggregate_type, aggregate_id, payload, occurred_at
+                ) VALUES (
+                    @id, @tenantId, @eventType, @aggType, @aggId, @payload::jsonb, @occurredAt
+                );
+            ";
+            await using var outboxCmd = new NpgsqlCommand(outboxSql, conn, tx);
+            outboxCmd.Parameters.AddWithValue("id", createdEvent.EventId);
+            outboxCmd.Parameters.AddWithValue("tenantId", employment.TenantId.Value);
+            outboxCmd.Parameters.AddWithValue("eventType", nameof(EmployeeCreatedEvent));
+            outboxCmd.Parameters.AddWithValue("aggType", "Employment");
+            outboxCmd.Parameters.AddWithValue("aggId", employment.Id);
+            outboxCmd.Parameters.AddWithValue("payload", JsonSerializer.Serialize(createdEvent));
+            outboxCmd.Parameters.AddWithValue("occurredAt", createdEvent.OccurredAt);
+            await outboxCmd.ExecuteNonQueryAsync(ct);
+
+            await tx.CommitAsync(ct);
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
     public async Task<bool> ChangeAssignmentAsync(
         Guid employmentId,
         EmploymentAssignment newAssignment,

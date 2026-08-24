@@ -61,7 +61,7 @@ const sampleRequests: LeaveRequestDto[] = [
     endDate: '2026-09-05',
     durationDays: 5,
     durationMinutes: 2400,
-    status: LeaveRequestStatus.PendingApproval,
+    status: 1,
     statusName: 'PendingApproval',
     reason: 'Family holiday',
     createdAt: '2026-08-24T10:00:00Z',

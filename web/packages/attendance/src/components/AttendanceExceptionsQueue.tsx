@@ -8,9 +8,15 @@ import {
 } from '@zainx/design-system';
 import {
   AttendanceExceptionDto,
-  AttendanceExceptionType,
-  AttendanceExceptionStatus
 } from '@zainx/contracts';
+
+export const AttendanceExceptionType = {
+  MissingClockIn: 1,
+  MissingClockOut: 2,
+  UnexpectedAbsence: 3,
+  LateArrival: 4,
+  EarlyDeparture: 5,
+} as const;
 
 export interface AttendanceExceptionsQueueProps {
   exceptions?: AttendanceExceptionDto[];
@@ -34,19 +40,15 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
 
   if (!isOpen) return null;
 
-  const getExceptionTypeBadge = (type: number, typeName: string) => {
-    switch (type) {
-      case AttendanceExceptionType.MissingClockIn:
-      case AttendanceExceptionType.MissingClockOut:
-        return <Badge variant="warning" label={typeName || 'Missing Punch'} />;
-      case AttendanceExceptionType.UnexpectedAbsence:
-        return <Badge variant="danger" label={typeName || 'Absence'} />;
-      case AttendanceExceptionType.LateArrival:
-      case AttendanceExceptionType.EarlyDeparture:
-        return <Badge variant="secondary" label={typeName || 'Time Anomaly'} />;
-      default:
-        return <Badge variant="default" label={typeName || 'Exception'} />;
+  const getExceptionTypeBadge = (type: any, typeName?: string) => {
+    const s = String(type);
+    if (s === '1' || s === '2' || s === 'MissingClockIn' || s === 'MissingClockOut') {
+      return <Badge variant="warning">{typeName || 'Missing Punch'}</Badge>;
     }
+    if (s === '3' || s === 'UnexpectedAbsence') {
+      return <Badge variant="danger">{typeName || 'Absence'}</Badge>;
+    }
+    return <Badge variant="neutral">{typeName || s || 'Time Anomaly'}</Badge>;
   };
 
   const filteredExceptions = exceptions.filter((e) => {
@@ -85,7 +87,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
               Review and resolve punch anomalies, missing clocks, and unplanned absences
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} ariaLabel="Close exceptions drawer">
+          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close exceptions drawer">
             ✕
           </Button>
         </div>
@@ -111,9 +113,9 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
                 : val === '1'
                 ? 'Missing Out'
                 : val === '2'
-                ? 'Late In'
+                ? 'Late'
                 : val === '3'
-                ? 'Early Out'
+                ? 'Early'
                 : 'Absence'}
             </button>
           ))}
@@ -130,7 +132,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
           ) : filteredExceptions.length === 0 ? (
             <EmptyState
               title="Exceptions Queue Clear"
-              message="No outstanding attendance exceptions found for the active period."
+              description="No outstanding attendance exceptions found for the active period."
             />
           ) : (
             filteredExceptions.map((item) => {
@@ -149,15 +151,15 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
                   <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="text-sm font-semibold text-text-primary">
-                        {item.employeeNameEn || 'Employee'}
+                        {(item as any).employeeNameEn || 'Employee'}
                       </span>
                       <p className="text-xs text-text-muted mt-0.5">{item.details}</p>
                     </div>
-                    {getExceptionTypeBadge(item.type, item.typeName)}
+                    {getExceptionTypeBadge((item as any).type || (item as any).exceptionType, (item as any).typeName)}
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-text-secondary font-mono">
                     <span>{new Date(item.createdAtUtc).toLocaleDateString()}</span>
-                    <span className="capitalize">{item.statusName || 'Pending'}</span>
+                    <span className="capitalize">{(item as any).statusName || item.status || 'Pending'}</span>
                   </div>
                 </div>
               );
@@ -169,7 +171,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
         {selectedException && (
           <div className="p-6 border-t border-border-primary bg-surface-secondary/40 space-y-4">
             <h3 className="text-sm font-semibold text-text-primary">
-              Resolve Exception: {selectedException.typeName}
+              Resolve Exception: {(selectedException as any).typeName || 'Attendance Exception'}
             </h3>
             <div>
               <label htmlFor="resolution-notes" className="block text-xs font-medium text-text-secondary mb-1">
@@ -190,7 +192,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
                 size="sm"
                 disabled={isSubmitting || !resolutionNotes.trim()}
                 onClick={() => handleResolve(true)}
-                ariaLabel="Waive exception without manual clock adjustment"
+                aria-label="Waive exception without manual clock adjustment"
               >
                 Waive Exception
               </Button>
@@ -199,7 +201,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
                 size="sm"
                 disabled={isSubmitting || !resolutionNotes.trim()}
                 onClick={() => handleResolve(false)}
-                ariaLabel="Resolve and apply clock regularisation"
+                aria-label="Resolve and apply clock regularisation"
               >
                 {isSubmitting ? 'Resolving...' : 'Confirm Resolution'}
               </Button>

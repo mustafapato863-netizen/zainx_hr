@@ -36,7 +36,7 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
       case 'Blocking':
-        return <Badge variant="error">Blocking</Badge>;
+        return <Badge variant="danger">Blocking</Badge>;
       case 'Warning':
         return <Badge variant="warning">Warning</Badge>;
       default:
@@ -60,7 +60,7 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
           </span>
         </div>
         <Button id="btn-close-exceptions" variant="ghost" className="p-2" onPress={onClose} aria-label="Close Exceptions Queue">
-          <Icon name="X" className="w-5 h-5" />
+          <Icon name="x" className="w-5 h-5" />
         </Button>
       </div>
 
@@ -125,7 +125,7 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
 
         {exceptions.length === 0 && (
           <div className="p-8 text-center text-neutral-400">
-            <Icon name="CheckCircle" className="w-10 h-10 mx-auto text-emerald-500 mb-2" />
+            <Icon name="check-circle" className="w-10 h-10 mx-auto text-emerald-500 mb-2" />
             <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
               No Exceptions Found
             </p>

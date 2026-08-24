@@ -49,4 +49,11 @@ public class PayrollInputSnapshot
         UnpaidLeaveDays = Math.Max(0, unpaidLeaveDays);
         CapturedAtUtc = DateTime.UtcNow;
     }
+
+    public string ToCanonicalFingerprintString()
+    {
+        // Explicitly excludes volatile PKs, FKs, and timestamps (Id, PayrollRunId, CapturedAtUtc)
+        // Includes ONLY the financially meaningful parameters that impact calculation.
+        return $"{EmploymentId}|SAL:{BaseSalaryMonthly:F2}|SCH:{ScheduledDays}|WKM:{VerifiedWorkedMinutes}|A_ABS:{ApprovedAbsenceDays:F2}|A_LV:{ApprovedLeaveDays:F2}|U_LV:{UnpaidLeaveDays:F2}|ALW:{AllowancesJson}";
+    }
 }
