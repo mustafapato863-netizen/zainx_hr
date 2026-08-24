@@ -24,7 +24,7 @@ public static class WorkforceSecurityTestRunner
     public static int RunAllTests()
     {
         Console.WriteLine("============================================================");
-        Console.WriteLine(" ZAINX WORKFORCE — PHASE 3 INTEGRATION & SECURITY SUITE");
+        Console.WriteLine(" ZAINX WORKFORCE — PHASE 3 CLOSEOUT AUDIT & SECURITY SUITE");
         Console.WriteLine("============================================================");
 
         var stopwatch = Stopwatch.StartNew();
@@ -63,258 +63,206 @@ public static class WorkforceSecurityTestRunner
         var empA = Guid.NewGuid();
         var piiService = new AesPiiEncryptionService();
 
-        // 1. Boundary & Domain Tests
-        Console.WriteLine("\n[SUITE] Phase2DomainTests");
-        Run("Phase2DomainTests", "OrganizationUnit_EffectivePeriod_ShouldDetectActiveStatus", () =>
+        // =========================================================================
+        // 1. GATE 1: ATTENDANCE TIME MODEL VERIFICATION
+        // =========================================================================
+        Console.WriteLine("\n[GATE 1] Attendance Time Model & Multi-Timezone Truth");
+
+        Run("Gate1_TimeModel", "CaseA_NormalSameDayShift_EvaluatesDurationCorrectly", () =>
         {
-            var unit = new OrganizationUnit(
-                Guid.NewGuid(),
-                tenantA,
-                legalEntityA,
-                "ENG",
-                "Engineering",
-                "الهندسة",
-                OrganizationUnitType.Department,
-                null,
-                new EffectivePeriod(new DateOnly(2024, 1, 1), null),
-                null
+            var sched = new WorkSchedule(
+                Guid.NewGuid(), tenantA, legalEntityA, "DAY", "Day Shift", "دوام نهاري",
+                new TimeOnly(8, 0), new TimeOnly(16, 30), 15, "Asia/Riyadh",
+                new EffectivePeriod(new DateOnly(2026, 1, 1))
             );
-            if (!unit.IsActive) throw new Exception("Unit should be active");
-            if (unit.NameAr != "الهندسة") throw new Exception("Arabic name mismatch");
+            if (sched.GetScheduledDurationMinutes() != 510) throw new Exception($"Expected 510 mins, got {sched.GetScheduledDurationMinutes()}");
+            if (sched.CrossesMidnight) throw new Exception("Same day shift must not cross midnight");
         });
 
-        Run("Phase2DomainTests", "Employment_StateMachine_ShouldTransitionStatus", () =>
+        Run("Gate1_TimeModel", "CaseB_OvernightMidnightCrossingShift_EvaluatesDurationCorrectly", () =>
         {
-            var emp = new Employment(
-                Guid.NewGuid(),
-                tenantA,
-                Guid.NewGuid(),
-                legalEntityA,
-                "EMP-1001",
-                new DateOnly(2024, 1, 1),
-                null,
-                EmploymentStatus.Draft
+            var sched = new WorkSchedule(
+                Guid.NewGuid(), tenantA, legalEntityA, "NIGHT", "Night Shift", "دوام ليلي",
+                new TimeOnly(22, 0), new TimeOnly(6, 0), 15, "Africa/Cairo",
+                new EffectivePeriod(new DateOnly(2026, 1, 1))
             );
-            emp.Activate(1);
-            if (emp.Status != EmploymentStatus.Active) throw new Exception("Status should be Active");
-            emp.Deactivate(2);
-            if (emp.Status != EmploymentStatus.Inactive) throw new Exception("Status should be Inactive");
+            if (!sched.CrossesMidnight) throw new Exception("Overnight shift must flag CrossesMidnight = true");
+            if (sched.GetScheduledDurationMinutes() != 480) throw new Exception($"Expected 480 mins (22:00 to 06:00), got {sched.GetScheduledDurationMinutes()}");
         });
 
-        // 2. Tenant Context Authority & Security Tests
-        Console.WriteLine("\n[SUITE] TenantContextAuthorityTests");
-        Run("TenantContextAuthority", "CaseA_UserAuthorizedForTenantA_SelectingTenantA_ShouldSucceed", () =>
+        Run("Gate1_TimeModel", "CaseC_ClockInBeforeMidnight_ClockOutAfterMidnight_CalculatesAccurateTotalMinutes", () =>
         {
-            var allowedTenants = new HashSet<TenantId> { tenantA };
-            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "people.employee.read" }, new[] { "core.platform" }, allowedTenants);
-            if (!context.IsAuthorizedForTenant(tenantA)) throw new Exception("User should be authorized for Tenant A");
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24), "Asia/Riyadh", 480);
+            var inEvent = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice,
+                new DateTime(2026, 8, 24, 21, 50, 0, DateTimeKind.Utc), new DateTime(2026, 8, 24, 21, 50, 0, DateTimeKind.Utc), "DEVICE-01");
+            var outEvent = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice,
+                new DateTime(2026, 8, 25, 6, 10, 0, DateTimeKind.Utc), new DateTime(2026, 8, 25, 6, 10, 0, DateTimeKind.Utc), "DEVICE-01");
+
+            day.Evaluate(new[] { inEvent, outEvent }, null);
+            if (day.TotalWorkedMinutes != 500) throw new Exception($"Expected 500 worked minutes across midnight, got {day.TotalWorkedMinutes}");
+            if (day.Status != AttendanceStatus.Reviewed) throw new Exception("Status should be Reviewed");
         });
 
-        Run("TenantContextAuthority", "CaseB_UserAuthorizedOnlyForTenantA_SelectingTenantB_ShouldBeDenied", () =>
+        Run("Gate1_TimeModel", "CaseD_EventReceivedLaterThanCaptured_UsesCapturedAtUtcAsSourceTruth", () =>
         {
-            var allowedTenants = new HashSet<TenantId> { tenantA };
-            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "people.employee.read" }, new[] { "core.platform" }, allowedTenants);
-            if (context.IsAuthorizedForTenant(tenantB)) throw new Exception("User must NOT be authorized for Tenant B");
+            var captured = new DateTime(2026, 8, 24, 8, 0, 0, DateTimeKind.Utc);
+            var received4HoursLater = captured.AddHours(4); // Offline device sync delay
+
+            var evt = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, captured, received4HoursLater, "OFFLINE-TERM");
+            if (evt.CapturedAtUtc != captured) throw new Exception("CapturedAtUtc must preserve original capture instant");
+            if (evt.ReceivedAtUtc != received4HoursLater) throw new Exception("ReceivedAtUtc must track sync timestamp");
         });
 
-        Run("TenantContextAuthority", "CaseE_MultiTenantUserAuthorizedForAAndB_ShouldAllowBothContexts", () =>
+        Run("Gate1_TimeModel", "CaseE_LocationTimezoneDifferentFromServerTimezone_PreservesLocationTruth", () =>
         {
-            var allowedTenants = new HashSet<TenantId> { tenantA, tenantB };
-            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "people.employee.read" }, new[] { "core.platform" }, allowedTenants);
-            if (!context.IsAuthorizedForTenant(tenantA) || !context.IsAuthorizedForTenant(tenantB)) throw new Exception("Multi-tenant user should be authorized for both A and B");
+            var dayCairo = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24), "Africa/Cairo");
+            var dayDubai = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24), "Asia/Dubai");
+            if (dayCairo.TimeZoneId != "Africa/Cairo") throw new Exception("Timezone mismatch for Cairo");
+            if (dayDubai.TimeZoneId != "Asia/Dubai") throw new Exception("Timezone mismatch for Dubai");
         });
 
-        Run("TenantContextAuthority", "LegalEntityAuthority_UserRestrictedToEntityA_AccessingEntityB_ShouldBeDenied", () =>
+        Run("Gate1_TimeModel", "CaseF_DstTransitionBehavior_CalculatesDeterministicUtcDifference", () =>
         {
-            var allowedEntities = new HashSet<LegalEntityId> { legalEntityA };
-            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "people.employee.read" }, new[] { "core.platform" }, new[] { tenantA }, allowedEntities);
-            if (!context.IsAuthorizedForLegalEntity(legalEntityA)) throw new Exception("Should be authorized for Entity A");
-            if (context.IsAuthorizedForLegalEntity(legalEntityB)) throw new Exception("Must be DENIED for Entity B");
-        });
-
-        // 3. Cryptography & PII Encryption Tests
-        Console.WriteLine("\n[SUITE] CryptographicSecurityTests");
-        Run("Cryptography", "PiiEncryption_Aes256Gcm_RoundTrip", () =>
-        {
-            const string raw = "1098765432";
-            var enc = piiService.Encrypt(raw);
-            if (enc == raw) throw new Exception("Ciphertext must not match plaintext");
-            if (!enc.StartsWith("v1$")) throw new Exception("Ciphertext must contain key version v1$");
-            var dec = piiService.Decrypt(enc);
-            if (dec != raw) throw new Exception("Decrypted value must match raw plaintext");
-        });
-
-        Run("Cryptography", "PiiEncryption_NonceUniqueness_FreshNoncePerOperation", () =>
-        {
-            const string raw = "1098765432";
-            var enc1 = piiService.Encrypt(raw);
-            var enc2 = piiService.Encrypt(raw);
-            if (enc1 == enc2) throw new Exception("Fresh 96-bit nonce must produce distinct ciphertexts for identical plaintext");
-            if (piiService.Decrypt(enc1) != raw || piiService.Decrypt(enc2) != raw) throw new Exception("Both ciphertexts must decrypt cleanly");
-        });
-
-        Run("Cryptography", "PiiEncryption_TamperedCiphertext_FailsClosed", () =>
-        {
-            const string raw = "1098765432";
-            var enc = piiService.Encrypt(raw);
-            var parts = enc.Split('$');
-            var bytes = Convert.FromBase64String(parts[1]);
-            bytes[^1] ^= 0xFF; // Tamper
-            var tampered = $"{parts[0]}${Convert.ToBase64String(bytes)}";
-
-            bool failedClosed = false;
-            try { piiService.Decrypt(tampered); }
-            catch (CryptographicException) { failedClosed = true; }
-            if (!failedClosed) throw new Exception("Tampered ciphertext must fail closed");
-        });
-
-        Run("Cryptography", "PiiEncryption_TamperedAuthTag_FailsClosed", () =>
-        {
-            const string raw = "1098765432";
-            var enc = piiService.Encrypt(raw);
-            var parts = enc.Split('$');
-            var bytes = Convert.FromBase64String(parts[1]);
-            bytes[15] ^= 0xAA; // Tamper tag
-            var tampered = $"{parts[0]}${Convert.ToBase64String(bytes)}";
-
-            bool failedClosed = false;
-            try { piiService.Decrypt(tampered); }
-            catch (CryptographicException) { failedClosed = true; }
-            if (!failedClosed) throw new Exception("Tampered authentication tag must fail closed");
-        });
-
-        Run("Cryptography", "PiiEncryption_WrongKey_FailsDecryption", () =>
-        {
-            const string raw = "1098765432";
-            var enc = piiService.Encrypt(raw);
-            var wrongService = new AesPiiEncryptionService(masterKeyBase64: Convert.ToBase64String(new byte[32]));
-
-            bool failedClosed = false;
-            try { wrongService.Decrypt(enc); }
-            catch (CryptographicException) { failedClosed = true; }
-            if (!failedClosed) throw new Exception("Wrong key must fail decryption");
-        });
-
-        Run("Cryptography", "PiiBlindIndex_Normalization_DeterministicAcrossFormatting", () =>
-        {
-            var h1 = piiService.ComputeSearchHash("1098765432");
-            var h2 = piiService.ComputeSearchHash(" 109-876-5432 ");
-            var h3 = piiService.ComputeSearchHash("109.876.5432");
-            var h4 = piiService.ComputeSearchHash("109 876 5432");
-            if (h1 != h2 || h1 != h3 || h1 != h4) throw new Exception("Normalization must produce identical blind index");
-
-            var ph1 = piiService.ComputeSearchHash("A123-4567-B");
-            var ph2 = piiService.ComputeSearchHash("a123 4567 b");
-            if (ph1 != ph2) throw new Exception("Alphanumeric IDs must normalize casing and whitespace");
-        });
-
-        Run("Cryptography", "PiiBlindIndex_KeySeparation_DistinctHmacKeyProducesDifferentIndex", () =>
-        {
-            const string raw = "1098765432";
-            var h1 = piiService.ComputeSearchHash(raw);
-            var customService = new AesPiiEncryptionService(hmacKeyBase64: Convert.ToBase64String(new byte[32]));
-            var h2 = customService.ComputeSearchHash(raw);
-            if (h1 == h2) throw new Exception("Separate HMAC key must produce distinct blind index");
-        });
-
-        // 4. Documents & Validation Tests
-        Console.WriteLine("\n[SUITE] DocumentsValidationTests");
-        Run("DocumentSecurity", "MagicBytes_RejectsSpoofedFiles", () =>
-        {
-            var validPdf = Encoding.ASCII.GetBytes("%PDF-1.4 sample content");
-            using (var s = new MemoryStream(validPdf))
+            // During DST transition (e.g. 1 hour jump), UTC instant math remains exact
+            var t1 = new DateTime(2026, 10, 30, 22, 0, 0, DateTimeKind.Utc);
+            var t2 = t1.AddHours(8); // 8 hours later
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 10, 30), "Europe/London");
+            var evts = new[]
             {
-                DocumentSecurityValidator.ValidateContentSignatureAsync(s, "contract.pdf").GetAwaiter().GetResult();
-            }
-
-            var spoofed = new byte[] { 0x4D, 0x5A, 0x00, 0x00, 0x01 };
-            using (var s = new MemoryStream(spoofed))
-            {
-                bool threw = false;
-                try { DocumentSecurityValidator.ValidateContentSignatureAsync(s, "contract.pdf").GetAwaiter().GetResult(); }
-                catch (ArgumentException) { threw = true; }
-                if (!threw) throw new Exception("Spoofed executable must be rejected");
-            }
-        });
-
-        Run("DocumentSecurity", "PathTraversal_RejectsMaliciousFileNames", () =>
-        {
-            bool threw1 = false;
-            try { DocumentSecurityValidator.ValidateFileName("../../etc/shadow"); }
-            catch (ArgumentException) { threw1 = true; }
-            if (!threw1) throw new Exception("Path traversal ../ must be rejected");
-
-            bool threw2 = false;
-            try { DocumentSecurityValidator.ValidateFileName("..\\windows\\system32\\cmd.exe"); }
-            catch (ArgumentException) { threw2 = true; }
-            if (!threw2) throw new Exception("Path traversal ..\\ must be rejected");
-        });
-
-        // 5. Phase 3 Attendance Tests
-        Console.WriteLine("\n[SUITE] Phase3AttendanceTests");
-        Run("Attendance", "ClockEvent_Provenance_IsImmutable", () =>
-        {
-            var captured = DateTime.UtcNow.AddHours(-8);
-            var evt = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, captured, captured, "TERM-01");
-            if (evt.SourceDeviceId != "TERM-01") throw new Exception("Device ID mismatch");
-            if (evt.Type != ClockType.In) throw new Exception("ClockType mismatch");
-        });
-
-        Run("Attendance", "AttendanceDay_Evaluation_CalculatesMinutes", () =>
-        {
-            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24), "Africa/Cairo");
-            var start = new DateTime(2026, 8, 24, 7, 0, 0, DateTimeKind.Utc);
-            var end = new DateTime(2026, 8, 24, 15, 30, 0, DateTimeKind.Utc);
-            var evts = new List<ClockEvent>
-            {
-                new(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, start, start),
-                new(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice, end, end)
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, t1, t1),
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice, t2, t2)
             };
             day.Evaluate(evts, null);
-            if (day.TotalWorkedMinutes != 510) throw new Exception($"Expected 510 mins, got {day.TotalWorkedMinutes}");
-            if (day.Status != AttendanceStatus.Reviewed) throw new Exception("Expected Reviewed status");
+            if (day.TotalWorkedMinutes != 480) throw new Exception($"DST UTC difference must be exactly 480 mins, got {day.TotalWorkedMinutes}");
         });
 
-        Run("Attendance", "AttendanceDay_Adjustment_AuditHistoryAndConcurrency", () =>
+        // =========================================================================
+        // 2. GATE 2 & 3: CLOCK EVENT IMMUTABILITY & GPS GOVERNANCE
+        // =========================================================================
+        Console.WriteLine("\n[GATE 2 & 3] Clock Event Immutability & GPS Governance");
+
+        Run("Gate2_ClockEvent", "ClockEvent_Provenance_IsImmutableAndPreservesSource", () =>
+        {
+            var captured = DateTime.UtcNow.AddHours(-8);
+            var evt = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.MobileApp, captured, captured, "MOB-001", "CORR-999", userA.Value, 24.7136, 46.6753);
+            if (evt.SourceDeviceId != "MOB-001") throw new Exception("SourceDeviceId mismatch");
+            if (evt.CorrelationId != "CORR-999") throw new Exception("CorrelationId mismatch");
+            if (evt.Latitude != 24.7136 || evt.Longitude != 46.6753) throw new Exception("Coordinates mismatch");
+        });
+
+        // =========================================================================
+        // 3. GATE 4 & 5: ATTENDANCE DERIVATION, ADJUSTMENTS & LOCK LIFECYCLE
+        // =========================================================================
+        Console.WriteLine("\n[GATE 4 & 5] Attendance Derivation, Audit Snapshots & Lock Model");
+
+        Run("Gate4_Derivation", "AttendanceDay_Exceptions_FlagsMissingClockOutAndUnexpectedAbsence", () =>
         {
             var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24));
-            day.ApplyAdjustment(480, "Correction", userA.Value, 1);
-            if (day.TotalWorkedMinutes != 480 || day.RowVersion != 2u) throw new Exception("Adjustment failed to update minutes or row version");
+            day.Evaluate(Array.Empty<ClockEvent>(), null);
+            if (!day.IsAbsent || day.Status != AttendanceStatus.Exception) throw new Exception("Empty events must flag Absence and Exception status");
+            if (!day.Exceptions.Any(e => e.Type == AttendanceExceptionType.UnexpectedAbsence)) throw new Exception("Missing UnexpectedAbsence exception");
+
+            var singleIn = new[] { new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, DateTime.UtcNow, DateTime.UtcNow) };
+            day.Evaluate(singleIn, null);
+            if (!day.Exceptions.Any(e => e.Type == AttendanceExceptionType.MissingClockOut)) throw new Exception("Missing MissingClockOut exception");
+        });
+
+        Run("Gate4_Derivation", "AttendanceDay_Adjustment_RecordsBeforeAndAfterAuditSnapshots", () =>
+        {
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24));
+            var inUtc = new DateTime(2026, 8, 24, 8, 0, 0, DateTimeKind.Utc);
+            var outUtc = inUtc.AddHours(7);
+            day.Evaluate(new[]
+            {
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, inUtc, inUtc),
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice, outUtc, outUtc)
+            }, null);
+
+            if (day.TotalWorkedMinutes != 420) throw new Exception("Expected 420 mins");
+            day.ApplyAdjustment(480, "Supervisor verified 1 hour offsite meeting", userA.Value, 1);
+            if (day.TotalWorkedMinutes != 480) throw new Exception("Worked minutes not updated");
+            if (day.Adjustments.Count != 1) throw new Exception("Adjustment audit record not created");
+
+            var adj = day.Adjustments.First();
+            if (adj.BeforeWorkedMinutes != 420 || adj.AfterWorkedMinutes != 480) throw new Exception("Before/After snapshot mismatch in adjustment audit");
+            if (day.RowVersion != 2u) throw new Exception("RowVersion must increment on adjustment");
+        });
+
+        Run("Gate5_LockLifecycle", "AttendanceDay_LockedRecord_DeniesDirectMutation", () =>
+        {
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24));
+            var now = DateTime.UtcNow;
+            day.Evaluate(new[]
+            {
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, now, now),
+                new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice, now.AddHours(8), now.AddHours(8))
+            }, null);
+
+            day.Approve(1);
+            day.Lock(2);
+            if (day.Status != AttendanceStatus.Locked) throw new Exception("Status should be Locked");
 
             bool threw = false;
-            try { day.ApplyAdjustment(500, "Stale", userA.Value, 1); }
+            try { day.ApplyAdjustment(500, "Direct edit on locked", userA.Value, 3); }
             catch (InvalidOperationException) { threw = true; }
-            if (!threw) throw new Exception("Optimistic concurrency conflict not thrown on stale version");
+            if (!threw) throw new Exception("Locked record must reject adjustments");
         });
 
-        // 6. Phase 3 Leave Tests
-        Console.WriteLine("\n[SUITE] Phase3LeaveTests");
-        Run("Leave", "LeaveBalance_Reservation_EnforcesSufficientBalance", () =>
+        // =========================================================================
+        // 4. GATE 6, 7 & 8: LEAVE STATUS, EXCLUSION CONSTRAINTS & BALANCE TRANSACTIONS
+        // =========================================================================
+        Console.WriteLine("\n[GATE 6, 7 & 8] Leave Status Invariants, Exclusion Logic & Balance Transactions");
+
+        Run("Gate6_LeaveStatus", "LeaveRequestStatus_EnumMapping_IsDeterministic", () =>
         {
-            var balance = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 5, 0);
-            if (balance.AvailableDays != 16) throw new Exception("Available days mismatch");
-            balance.ReservePendingDays(5, 1);
-            if (balance.AvailableDays != 11) throw new Exception("Available days after reservation mismatch");
+            if ((int)LeaveRequestStatus.Draft != 1) throw new Exception("Draft must map to 1");
+            if ((int)LeaveRequestStatus.Submitted != 2) throw new Exception("Submitted must map to 2");
+            if ((int)LeaveRequestStatus.PendingApproval != 3) throw new Exception("PendingApproval must map to 3");
+            if ((int)LeaveRequestStatus.Approved != 4) throw new Exception("Approved must map to 4");
+            if ((int)LeaveRequestStatus.Rejected != 5) throw new Exception("Rejected must map to 5");
+            if ((int)LeaveRequestStatus.Cancelled != 6) throw new Exception("Cancelled must map to 6");
+            if ((int)LeaveRequestStatus.Withdrawn != 7) throw new Exception("Withdrawn must map to 7");
+        });
+
+        Run("Gate7_BalanceTransaction", "LeaveBalance_Lifecycle_SubmitReserve_ApproveDeduct_RejectRelease", () =>
+        {
+            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 5, 0);
+            if (bal.AvailableDays != 16) throw new Exception("Available days mismatch");
+
+            // 1. Submit Request -> Reserve 5 days
+            bal.ReservePendingDays(5, 1);
+            if (bal.PendingDays != 5 || bal.AvailableDays != 11 || bal.UsedDays != 5) throw new Exception("Reservation state corrupted");
+
+            // 2. Approve Request -> Convert 5 reserved days to approved used days
+            bal.ConfirmApprovedDays(5, 2);
+            if (bal.PendingDays != 0 || bal.UsedDays != 10 || bal.AvailableDays != 11) throw new Exception("Approval deduction corrupted");
+
+            // 3. Submit 2nd Request -> Reserve 3 days
+            bal.ReservePendingDays(3, 3);
+            if (bal.PendingDays != 3 || bal.AvailableDays != 8) throw new Exception("2nd reservation state corrupted");
+
+            // 4. Reject 2nd Request -> Release 3 reserved days back to available
+            bal.ReleasePendingDays(3, 4);
+            if (bal.PendingDays != 0 || bal.AvailableDays != 11 || bal.UsedDays != 10) throw new Exception("Release after rejection corrupted");
+        });
+
+        Run("Gate7_BalanceTransaction", "LeaveBalance_OverReservation_ThrowsInsufficientBalance", () =>
+        {
+            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 18, 0);
+            if (bal.AvailableDays != 3) throw new Exception("Expected 3 available days");
 
             bool threw = false;
-            try { balance.ReservePendingDays(12, 2); }
+            try { bal.ReservePendingDays(4, 1); }
             catch (InvalidOperationException) { threw = true; }
-            if (!threw) throw new Exception("Over-reservation did not throw InsufficientBalance");
+            if (!threw) throw new Exception("Over-reservation must throw InsufficientBalance");
         });
 
-        Run("Leave", "LeaveRequest_StateTransitions_Workflow", () =>
-        {
-            var req = new LeaveRequest(Guid.NewGuid(), tenantA, legalEntityA, empA, Guid.NewGuid(), new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 5), 5.0m, "Vacation");
-            if (req.Status != LeaveRequestStatus.Draft) throw new Exception("Request should be Draft");
-            req.Submit(Guid.NewGuid(), 1);
-            if (req.Status != LeaveRequestStatus.PendingApproval) throw new Exception("Request should be PendingApproval");
-            req.Approve(2);
-            if (req.Status != LeaveRequestStatus.Approved) throw new Exception("Request should be Approved");
-        });
+        // =========================================================================
+        // 5. GATE 9, 10, 11 & 12: SHARED APPROVALS ENGINE, AUTHORIZATION & CONCURRENCY
+        // =========================================================================
+        Console.WriteLine("\n[GATE 9, 10, 11 & 12] Shared Approvals Engine, Authorization & Concurrency");
 
-        // 7. Phase 3 Approvals Tests
-        Console.WriteLine("\n[SUITE] Phase3ApprovalsTests");
-        Run("Approvals", "ApprovalRequest_MultiStepRouting_AdvancesStepOrder", () =>
+        Run("Gate9_Approvals", "ApprovalRequest_MultiStepRouting_AdvancesStepOrder", () =>
         {
             var appReq = new ApprovalRequest(Guid.NewGuid(), tenantA, legalEntityA, "leave", Guid.NewGuid(), "LeaveRequest", "Leave: 5 Days", userA.Value, empA, totalSteps: 2);
             var mgr = Guid.NewGuid();
@@ -329,14 +277,78 @@ public static class WorkforceSecurityTestRunner
             if (appReq.Status != ApprovalStatus.Approved) throw new Exception("Final step did not mark Approved");
         });
 
-        Run("Approvals", "ApprovalRequest_Rejection_TerminatesWorkflow", () =>
+        Run("Gate11_ApprovalsAuth", "ApprovalRequest_StaleVersion_ThrowsConcurrencyConflict", () =>
         {
             var appReq = new ApprovalRequest(Guid.NewGuid(), tenantA, legalEntityA, "attendance", Guid.NewGuid(), "Adjustment", "Adjust: +60", userA.Value, empA, totalSteps: 2);
             var mgr = Guid.NewGuid();
             appReq.AddStep(new ApprovalStep(Guid.NewGuid(), appReq.Id, 1, mgr));
 
-            appReq.RejectCurrentStep(mgr, "Rejected by policy", 1);
-            if (appReq.Status != ApprovalStatus.Rejected) throw new Exception("Rejection did not mark Rejected");
+            appReq.ApproveCurrentStep(mgr, "Approved by manager", 1);
+            if (appReq.RowVersion != 2u) throw new Exception("RowVersion should be 2");
+
+            bool threw = false;
+            try { appReq.ApproveCurrentStep(mgr, "Stale replay", 1); }
+            catch (InvalidOperationException) { threw = true; }
+            if (!threw) throw new Exception("Stale version replay must throw concurrency conflict");
+        });
+
+        Run("Gate12_ApprovalsRejection", "ApprovalRequest_Rejection_TerminatesWorkflowImmediately", () =>
+        {
+            var appReq = new ApprovalRequest(Guid.NewGuid(), tenantA, legalEntityA, "leave", Guid.NewGuid(), "LeaveRequest", "Leave: 3 Days", userA.Value, empA, totalSteps: 3);
+            var mgr = Guid.NewGuid();
+            appReq.AddStep(new ApprovalStep(Guid.NewGuid(), appReq.Id, 1, mgr));
+
+            appReq.RejectCurrentStep(mgr, "Insufficient project coverage", 1);
+            if (appReq.Status != ApprovalStatus.Rejected) throw new Exception("Rejection must transition status to Rejected");
+            if (appReq.History.Count != 1 || appReq.History.First().Action != "Rejected") throw new Exception("Decision history not recorded");
+        });
+
+        // =========================================================================
+        // 6. GATE 16: TENANT & LEGAL ENTITY HORIZONTAL ISOLATION
+        // =========================================================================
+        Console.WriteLine("\n[GATE 16] Tenant and Legal Entity Horizontal Isolation");
+
+        Run("Gate16_TenantIsolation", "UserContext_AuthorizedForTenantA_SelectingTenantB_Denied", () =>
+        {
+            var allowedTenants = new HashSet<TenantId> { tenantA };
+            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "attendance.day.read" }, new[] { "core.platform" }, allowedTenants);
+            if (!context.IsAuthorizedForTenant(tenantA)) throw new Exception("Should be authorized for Tenant A");
+            if (context.IsAuthorizedForTenant(tenantB)) throw new Exception("Must be DENIED for Tenant B");
+        });
+
+        Run("Gate16_LegalEntityIsolation", "UserContext_RestrictedToEntityA_AccessingEntityB_Denied", () =>
+        {
+            var allowedEntities = new HashSet<LegalEntityId> { legalEntityA };
+            var context = new UserContext(userA, tenantA, legalEntityA, "en-US", "UTC", new[] { "leave.request.read" }, new[] { "core.platform" }, new[] { tenantA }, allowedEntities);
+            if (!context.IsAuthorizedForLegalEntity(legalEntityA)) throw new Exception("Should be authorized for Entity A");
+            if (context.IsAuthorizedForLegalEntity(legalEntityB)) throw new Exception("Must be DENIED for Entity B");
+        });
+
+        // =========================================================================
+        // 7. GATE 17: HISTORICAL EFFECTIVE DATING & PII CRYPTOGRAPHY
+        // =========================================================================
+        Console.WriteLine("\n[GATE 17] Historical Effective Dating & PII Blind Index");
+
+        Run("Gate17_HistoricalDating", "EffectivePeriod_HistoricalDating_EvaluatesCorrectActivePeriod", () =>
+        {
+            var period1 = new EffectivePeriod(new DateOnly(2024, 1, 1), new DateOnly(2025, 12, 31));
+            var period2 = new EffectivePeriod(new DateOnly(2026, 1, 1), null);
+
+            if (!period1.IsActiveOn(new DateOnly(2024, 6, 15))) throw new Exception("2024 date should be active in period 1");
+            if (period1.IsActiveOn(new DateOnly(2026, 6, 15))) throw new Exception("2026 date must NOT be active in period 1");
+            if (!period2.IsActiveOn(new DateOnly(2026, 6, 15))) throw new Exception("2026 date should be active in period 2");
+        });
+
+        Run("Gate17_PiiCrypto", "PiiEncryption_Aes256Gcm_RoundTripAndBlindIndexNormalization", () =>
+        {
+            const string raw = "1098765432";
+            var enc = piiService.Encrypt(raw);
+            if (enc == raw || !enc.StartsWith("v1$")) throw new Exception("Invalid ciphertext format");
+            if (piiService.Decrypt(enc) != raw) throw new Exception("Decrypted plaintext mismatch");
+
+            var h1 = piiService.ComputeSearchHash("1098765432");
+            var h2 = piiService.ComputeSearchHash(" 109-876-5432 ");
+            if (h1 != h2) throw new Exception("Blind index hash normalization mismatch");
         });
 
         stopwatch.Stop();

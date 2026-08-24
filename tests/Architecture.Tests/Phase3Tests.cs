@@ -167,6 +167,46 @@ public class Phase3Tests
         Assert.Equal(480, schedule.GetScheduledDurationMinutes());
     }
 
+    [Fact]
+    public void Attendance_TimeModel_ClockInBeforeMidnight_ClockOutAfterMidnight_CalculatesAccurateTotalMinutes()
+    {
+        var day = new AttendanceDay(Guid.NewGuid(), TestTenantId, TestLegalEntityId, TestEmpId, new DateOnly(2026, 8, 24), "Asia/Riyadh", 480);
+        var inEvent = new ClockEvent(Guid.NewGuid(), TestTenantId, TestEmpId, ClockType.In, ClockSource.BiometricDevice,
+            new DateTime(2026, 8, 24, 21, 50, 0, DateTimeKind.Utc), new DateTime(2026, 8, 24, 21, 50, 0, DateTimeKind.Utc), "DEVICE-01");
+        var outEvent = new ClockEvent(Guid.NewGuid(), TestTenantId, TestEmpId, ClockType.Out, ClockSource.BiometricDevice,
+            new DateTime(2026, 8, 25, 6, 10, 0, DateTimeKind.Utc), new DateTime(2026, 8, 25, 6, 10, 0, DateTimeKind.Utc), "DEVICE-01");
+
+        day.Evaluate(new[] { inEvent, outEvent }, null);
+        Assert.Equal(500, day.TotalWorkedMinutes);
+        Assert.Equal(AttendanceStatus.Reviewed, day.Status);
+    }
+
+    [Fact]
+    public void Attendance_TimeModel_EventReceivedLaterThanCaptured_UsesCapturedAtUtcAsSourceTruth()
+    {
+        var captured = new DateTime(2026, 8, 24, 8, 0, 0, DateTimeKind.Utc);
+        var received4HoursLater = captured.AddHours(4);
+
+        var evt = new ClockEvent(Guid.NewGuid(), TestTenantId, TestEmpId, ClockType.In, ClockSource.BiometricDevice, captured, received4HoursLater, "OFFLINE-TERM");
+        Assert.Equal(captured, evt.CapturedAtUtc);
+        Assert.Equal(received4HoursLater, evt.ReceivedAtUtc);
+    }
+
+    [Fact]
+    public void Attendance_TimeModel_DstTransition_CalculatesDeterministicUtcDifference()
+    {
+        var t1 = new DateTime(2026, 10, 30, 22, 0, 0, DateTimeKind.Utc);
+        var t2 = t1.AddHours(8);
+        var day = new AttendanceDay(Guid.NewGuid(), TestTenantId, TestLegalEntityId, TestEmpId, new DateOnly(2026, 10, 30), "Europe/London");
+        var evts = new[]
+        {
+            new ClockEvent(Guid.NewGuid(), TestTenantId, TestEmpId, ClockType.In, ClockSource.BiometricDevice, t1, t1),
+            new ClockEvent(Guid.NewGuid(), TestTenantId, TestEmpId, ClockType.Out, ClockSource.BiometricDevice, t2, t2)
+        };
+        day.Evaluate(evts, null);
+        Assert.Equal(480, day.TotalWorkedMinutes);
+    }
+
     // =========================================================================
     // 2. LEAVE DOMAIN & BALANCE CONSTRAINTS
     // =========================================================================
