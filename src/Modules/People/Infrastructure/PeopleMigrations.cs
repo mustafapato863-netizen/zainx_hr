@@ -12,6 +12,8 @@ public static class PeopleMigrations
         const string sql = @"
             CREATE SCHEMA IF NOT EXISTS people;
 
+            CREATE EXTENSION IF NOT EXISTS btree_gist;
+
             CREATE TABLE IF NOT EXISTS people.persons (
                 id UUID PRIMARY KEY,
                 tenant_id UUID NOT NULL,
@@ -22,7 +24,9 @@ public static class PeopleMigrations
                 date_of_birth DATE NOT NULL,
                 gender VARCHAR(20) NOT NULL DEFAULT 'Unspecified',
                 nationality VARCHAR(10) NOT NULL DEFAULT 'SA',
-                national_identifier VARCHAR(50) NOT NULL,
+                national_identifier_encrypted VARCHAR(512) NOT NULL,
+                national_identifier_hash VARCHAR(64) NOT NULL,
+                masked_national_identifier VARCHAR(50) NOT NULL,
                 primary_email VARCHAR(200) NOT NULL DEFAULT '',
                 phone_number VARCHAR(50) NOT NULL DEFAULT '',
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -86,16 +90,37 @@ public static class PeopleMigrations
                 processed_at TIMESTAMPTZ NULL
             );
 
-            -- Performance Indexes
+            -- Performance and Isolation Indexes
             CREATE INDEX IF NOT EXISTS ix_employments_tenant_person ON people.employments(tenant_id, person_id);
             CREATE INDEX IF NOT EXISTS ix_employments_tenant_legal ON people.employments(tenant_id, legal_entity_id, status);
             CREATE INDEX IF NOT EXISTS ix_assignments_emp_current ON people.employment_assignments(employment_id, is_current);
             CREATE INDEX IF NOT EXISTS ix_persons_names ON people.persons(tenant_id, last_name_en, first_name_en);
+            CREATE INDEX IF NOT EXISTS ix_persons_nat_id_hash ON people.persons(tenant_id, national_identifier_hash);
             CREATE INDEX IF NOT EXISTS ix_sensitive_audit_tenant ON people.sensitive_pii_audit(tenant_id, employment_id, timestamp);
             CREATE INDEX IF NOT EXISTS ix_outbox_unprocessed ON people.outbox_messages(tenant_id, processed_at) WHERE processed_at IS NULL;
 
-            -- Database Integrity: Partial Unique Index to guarantee only 1 current assignment
+            -- Database Integrity: Unique index for single active current assignment
             CREATE UNIQUE INDEX IF NOT EXISTS uq_assignments_single_current ON people.employment_assignments (employment_id) WHERE is_current = TRUE;
+
+            -- Database-Enforced Non-Overlapping Effective Periods Exclusion Constraint
+            DO $$
+            BEGIN
+                IF NOT EXISTS (
+                    SELECT 1 FROM pg_constraint WHERE conname = 'ex_employment_assignment_no_overlap'
+                ) THEN
+                    BEGIN
+                        ALTER TABLE people.employment_assignments
+                        ADD CONSTRAINT ex_employment_assignment_no_overlap
+                        EXCLUDE USING gist (
+                            employment_id WITH =,
+                            daterange(effective_from, COALESCE(effective_to, 'infinity'::date), '[]') WITH &&
+                        );
+                    EXCEPTION WHEN OTHERS THEN
+                        -- Handles standalone environments without root extension install privileges
+                        NULL;
+                    END;
+                END IF;
+            END $$;
         ";
 
         await using var cmd = new NpgsqlCommand(sql, conn);

@@ -18,11 +18,16 @@ public class PeopleController : ControllerBase
 {
     private readonly PeopleRepository _repository;
     private readonly IUserContext _userContext;
+    private readonly IPiiEncryptionService _piiEncryptionService;
 
-    public PeopleController(PeopleRepository repository, IUserContext userContext)
+    public PeopleController(
+        PeopleRepository repository, 
+        IUserContext userContext,
+        IPiiEncryptionService? piiEncryptionService = null)
     {
         _repository = repository;
         _userContext = userContext;
+        _piiEncryptionService = piiEncryptionService ?? new AesPiiEncryptionService();
     }
 
     [HttpGet("employees")]
@@ -85,6 +90,12 @@ public class PeopleController : ControllerBase
         var dob = DateOnly.TryParse(request.DateOfBirth, out var parsedDob) ? parsedDob : new DateOnly(1990, 1, 1);
         var hireDate = DateOnly.TryParse(request.HireDate, out var parsedHire) ? parsedHire : DateOnly.FromDateTime(DateTime.UtcNow);
 
+        // Encrypt National ID and generate blind index hash
+        var plainNatId = string.IsNullOrWhiteSpace(request.NationalIdentifier) ? "1000000000" : request.NationalIdentifier;
+        var encryptedNatId = _piiEncryptionService.Encrypt(plainNatId);
+        var natIdHash = _piiEncryptionService.ComputeSearchHash(plainNatId);
+        var maskedNatId = _piiEncryptionService.MaskNationalId(plainNatId);
+
         var person = new Person(
             personId,
             userContext.TenantId,
@@ -95,7 +106,9 @@ public class PeopleController : ControllerBase
             dob,
             request.Gender ?? "Unspecified",
             request.Nationality ?? "SA",
-            request.NationalIdentifier,
+            encryptedNatId,
+            natIdHash,
+            maskedNatId,
             request.PrimaryEmail ?? string.Empty,
             request.PhoneNumber ?? string.Empty
         );

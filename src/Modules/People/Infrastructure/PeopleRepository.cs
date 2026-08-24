@@ -5,16 +5,19 @@ using Npgsql;
 using Workforce.Modules.People.Application;
 using Workforce.Modules.People.Domain;
 using Workforce.SharedKernel.Primitives;
+using Workforce.SharedKernel.Security;
 
 namespace Workforce.Modules.People.Infrastructure;
 
 public class PeopleRepository
 {
     private readonly string _connectionString;
+    private readonly IPiiEncryptionService _piiEncryptionService;
 
-    public PeopleRepository(string connectionString)
+    public PeopleRepository(string connectionString, IPiiEncryptionService? piiEncryptionService = null)
     {
         _connectionString = connectionString;
+        _piiEncryptionService = piiEncryptionService ?? new AesPiiEncryptionService();
     }
 
     public async Task<PagedResult<EmployeeSummaryDto>> QueryDirectoryAsync(
@@ -39,16 +42,25 @@ public class PeopleRepository
         {
             whereClause += " AND e.legal_entity_id = @legalEntityId";
         }
+        
+        string? searchHash = null;
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
+            var trimmedSearch = searchTerm.Trim();
+            if (trimmedSearch.Length >= 6 && long.TryParse(trimmedSearch, out _))
+            {
+                searchHash = _piiEncryptionService.ComputeSearchHash(trimmedSearch);
+            }
+
             whereClause += @" AND (
                 p.first_name_en ILIKE @search OR 
                 p.last_name_en ILIKE @search OR 
                 p.first_name_ar ILIKE @search OR 
                 p.last_name_ar ILIKE @search OR 
                 e.employee_number ILIKE @search OR
-                p.primary_email ILIKE @search
-            )";
+                p.primary_email ILIKE @search" + 
+                (searchHash != null ? " OR p.national_identifier_hash = @searchHash" : "") + 
+            ")";
         }
         if (departmentId.HasValue)
         {
@@ -71,6 +83,7 @@ public class PeopleRepository
         countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
         if (legalEntityId.HasValue) countCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
         if (!string.IsNullOrWhiteSpace(searchTerm)) countCmd.Parameters.AddWithValue("search", $"%{searchTerm}%");
+        if (searchHash != null) countCmd.Parameters.AddWithValue("searchHash", searchHash);
         if (departmentId.HasValue) countCmd.Parameters.AddWithValue("departmentId", departmentId.Value);
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<EmploymentStatus>(status, true, out var stVal))
         {
@@ -83,7 +96,7 @@ public class PeopleRepository
             SELECT 
                 e.id, e.tenant_id, e.legal_entity_id, e.employee_number,
                 p.first_name_en, p.last_name_en, p.first_name_ar, p.last_name_ar,
-                p.primary_email, p.phone_number, p.national_identifier,
+                p.primary_email, p.phone_number, p.masked_national_identifier,
                 e.status, e.hire_date, e.row_version,
                 COALESCE(ou.name_en, 'Unassigned') as dept_en,
                 COALESCE(ou.name_ar, 'غير محدد') as dept_ar,
@@ -104,6 +117,7 @@ public class PeopleRepository
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
         if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
         if (!string.IsNullOrWhiteSpace(searchTerm)) cmd.Parameters.AddWithValue("search", $"%{searchTerm}%");
+        if (searchHash != null) cmd.Parameters.AddWithValue("searchHash", searchHash);
         if (departmentId.HasValue) cmd.Parameters.AddWithValue("departmentId", departmentId.Value);
         if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse<EmploymentStatus>(status, true, out var stVal2))
         {
@@ -116,9 +130,6 @@ public class PeopleRepository
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         while (await reader.ReadAsync(ct))
         {
-            var rawNationalId = reader.GetString(10);
-            var maskedId = MaskNationalId(rawNationalId);
-
             items.Add(new EmployeeSummaryDto
             {
                 Id = reader.GetGuid(0),
@@ -133,7 +144,7 @@ public class PeopleRepository
                 FullNameAr = $"{reader.GetString(6)} {reader.GetString(7)}",
                 PrimaryEmail = reader.GetString(8),
                 PhoneNumber = reader.GetString(9),
-                MaskedNationalId = maskedId,
+                MaskedNationalId = reader.GetString(10),
                 Status = ((EmploymentStatus)reader.GetInt32(11)).ToString(),
                 HireDate = DateOnly.FromDateTime(reader.GetDateTime(12)).ToString("yyyy-MM-dd"),
                 RowVersion = (uint)reader.GetInt32(13),
@@ -167,7 +178,7 @@ public class PeopleRepository
             SELECT 
                 e.id, e.tenant_id, e.person_id, e.legal_entity_id, e.employee_number,
                 p.first_name_en, p.last_name_en, p.first_name_ar, p.last_name_ar,
-                p.gender, p.nationality, p.date_of_birth, p.national_identifier,
+                p.gender, p.nationality, p.date_of_birth, p.masked_national_identifier,
                 p.primary_email, p.phone_number,
                 e.status, e.hire_date, e.probation_end_date, e.termination_date, e.termination_reason,
                 e.row_version
@@ -192,7 +203,7 @@ public class PeopleRepository
             if (await reader.ReadAsync(ct))
             {
                 var rawDob = DateOnly.FromDateTime(reader.GetDateTime(11));
-                var rawNatId = reader.GetString(12);
+                var maskedNatId = reader.GetString(12);
 
                 profile = new EmployeeProfileDto
                 {
@@ -209,8 +220,8 @@ public class PeopleRepository
                     FullNameAr = $"{reader.GetString(7)} {reader.GetString(8)}",
                     Gender = reader.GetString(9),
                     Nationality = reader.GetString(10),
-                    MaskedDateOfBirth = MaskDateOfBirth(rawDob),
-                    MaskedNationalId = MaskNationalId(rawNatId),
+                    MaskedDateOfBirth = _piiEncryptionService.MaskDateOfBirth(rawDob),
+                    MaskedNationalId = maskedNatId,
                     PrimaryEmail = reader.GetString(13),
                     PhoneNumber = reader.GetString(14),
                     Status = ((EmploymentStatus)reader.GetInt32(15)).ToString(),
@@ -286,16 +297,16 @@ public class PeopleRepository
 
         try
         {
-            // Insert Person
+            // Insert Person with encrypted PII persistence
             const string personSql = @"
                 INSERT INTO people.persons (
                     id, tenant_id, first_name_en, last_name_en, first_name_ar, last_name_ar,
-                    date_of_birth, gender, nationality, national_identifier, primary_email, phone_number,
-                    created_at, updated_at
+                    date_of_birth, gender, nationality, national_identifier_encrypted, national_identifier_hash, masked_national_identifier,
+                    primary_email, phone_number, created_at, updated_at
                 ) VALUES (
                     @id, @tenantId, @fnEn, @lnEn, @fnAr, @lnAr,
-                    @dob, @gender, @nationality, @natId, @email, @phone,
-                    @createdAt, @updatedAt
+                    @dob, @gender, @nationality, @natEnc, @natHash, @natMask,
+                    @email, @phone, @createdAt, @updatedAt
                 );
             ";
             await using var personCmd = new NpgsqlCommand(personSql, conn, tx);
@@ -308,7 +319,9 @@ public class PeopleRepository
             personCmd.Parameters.AddWithValue("dob", person.DateOfBirth.ToDateTime(TimeOnly.MinValue));
             personCmd.Parameters.AddWithValue("gender", person.Gender);
             personCmd.Parameters.AddWithValue("nationality", person.Nationality);
-            personCmd.Parameters.AddWithValue("natId", person.NationalIdentifier);
+            personCmd.Parameters.AddWithValue("natEnc", person.NationalIdentifierEncrypted);
+            personCmd.Parameters.AddWithValue("natHash", person.NationalIdentifierHash);
+            personCmd.Parameters.AddWithValue("natMask", person.MaskedNationalIdentifier);
             personCmd.Parameters.AddWithValue("email", person.PrimaryEmail);
             personCmd.Parameters.AddWithValue("phone", person.PhoneNumber);
             personCmd.Parameters.AddWithValue("createdAt", person.CreatedAt);
@@ -364,7 +377,7 @@ public class PeopleRepository
             assignCmd.Parameters.AddWithValue("createdAt", assignment.CreatedAt);
             await assignCmd.ExecuteNonQueryAsync(ct);
 
-            // Insert Outbox Domain Event
+            // Atomic Outbox Domain Event
             var createdEvent = new EmployeeCreatedEvent(
                 Guid.NewGuid(),
                 employment.Id,
@@ -532,15 +545,37 @@ public class PeopleRepository
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        // Fetch plaintext value only for supported field names
-        string selectCol = fieldName.ToLowerInvariant() switch
+        // Allowlist only specific reveal-supported field names
+        var normalizedField = fieldName.ToLowerInvariant();
+        string selectCol;
+        bool isEncryptedField = false;
+
+        switch (normalizedField)
         {
-            "nationalid" or "nationalidentifier" => "p.national_identifier",
-            "dateofbirth" or "dob" => "p.date_of_birth::text",
-            "phonenumber" or "phone" => "p.phone_number",
-            "primaryemail" or "email" => "p.primary_email",
-            _ => throw new ArgumentException($"Unsupported sensitive field name: '{fieldName}'.")
-        };
+            case "nationalid":
+            case "nationalidentifier":
+                selectCol = "p.national_identifier_encrypted";
+                isEncryptedField = true;
+                break;
+
+            case "dateofbirth":
+            case "dob":
+                selectCol = "p.date_of_birth::text";
+                break;
+
+            case "phonenumber":
+            case "phone":
+                selectCol = "p.phone_number";
+                break;
+
+            case "primaryemail":
+            case "email":
+                selectCol = "p.primary_email";
+                break;
+
+            default:
+                throw new ArgumentException($"Unsupported or non-allowlisted sensitive field: '{fieldName}'.");
+        }
 
         var sql = $@"
             SELECT {selectCol}
@@ -559,13 +594,14 @@ public class PeopleRepository
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
         if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
-        var plaintextObj = await cmd.ExecuteScalarAsync(ct);
-        if (plaintextObj == null || plaintextObj == DBNull.Value)
+        var rawValueObj = await cmd.ExecuteScalarAsync(ct);
+        if (rawValueObj == null || rawValueObj == DBNull.Value)
         {
             return null; // Unauthorized or not found
         }
 
-        var plaintext = plaintextObj.ToString();
+        var rawValue = rawValueObj.ToString() ?? string.Empty;
+        var plaintext = isEncryptedField ? _piiEncryptionService.Decrypt(rawValue) : rawValue;
 
         // Application-managed audit history: Insert audit record (NEVER write plaintext to audit trail)
         const string auditSql = @"
@@ -586,17 +622,5 @@ public class PeopleRepository
         await auditCmd.ExecuteNonQueryAsync(ct);
 
         return plaintext;
-    }
-
-    private static string MaskNationalId(string raw)
-    {
-        if (string.IsNullOrWhiteSpace(raw)) return "**********";
-        if (raw.Length <= 4) return new string('*', raw.Length);
-        return string.Concat(raw.AsSpan(0, 3), new string('*', raw.Length - 4), raw.AsSpan(raw.Length - 1, 1));
-    }
-
-    private static string MaskDateOfBirth(DateOnly dob)
-    {
-        return $"****-**-{dob.Day:D2}";
     }
 }

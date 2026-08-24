@@ -9,6 +9,9 @@ public interface IUserContext
     TenantId TenantId { get; }
     LegalEntityId? LegalEntityId { get; }
     
+    IReadOnlySet<TenantId> AllowedTenants { get; }
+    IReadOnlySet<LegalEntityId> AllowedLegalEntities { get; }
+    
     string Culture { get; }
     string Timezone { get; }
     
@@ -17,4 +20,6 @@ public interface IUserContext
     
     bool HasPermission(string permission);
     bool HasEntitlement(string entitlement);
+    bool IsAuthorizedForTenant(TenantId tenantId);
+    bool IsAuthorizedForLegalEntity(LegalEntityId legalEntityId);
 }

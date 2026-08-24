@@ -53,12 +53,15 @@ builder.Services.AddScoped<IUserContext>(sp =>
     );
 });
 
+// PII Encryption Service (AES-256-GCM + Blind Indexing)
+builder.Services.AddSingleton<IPiiEncryptionService, AesPiiEncryptionService>();
+
 // Storage Provider for Documents
 builder.Services.AddSingleton<IStorageProvider, LocalStorageProvider>();
 
 // Module Repositories
 builder.Services.AddScoped<OrganizationRepository>(_ => new OrganizationRepository(connectionString));
-builder.Services.AddScoped<PeopleRepository>(_ => new PeopleRepository(connectionString));
+builder.Services.AddScoped<PeopleRepository>(sp => new PeopleRepository(connectionString, sp.GetRequiredService<IPiiEncryptionService>()));
 builder.Services.AddScoped<DocumentsRepository>(_ => new DocumentsRepository(connectionString));
 
 // Controllers with cross-assembly discovery

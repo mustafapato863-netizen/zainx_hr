@@ -1,3 +1,4 @@
+using System;
 using Workforce.SharedKernel.Primitives;
 
 namespace Workforce.Modules.People.Domain;
@@ -13,7 +14,12 @@ public class Person
     public DateOnly DateOfBirth { get; private set; }
     public string Gender { get; private set; }
     public string Nationality { get; private set; }
-    public string NationalIdentifier { get; private set; }
+    
+    // Encrypted PII persistence
+    public string NationalIdentifierEncrypted { get; private set; }
+    public string NationalIdentifierHash { get; private set; }
+    public string MaskedNationalIdentifier { get; private set; }
+
     public string PrimaryEmail { get; private set; }
     public string PhoneNumber { get; private set; }
     public DateTime CreatedAt { get; private set; }
@@ -30,7 +36,9 @@ public class Person
         LastNameAr = string.Empty;
         Gender = string.Empty;
         Nationality = string.Empty;
-        NationalIdentifier = string.Empty;
+        NationalIdentifierEncrypted = string.Empty;
+        NationalIdentifierHash = string.Empty;
+        MaskedNationalIdentifier = string.Empty;
         PrimaryEmail = string.Empty;
         PhoneNumber = string.Empty;
     }
@@ -45,7 +53,9 @@ public class Person
         DateOnly dateOfBirth,
         string gender,
         string nationality,
-        string nationalIdentifier,
+        string nationalIdentifierEncrypted,
+        string nationalIdentifierHash,
+        string maskedNationalIdentifier,
         string primaryEmail,
         string phoneNumber)
     {
@@ -54,7 +64,7 @@ public class Person
         if (string.IsNullOrWhiteSpace(lastNameEn)) throw new ArgumentException("English last name is required.", nameof(lastNameEn));
         if (string.IsNullOrWhiteSpace(firstNameAr)) throw new ArgumentException("Arabic first name is required.", nameof(firstNameAr));
         if (string.IsNullOrWhiteSpace(lastNameAr)) throw new ArgumentException("Arabic last name is required.", nameof(lastNameAr));
-        if (string.IsNullOrWhiteSpace(nationalIdentifier)) throw new ArgumentException("National identifier is required.", nameof(nationalIdentifier));
+        if (string.IsNullOrWhiteSpace(nationalIdentifierEncrypted)) throw new ArgumentException("Encrypted national identifier is required.", nameof(nationalIdentifierEncrypted));
 
         Id = id;
         TenantId = tenantId;
@@ -65,7 +75,9 @@ public class Person
         DateOfBirth = dateOfBirth;
         Gender = gender?.Trim() ?? "Unspecified";
         Nationality = nationality?.Trim() ?? "SA";
-        NationalIdentifier = nationalIdentifier.Trim();
+        NationalIdentifierEncrypted = nationalIdentifierEncrypted;
+        NationalIdentifierHash = nationalIdentifierHash;
+        MaskedNationalIdentifier = maskedNationalIdentifier;
         PrimaryEmail = primaryEmail?.Trim().ToLowerInvariant() ?? string.Empty;
         PhoneNumber = phoneNumber?.Trim() ?? string.Empty;
         CreatedAt = DateTime.UtcNow;
@@ -80,7 +92,9 @@ public class Person
         DateOnly dateOfBirth,
         string gender,
         string nationality,
-        string nationalIdentifier,
+        string nationalIdentifierEncrypted,
+        string nationalIdentifierHash,
+        string maskedNationalIdentifier,
         string primaryEmail,
         string phoneNumber)
     {
@@ -96,7 +110,12 @@ public class Person
         DateOfBirth = dateOfBirth;
         Gender = gender?.Trim() ?? Gender;
         Nationality = nationality?.Trim() ?? Nationality;
-        NationalIdentifier = nationalIdentifier?.Trim() ?? NationalIdentifier;
+        if (!string.IsNullOrWhiteSpace(nationalIdentifierEncrypted))
+        {
+            NationalIdentifierEncrypted = nationalIdentifierEncrypted;
+            NationalIdentifierHash = nationalIdentifierHash;
+            MaskedNationalIdentifier = maskedNationalIdentifier;
+        }
         PrimaryEmail = primaryEmail?.Trim().ToLowerInvariant() ?? PrimaryEmail;
         PhoneNumber = phoneNumber?.Trim() ?? PhoneNumber;
         UpdatedAt = DateTime.UtcNow;

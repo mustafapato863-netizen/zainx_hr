@@ -1,4 +1,5 @@
-import { createRootRoute, Outlet } from '@tanstack/react-router';
+import React from 'react';
+import { createRootRoute, Outlet, Link } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createRootRoute({
@@ -13,24 +14,32 @@ function RootComponent() {
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 p-4">
         <h1 className="font-bold text-xl mb-8">ZainX Platform</h1>
         <nav className="flex flex-col gap-2">
-          <div className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors">
-            My Work
-          </div>
-          <div className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors">
+          <Link 
+            to="/" 
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
+            Dashboard
+          </Link>
+          <Link 
+            to="/people" 
+            data-testid="nav-people-link"
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
             People
-          </div>
-          <div className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors">
+          </Link>
+          <div className="py-2 px-3 text-slate-500 rounded cursor-not-allowed">
             Administration
           </div>
         </nav>
       </aside>
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6">
-          <div className="font-semibold text-slate-700">Organization / Tenant</div>
+          <div className="font-semibold text-slate-700">ZainX Workforce • Enterprise</div>
           <div className="flex gap-4 items-center">
             <button 
+              data-testid="lang-switch-btn"
               onClick={() => i18n.changeLanguage(i18n.language === 'en' ? 'ar' : 'en')}
-              className="text-sm font-medium px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded"
+              className="text-sm font-medium px-3 py-1 bg-slate-100 hover:bg-slate-200 rounded border border-slate-200"
             >
               {i18n.language === 'en' ? 'العربية' : 'English'}
             </button>
