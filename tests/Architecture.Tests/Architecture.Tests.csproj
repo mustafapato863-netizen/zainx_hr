@@ -26,6 +26,9 @@
     <ProjectReference Include="..\..\src\Modules\Attendance\Workforce.Modules.Attendance.csproj" />
     <ProjectReference Include="..\..\src\Modules\Leave\Workforce.Modules.Leave.csproj" />
     <ProjectReference Include="..\..\src\Modules\Approvals\Workforce.Modules.Approvals.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Compliance\Workforce.Modules.Compliance.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Payroll\Workforce.Modules.Payroll.csproj" />
+    <ProjectReference Include="..\..\src\Modules\Settlement\Workforce.Modules.Settlement.csproj" />
   </ItemGroup>
 
 </Project>

@@ -24,6 +24,9 @@
     <ProjectReference Include="..\Modules\Attendance\Workforce.Modules.Attendance.csproj" />
     <ProjectReference Include="..\Modules\Leave\Workforce.Modules.Leave.csproj" />
     <ProjectReference Include="..\Modules\Approvals\Workforce.Modules.Approvals.csproj" />
+    <ProjectReference Include="..\Modules\Compliance\Workforce.Modules.Compliance.csproj" />
+    <ProjectReference Include="..\Modules\Payroll\Workforce.Modules.Payroll.csproj" />
+    <ProjectReference Include="..\Modules\Settlement\Workforce.Modules.Settlement.csproj" />
   </ItemGroup>
 
 </Project>

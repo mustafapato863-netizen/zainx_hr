@@ -6,10 +6,16 @@ using Workforce.BuildingBlocks.Database;
 using Workforce.Host.Api.Middleware;
 using Workforce.Modules.Attendance.Infrastructure;
 using Workforce.Modules.Approvals.Infrastructure;
+using Workforce.Modules.Compliance.Domain;
+using Workforce.Modules.Compliance.Infrastructure;
 using Workforce.Modules.Documents.Infrastructure;
 using Workforce.Modules.Leave.Infrastructure;
 using Workforce.Modules.Organization.Infrastructure;
+using Workforce.Modules.Payroll.Domain.CalculationEngine;
+using Workforce.Modules.Payroll.Infrastructure;
 using Workforce.Modules.People.Infrastructure;
+using Workforce.Modules.Settlement.Domain.ExportAdapters;
+using Workforce.Modules.Settlement.Infrastructure;
 using Workforce.SharedKernel.Primitives;
 using Workforce.SharedKernel.Security;
 
@@ -70,9 +76,12 @@ builder.Services.AddScoped<IUserContext>(sp =>
             "attendance.clock.create", "attendance.adjustment.submit", "attendance.day.approve", "attendance.exception.resolve",
             "leave.request.create", "leave.request.approve", "leave.request.reject",
             "approvals.decision.approve", "approvals.decision.reject",
+            "payroll.run.read", "payroll.run.create", "payroll.run.calculate", "payroll.run.finalize", "payroll.exceptions.resolve",
+            "settlement.batch.read", "settlement.batch.generate", "settlement.batch.approve", "settlement.batch.export",
+            "compliance.rules.read",
             "admin" 
         },
-        new HashSet<string> { "core.platform", "people", "organization", "documents", "attendance", "leave", "approvals" }
+        new HashSet<string> { "core.platform", "people", "organization", "documents", "attendance", "leave", "approvals", "payroll", "compliance", "settlement" }
     );
 });
 
@@ -89,6 +98,13 @@ builder.Services.AddScoped<DocumentsRepository>(_ => new DocumentsRepository(con
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<IApprovalsRepository, ApprovalsRepository>();
+
+// Phase 4 Services
+builder.Services.AddScoped<IComplianceRepository, ComplianceRepository>();
+builder.Services.AddScoped<IPayrollRepository, PayrollRepository>();
+builder.Services.AddScoped<IPayrollCalculationEngine, DeterministicPayrollEngine>();
+builder.Services.AddScoped<ISettlementRepository, SettlementRepository>();
+builder.Services.AddScoped<IPaymentExportAdapter, NeutralCsvPaymentExportAdapter>();
 
 // Controllers
 builder.Services.AddControllers();
@@ -116,7 +132,18 @@ try
     await AttendanceMigrations.ApplyAsync(dataSource);
     await LeaveMigrations.ApplyAsync(dataSource);
     await ApprovalsMigrations.ApplyAsync(dataSource);
-    Console.WriteLine("[MIGRATIONS] Database schemas initialized successfully.");
+    await ComplianceMigrations.ApplyAsync(dataSource);
+    await PayrollMigrations.ApplyAsync(dataSource);
+    await SettlementMigrations.ApplyAsync(dataSource);
+
+    // Seed compliance rules
+    using (var scope = app.Services.CreateScope())
+    {
+        var complianceRepo = scope.ServiceProvider.GetRequiredService<IComplianceRepository>();
+        await complianceRepo.SeedDefaultEgyptRulesAsync();
+    }
+
+    Console.WriteLine("[MIGRATIONS] Phase 1 - 4 Database schemas initialized successfully.");
 }
 catch (Exception ex)
 {
@@ -150,46 +177,30 @@ app.MapOpenApi();
 
 app.MapControllers();
 
-// Seed initial test data for Attendance, Leave, and Approvals if needed
-app.MapGet("/api/v1/seed/phase3", async (
-    IAttendanceRepository attRepo,
-    ILeaveRepository leaveRepo,
-    IApprovalsRepository appRepo,
+// Seed initial test data for Phase 4 if needed
+app.MapGet("/api/v1/seed/phase4", async (
+    IPayrollRepository payrollRepo,
     IUserContext uCtx) =>
 {
     var tid = uCtx.TenantId;
     var lid = uCtx.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
 
-    // 1. Seed Work Schedule
-    var schedule = new Workforce.Modules.Attendance.Domain.WorkSchedule(
-        Guid.Parse("12121212-1212-1212-1212-121212121212"),
-        tid, lid, "STD-9TO5", "Standard Shift 9 to 5", "الدوام القياسي ٩ إلى ٥",
-        new TimeOnly(9, 0), new TimeOnly(17, 0), 15, "Africa/Cairo",
-        new EffectivePeriod(new DateOnly(2024, 1, 1), null)
+    var period = new Workforce.Modules.Payroll.Domain.PayrollPeriod(
+        Guid.Parse("44444444-1111-2222-3333-444444444444"),
+        tid, lid, "2026-08-MONTHLY",
+        new DateOnly(2026, 8, 1),
+        new DateOnly(2026, 8, 31),
+        new DateOnly(2026, 8, 31)
     );
-    await attRepo.SaveWorkScheduleAsync(schedule);
+    await payrollRepo.CreatePeriodAsync(period);
 
-    // 2. Seed Leave Types
-    var annualLeave = new Workforce.Modules.Leave.Domain.LeaveType(
-        Guid.Parse("aaaaaaaa-1111-2222-3333-444444444444"),
-        tid, lid, "ANNUAL", "Annual Leave", "الإجازة السنوية",
-        Workforce.Modules.Leave.Domain.LeaveCategory.Annual, true, false, true
+    var run = new Workforce.Modules.Payroll.Domain.PayrollRun(
+        Guid.Parse("55555555-1111-2222-3333-444444444444"),
+        tid, lid, period.Id, "RUN-2026-08-STD", "EGP"
     );
-    await leaveRepo.SaveLeaveTypeAsync(annualLeave);
+    await payrollRepo.CreateRunAsync(run);
 
-    var sickLeave = new Workforce.Modules.Leave.Domain.LeaveType(
-        Guid.Parse("bbbbbbbb-1111-2222-3333-444444444444"),
-        tid, lid, "SICK", "Sick Leave", "الإجازة المرضية",
-        Workforce.Modules.Leave.Domain.LeaveCategory.Sick, true, true, false
-    );
-    await leaveRepo.SaveLeaveTypeAsync(sickLeave);
-
-    // 3. Seed Default Balance
-    var defaultEmpId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-    await leaveRepo.GetOrCreateLeaveBalanceAsync(tid, defaultEmpId, annualLeave.Id, DateTime.UtcNow.Year, 21.00m);
-    await leaveRepo.GetOrCreateLeaveBalanceAsync(tid, defaultEmpId, sickLeave.Id, DateTime.UtcNow.Year, 14.00m);
-
-    return Results.Ok(new { status = "Seeded Phase 3 baseline data" });
+    return Results.Ok(new { status = "Seeded Phase 4 baseline period and run", periodId = period.Id, runId = run.Id });
 });
 
 app.Run();

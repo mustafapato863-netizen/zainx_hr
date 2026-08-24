@@ -61,6 +61,9 @@ export default defineConfig({
           if (id.includes('packages/approvals')) {
             return 'module-approvals';
           }
+          if (id.includes('packages/payroll')) {
+            return 'module-payroll';
+          }
         },
       },
     },

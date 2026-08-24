@@ -5,6 +5,7 @@ import { peopleRoute } from './people';
 import { attendanceRoute } from './attendance';
 import { leaveRoute } from './leave';
 import { approvalsRoute } from './approvals';
+import { payrollRoute } from './payroll';
 
 // The complete route tree
 const routeTree = rootRoute.addChildren([
@@ -12,7 +13,8 @@ const routeTree = rootRoute.addChildren([
   peopleRoute,
   attendanceRoute,
   leaveRoute,
-  approvalsRoute
+  approvalsRoute,
+  payrollRoute
 ]);
 
 export const router = createRouter({ routeTree });

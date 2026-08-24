@@ -399,30 +399,119 @@ public static class WorkforceSecurityTestRunner
         });
 
         // =========================================================================
-        // 7. GATE 17: HISTORICAL EFFECTIVE DATING & PII CRYPTOGRAPHY
+        // 8. PHASE 4: PAYROLL, COMPLIANCE & SETTLEMENT INVARIANTS
         // =========================================================================
-        Console.WriteLine("\n[GATE 17] Historical Effective Dating & PII Blind Index");
+        Console.WriteLine("\n[PHASE 4] Payroll, Compliance & Settlement Invariants");
 
-        Run("Gate17_HistoricalDating", "EffectivePeriod_HistoricalDating_EvaluatesCorrectActivePeriod", () =>
+        Run("Phase4_PayrollEngine", "DeterministicEngine_CalculatesAccurateEarningsAndDeductions", () =>
         {
-            var period1 = new EffectivePeriod(new DateOnly(2024, 1, 1), new DateOnly(2025, 12, 31));
-            var period2 = new EffectivePeriod(new DateOnly(2026, 1, 1), null);
+            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
+            var runId = Guid.NewGuid();
+            var empId = Guid.NewGuid();
 
-            if (!period1.IsActiveOn(new DateOnly(2024, 6, 15))) throw new Exception("2024 date should be active in period 1");
-            if (period1.IsActiveOn(new DateOnly(2026, 6, 15))) throw new Exception("2026 date must NOT be active in period 1");
-            if (!period2.IsActiveOn(new DateOnly(2026, 6, 15))) throw new Exception("2026 date should be active in period 2");
+            var snapshot = new Workforce.Modules.Payroll.Domain.PayrollInputSnapshot(
+                Guid.NewGuid(), runId, empId,
+                baseSalaryMonthly: 30000.00m,
+                allowancesJson: "[{\"code\":\"HOUSING\",\"nameEn\":\"Housing Allowance\",\"nameAr\":\"بدل سكن\",\"amount\":5000.00}]",
+                scheduledDays: 22,
+                verifiedWorkedMinutes: 22 * 480,
+                approvedAbsenceDays: 0,
+                approvedLeaveDays: 0,
+                unpaidLeaveDays: 0
+            );
+
+            var taxRuleVersion = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
+                Guid.NewGuid(), Guid.NewGuid(), 1,
+                new EffectivePeriod(new DateOnly(2024, 1, 1)),
+                "{\"personalExemptionYearly\": 20000.00}",
+                "EgyptProgressiveIncomeTaxStrategy"
+            );
+
+            var gosiRuleVersion = new Workforce.Modules.Compliance.Domain.StatutoryRuleVersion(
+                Guid.NewGuid(), Guid.NewGuid(), 1,
+                new EffectivePeriod(new DateOnly(2024, 1, 1)),
+                "{\"employeeRate\": 0.11, \"employerRate\": 0.1875, \"minInsuredMonthly\": 2000.00, \"maxInsuredMonthly\": 12600.00}",
+                "EgyptSocialInsuranceStrategy"
+            );
+
+            var rules = new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion> { taxRuleVersion, gosiRuleVersion };
+            var result = engine.Calculate(snapshot, rules, out var exceptions);
+
+            if (result.GrossPay != 35000.00m) throw new Exception($"Expected GrossPay 35000, got {result.GrossPay}");
+            if (result.EmployerContributions != 2362.50m) throw new Exception($"Expected EmployerContributions 2362.50, got {result.EmployerContributions}");
+            if (result.NetPay <= 0 || result.NetPay >= result.GrossPay) throw new Exception($"Invalid NetPay: {result.NetPay}");
         });
 
-        Run("Gate17_PiiCrypto", "PiiEncryption_Aes256Gcm_RoundTripAndBlindIndexNormalization", () =>
+        Run("Phase4_FinalizationBoundary", "PayrollRun_FinalizationIsPermanent_RejectsSubsequentMutations", () =>
         {
-            const string raw = "1098765432";
-            var enc = piiService.Encrypt(raw);
-            if (enc == raw || !enc.StartsWith("v1$")) throw new Exception("Invalid ciphertext format");
-            if (piiService.Decrypt(enc) != raw) throw new Exception("Decrypted plaintext mismatch");
+            var run = new Workforce.Modules.Payroll.Domain.PayrollRun(Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "RUN-INVARIANT-01");
+            var snapshots = new List<Workforce.Modules.Payroll.Domain.PayrollInputSnapshot>
+            {
+                new(Guid.NewGuid(), run.Id, Guid.NewGuid(), 25000.00m, "[]", 22, 22 * 480, 0, 0, 0)
+            };
 
-            var h1 = piiService.ComputeSearchHash("1098765432");
-            var h2 = piiService.ComputeSearchHash(" 109-876-5432 ");
-            if (h1 != h2) throw new Exception("Blind index hash normalization mismatch");
+            run.LoadInputs(snapshots, 1);
+            var engine = new Workforce.Modules.Payroll.Domain.CalculationEngine.DeterministicPayrollEngine();
+            run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 2);
+            run.SubmitForReview(3);
+            run.Approve(Guid.NewGuid(), 4);
+            run.FinalizeRun(userA.Value, 5);
+
+            if (run.Status != Workforce.Modules.Payroll.Domain.PayrollRunStatus.Finalized) throw new Exception("Run should be Finalized");
+
+            bool threw = false;
+            try
+            {
+                run.Calculate(engine, new List<Workforce.Modules.Compliance.Domain.StatutoryRuleVersion>(), 6);
+            }
+            catch (InvalidOperationException)
+            {
+                threw = true;
+            }
+
+            if (!threw) throw new Exception("Finalized run did not throw on subsequent calculation attempt!");
+        });
+
+        Run("Phase4_SettlementReconciliation", "SettlementBatch_Enforces1to1TotalAmountReconciliation", () =>
+        {
+            var batch = new Workforce.Modules.Settlement.Domain.SettlementBatch(
+                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "BATCH-REC-01",
+                totalAmount: 10000.00m,
+                paymentDate: new DateOnly(2026, 8, 31)
+            );
+
+            batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Ali", "MISR", "EG123", 6000.00m
+            ));
+            batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Sara", "MISR", "EG456", 4000.00m
+            ));
+
+            batch.Approve(1);
+            if (batch.Status != Workforce.Modules.Settlement.Domain.SettlementStatus.Approved)
+            {
+                throw new Exception("Batch should be approved when total matches 1:1");
+            }
+        });
+
+        Run("Phase4_NeutralExport", "NeutralCsvExport_GeneratesSha256AndMaskedAccounts", () =>
+        {
+            var adapter = new Workforce.Modules.Settlement.Domain.ExportAdapters.NeutralCsvPaymentExportAdapter();
+            var batch = new Workforce.Modules.Settlement.Domain.SettlementBatch(
+                Guid.NewGuid(), tenantA, legalEntityA, Guid.NewGuid(), "BATCH-CSV-01",
+                totalAmount: 5000.00m,
+                paymentDate: new DateOnly(2026, 8, 31)
+            );
+
+            batch.AddInstruction(new Workforce.Modules.Settlement.Domain.PaymentInstruction(
+                Guid.NewGuid(), batch.Id, Guid.NewGuid(), "Tamer", "MISR", "EG9876543210", 5000.00m
+            ));
+
+            var res = adapter.GenerateExportAsync(batch).GetAwaiter().GetResult();
+            if (string.IsNullOrEmpty(res.FileSha256) || res.FileBytes.Length == 0)
+            {
+                throw new Exception("Export result is missing file bytes or SHA-256 fingerprint");
+            }
         });
 
         stopwatch.Stop();

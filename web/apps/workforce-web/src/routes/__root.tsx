@@ -48,6 +48,13 @@ function RootComponent() {
           >
             Universal Approvals
           </Link>
+          <Link 
+            to="/payroll" 
+            data-testid="nav-payroll-link"
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
+            Payroll & Settlement
+          </Link>
           <div className="py-2 px-3 text-slate-500 rounded cursor-not-allowed">
             Administration
           </div>
