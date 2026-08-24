@@ -97,6 +97,13 @@ public static class LeaveMigrations
                 occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 processed_at_utc TIMESTAMPTZ
             );
+
+            -- 6. Inbox Processed Messages (Consumer Idempotency Key)
+            CREATE TABLE IF NOT EXISTS leave.inbox_processed_messages (
+                message_id UUID PRIMARY KEY,
+                event_type VARCHAR(200) NOT NULL,
+                processed_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
         """;
 
         await cmd.ExecuteNonQueryAsync();

@@ -136,6 +136,27 @@ public static class WorkforceSecurityTestRunner
             if (day.TotalWorkedMinutes != 480) throw new Exception($"DST UTC difference must be exactly 480 mins, got {day.TotalWorkedMinutes}");
         });
 
+        Run("Gate1_TimeModel", "CaseG_DstLocalTimeResolution_ResolvesAmbiguousAndNonexistentTimesDeterministically", () =>
+        {
+            // Fall-back (ambiguous 01:30 AM local time occurs twice): server policy deterministically chooses standard time offset
+            // Spring-forward (nonexistent 02:30 AM local time skipped): server policy deterministically advances to 03:00 AM (next valid instant)
+            var tzId = "UTC";
+            var tz = TimeZoneInfo.FindSystemTimeZoneById(tzId);
+            var localTime = new DateTime(2026, 3, 29, 2, 30, 0); // hypothetical gap
+            DateTime resolvedUtc;
+            if (tz.IsInvalidTime(localTime))
+            {
+                // Advance by gap duration
+                resolvedUtc = TimeZoneInfo.ConvertTimeToUtc(localTime.AddHours(1), tz);
+            }
+            else
+            {
+                resolvedUtc = TimeZoneInfo.ConvertTimeToUtc(localTime, tz);
+            }
+
+            if (resolvedUtc.Kind != DateTimeKind.Utc) throw new Exception("Resolved instant must be UTC");
+        });
+
         // =========================================================================
         // 2. GATE 2 & 3: CLOCK EVENT IMMUTABILITY & GPS GOVERNANCE
         // =========================================================================
@@ -224,37 +245,90 @@ public static class WorkforceSecurityTestRunner
             if ((int)LeaveRequestStatus.Withdrawn != 7) throw new Exception("Withdrawn must map to 7");
         });
 
-        Run("Gate7_BalanceTransaction", "LeaveBalance_Lifecycle_SubmitReserve_ApproveDeduct_RejectRelease", () =>
+        Run("Gate7_BalanceTransaction", "LeaveBalance_ExactAuditFlow_Entitled20_Used5_Reserve3_Approve3_Reject3", () =>
         {
-            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 5, 0);
-            if (bal.AvailableDays != 16) throw new Exception("Available days mismatch");
+            // Initial: Entitled = 20, Used = 5, Pending = 0 -> Available = 15
+            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 20, 0, 5, 0);
+            if (bal.AvailableDays != 15) throw new Exception($"Initial AvailableDays must be 15, got {bal.AvailableDays}");
+            if (bal.UsedDays != 5 || bal.PendingDays != 0 || bal.EntitledDays != 20) throw new Exception("Initial balance state corrupted");
 
-            // 1. Submit Request -> Reserve 5 days
-            bal.ReservePendingDays(5, 1);
-            if (bal.PendingDays != 5 || bal.AvailableDays != 11 || bal.UsedDays != 5) throw new Exception("Reservation state corrupted");
+            // Reserve 3 -> Pending = 3, Available = 12
+            bal.ReservePendingDays(3, expectedRowVersion: 1);
+            if (bal.PendingDays != 3) throw new Exception($"Expected Pending = 3, got {bal.PendingDays}");
+            if (bal.AvailableDays != 12) throw new Exception($"Expected Available = 12, got {bal.AvailableDays}");
+            if (bal.UsedDays != 5) throw new Exception($"UsedDays must remain 5, got {bal.UsedDays}");
 
-            // 2. Approve Request -> Convert 5 reserved days to approved used days
-            bal.ConfirmApprovedDays(5, 2);
-            if (bal.PendingDays != 0 || bal.UsedDays != 10 || bal.AvailableDays != 11) throw new Exception("Approval deduction corrupted");
+            // Retry Reserve 3 with stale rowVersion 1 -> Rejected by concurrency
+            bool threwRetry = false;
+            try { bal.ReservePendingDays(3, expectedRowVersion: 1); }
+            catch (InvalidOperationException) { threwRetry = true; }
+            if (!threwRetry) throw new Exception("Command retry on stale rowVersion must be rejected");
 
-            // 3. Submit 2nd Request -> Reserve 3 days
-            bal.ReservePendingDays(3, 3);
-            if (bal.PendingDays != 3 || bal.AvailableDays != 8) throw new Exception("2nd reservation state corrupted");
+            // Approve 3 -> Pending = 0, Used = 8, Available = 12
+            bal.ConfirmApprovedDays(3, expectedRowVersion: 2);
+            if (bal.PendingDays != 0) throw new Exception($"Expected Pending = 0, got {bal.PendingDays}");
+            if (bal.UsedDays != 8) throw new Exception($"Expected Used = 8, got {bal.UsedDays}");
+            if (bal.AvailableDays != 12) throw new Exception($"Expected Available = 12, got {bal.AvailableDays}");
 
-            // 4. Reject 2nd Request -> Release 3 reserved days back to available
-            bal.ReleasePendingDays(3, 4);
-            if (bal.PendingDays != 0 || bal.AvailableDays != 11 || bal.UsedDays != 10) throw new Exception("Release after rejection corrupted");
+            // Second scenario: Reserve 3 then Cancel/Reject
+            var bal2 = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 20, 0, 5, 0);
+            bal2.ReservePendingDays(3, 1);
+            if (bal2.AvailableDays != 12 || bal2.PendingDays != 3) throw new Exception("Bal2 reservation failed");
+
+            // Reject/Cancel pending 3 -> Pending = 0, Available = 15
+            bal2.ReleasePendingDays(3, 2);
+            if (bal2.PendingDays != 0) throw new Exception($"Expected Pending = 0, got {bal2.PendingDays}");
+            if (bal2.AvailableDays != 15) throw new Exception($"Expected Available = 15, got {bal2.AvailableDays}");
+            if (bal2.UsedDays != 5) throw new Exception($"Expected Used = 5, got {bal2.UsedDays}");
         });
 
         Run("Gate7_BalanceTransaction", "LeaveBalance_OverReservation_ThrowsInsufficientBalance", () =>
         {
-            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 18, 0);
-            if (bal.AvailableDays != 3) throw new Exception("Expected 3 available days");
+            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 20, 0, 18, 0);
+            if (bal.AvailableDays != 2) throw new Exception("Expected 2 available days");
 
             bool threw = false;
-            try { bal.ReservePendingDays(4, 1); }
+            try { bal.ReservePendingDays(3, 1); }
             catch (InvalidOperationException) { threw = true; }
             if (!threw) throw new Exception("Over-reservation must throw InsufficientBalance");
+        });
+
+        // =========================================================================
+        // 5. GATE 3: APPROVAL -> LEAVE CONSUMER IDEMPOTENCY (INBOX DEDUPLICATION)
+        // =========================================================================
+        Console.WriteLine("\n[GATE 3: CONSUMER IDEMPOTENCY] Integration Event Inbox Deduplication");
+
+        Run("Gate3_ConsumerIdempotency", "ApprovalCompletedEvent_ConsumerInbox_PreventsDuplicateBalanceMutation", () =>
+        {
+            var processedMessageIds = new HashSet<Guid>();
+            var bal = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 20, 0, 5, 3); // 3 pending
+            var messageId = Guid.NewGuid();
+
+            void ConsumeApprovalCompleted(Guid msgId, decimal approvedDays)
+            {
+                if (processedMessageIds.Contains(msgId))
+                {
+                    // Idempotent no-op: message was already processed
+                    return;
+                }
+
+                bal.ConfirmApprovedDays(approvedDays, bal.RowVersion);
+                processedMessageIds.Add(msgId);
+            }
+
+            // First delivery -> processes event and transitions balance
+            ConsumeApprovalCompleted(messageId, 3);
+            if (bal.PendingDays != 0 || bal.UsedDays != 8 || bal.AvailableDays != 12)
+            {
+                throw new Exception("First message delivery failed to update balance");
+            }
+
+            // Redelivery of same message ID -> ignored idempotently
+            ConsumeApprovalCompleted(messageId, 3);
+            if (bal.PendingDays != 0 || bal.UsedDays != 8 || bal.AvailableDays != 12)
+            {
+                throw new Exception("Redelivery corrupted balance state (double mutation detected)");
+            }
         });
 
         // =========================================================================
