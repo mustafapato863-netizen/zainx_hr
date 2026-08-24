@@ -19,6 +19,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:5041',
         changeOrigin: true,
       },
+      '/api': {
+        target: 'http://127.0.0.1:5041',
+        changeOrigin: true,
+      },
     },
   },
   build: {
@@ -27,6 +31,32 @@ export default defineConfig({
     reportCompressedSize: true,
     commonjsOptions: {
       transformMixedEsModules: true,
+    },
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes('ag-grid-community') ||
+            id.includes('ag-grid-enterprise') ||
+            id.includes('ag-grid-react') ||
+            id.includes('ZainXDataGrid')
+          ) {
+            return 'vendor-aggrid';
+          }
+          if (id.includes('packages/people/src/components/EmployeeDirectory')) {
+            return 'people-directory';
+          }
+          if (
+            id.includes('packages/people/src/components/EmployeeProfile') ||
+            id.includes('packages/people/src/components/ChangeAssignmentModal')
+          ) {
+            return 'people-workspace';
+          }
+          if (id.includes('packages/people/src/components/DocumentsTab')) {
+            return 'people-documents';
+          }
+        },
+      },
     },
   },
 });

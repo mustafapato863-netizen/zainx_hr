@@ -206,14 +206,102 @@ public class Phase2SecurityIntegrationTests
         Assert.NotEqual(rawNationalId, encrypted);
         Assert.NotEqual(rawNationalId, blindHash);
         Assert.Equal("109******2", masked);
+        Assert.True(encrypted.StartsWith("v1$"));
 
         // Decrypt must recover exact plaintext
         var decrypted = _piiService.Decrypt(encrypted);
         Assert.Equal(rawNationalId, decrypted);
+    }
 
-        // Blind search index must be deterministic for exact query match
-        var blindHash2 = _piiService.ComputeSearchHash("1098765432");
-        Assert.Equal(blindHash, blindHash2);
+    public void PiiEncryption_NonceUniqueness_RepeatedEncryptionShouldProduceDifferentCiphertexts()
+    {
+        const string rawNationalId = "1098765432";
+        var enc1 = _piiService.Encrypt(rawNationalId);
+        var enc2 = _piiService.Encrypt(rawNationalId);
+
+        // Due to fresh 96-bit random nonces, identical plaintexts MUST produce completely different ciphertexts
+        Assert.NotEqual(enc1, enc2);
+
+        // Both must decrypt to the exact same plaintext
+        Assert.Equal(rawNationalId, _piiService.Decrypt(enc1));
+        Assert.Equal(rawNationalId, _piiService.Decrypt(enc2));
+    }
+
+    public void PiiEncryption_TamperedCiphertext_ShouldFailClosed()
+    {
+        const string rawNationalId = "1098765432";
+        var encrypted = _piiService.Encrypt(rawNationalId); // format: v1$base64
+        var parts = encrypted.Split('$');
+        var payloadBytes = Convert.FromBase64String(parts[1]);
+
+        // Tamper with the last ciphertext byte
+        payloadBytes[^1] ^= 0xFF;
+        var tamperedCiphertext = $"{parts[0]}${Convert.ToBase64String(payloadBytes)}";
+
+        // AES-GCM authenticated decryption must reject tampered ciphertext and fail closed
+        Assert.Throws<System.Security.Cryptography.CryptographicException>(() =>
+            _piiService.Decrypt(tamperedCiphertext)
+        );
+    }
+
+    public void PiiEncryption_TamperedAuthTag_ShouldFailClosed()
+    {
+        const string rawNationalId = "1098765432";
+        var encrypted = _piiService.Encrypt(rawNationalId);
+        var parts = encrypted.Split('$');
+        var payloadBytes = Convert.FromBase64String(parts[1]);
+
+        // Nonce is 0..11, Auth Tag is 12..27. Tamper with the Auth Tag
+        payloadBytes[15] ^= 0xAA;
+        var tamperedAuthTagCiphertext = $"{parts[0]}${Convert.ToBase64String(payloadBytes)}";
+
+        Assert.Throws<System.Security.Cryptography.CryptographicException>(() =>
+            _piiService.Decrypt(tamperedAuthTagCiphertext)
+        );
+    }
+
+    public void PiiEncryption_WrongKey_ShouldFailToDecrypt()
+    {
+        const string rawNationalId = "1098765432";
+        var encrypted = _piiService.Encrypt(rawNationalId);
+
+        // Service with a different key
+        var differentMasterKey = Convert.ToBase64String(new byte[32]); // All zeroes key
+        var wrongKeyService = new AesPiiEncryptionService(masterKeyBase64: differentMasterKey);
+
+        Assert.Throws<System.Security.Cryptography.CryptographicException>(() =>
+            wrongKeyService.Decrypt(encrypted)
+        );
+    }
+
+    public void PiiBlindIndex_Normalization_ShouldBeDeterministicAcrossFormatting()
+    {
+        // Normalization handles formatting, whitespace, hyphens, and casing without lossy truncation
+        var hash1 = _piiService.ComputeSearchHash("1098765432");
+        var hash2 = _piiService.ComputeSearchHash(" 109-876-5432 ");
+        var hash3 = _piiService.ComputeSearchHash("109.876.5432");
+        var hash4 = _piiService.ComputeSearchHash("109 876 5432");
+
+        Assert.Equal(hash1, hash2);
+        Assert.Equal(hash1, hash3);
+        Assert.Equal(hash1, hash4);
+
+        // Alphanumeric passports / IDs normalization
+        var passportHash1 = _piiService.ComputeSearchHash("A123-4567-B");
+        var passportHash2 = _piiService.ComputeSearchHash("a123 4567 b");
+        Assert.Equal(passportHash1, passportHash2);
+    }
+
+    public void PiiBlindIndex_KeySeparation_DifferentHmacKeyShouldProduceDifferentIndex()
+    {
+        const string raw = "1098765432";
+        var hashDefault = _piiService.ComputeSearchHash(raw);
+
+        var differentHmacKey = Convert.ToBase64String(new byte[32]);
+        var customHmacService = new AesPiiEncryptionService(hmacKeyBase64: differentHmacKey);
+        var hashCustom = customHmacService.ComputeSearchHash(raw);
+
+        Assert.NotEqual(hashDefault, hashCustom);
     }
 
     public void MultiTenant_Employment_ShouldEnforceTenantAndLegalEntityIsolation()

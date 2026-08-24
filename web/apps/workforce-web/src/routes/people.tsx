@@ -17,11 +17,11 @@ import {
   LocationDto
 } from '@zainx/contracts';
 
-// Lazy load heavy people components (AG Grid loaded only on demand)
-const EmployeeDirectory = lazy(() => import('@zainx/people').then(m => ({ default: m.EmployeeDirectory })));
-const EmployeeWorkspace = lazy(() => import('@zainx/people').then(m => ({ default: m.EmployeeWorkspace })));
-const CreateEmployeeModal = lazy(() => import('@zainx/people').then(m => ({ default: m.CreateEmployeeModal })));
-const ChangeAssignmentModal = lazy(() => import('@zainx/people').then(m => ({ default: m.ChangeAssignmentModal })));
+// Lazy load people components with strict route-level chunk isolation
+const EmployeeDirectory = lazy(() => import('@zainx/people/components/EmployeeDirectory/EmployeeDirectory').then(m => ({ default: m.EmployeeDirectory })));
+const EmployeeWorkspace = lazy(() => import('@zainx/people/components/EmployeeProfile/EmployeeWorkspace').then(m => ({ default: m.EmployeeWorkspace })));
+const CreateEmployeeModal = lazy(() => import('@zainx/people/components/CreateEmployeeModal/CreateEmployeeModal').then(m => ({ default: m.CreateEmployeeModal })));
+const ChangeAssignmentModal = lazy(() => import('@zainx/people/components/ChangeAssignmentModal/ChangeAssignmentModal').then(m => ({ default: m.ChangeAssignmentModal })));
 
 export function PeopleComponent() {
   const [selectedEmployeeId, setSelectedEmployeeId] = useState<string | null>(null);

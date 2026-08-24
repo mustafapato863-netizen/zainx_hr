@@ -9,6 +9,12 @@ using Workforce.Modules.People.Infrastructure;
 using Workforce.SharedKernel.Primitives;
 using Workforce.SharedKernel.Security;
 
+if (args.Contains("--run-security-tests"))
+{
+    var code = Workforce.Host.Api.Testing.WorkforceSecurityTestRunner.RunAllTests();
+    Environment.Exit(code);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 // OpenTelemetry Instrumentation
