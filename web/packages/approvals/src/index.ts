@@ -1,1 +1,2 @@
-export const APPROVALS_MODULE = '@zainx/approvals';
+export * from './components/ApprovalInbox';
+export * from './components/ApprovalDecisionDialog';

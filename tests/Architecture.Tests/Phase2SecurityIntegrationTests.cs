@@ -441,8 +441,8 @@ public class Phase2SecurityIntegrationTests
         using var validPdfStream = new MemoryStream(validPdfBytes);
         await DocumentSecurityValidator.ValidateContentSignatureAsync(validPdfStream, "contract.pdf");
 
-        // Spoofed executable renamed to .pdf
-        var maliciousExeBytes = Encoding.ASCII.GetBytes("MZ\x90\x00\x03\x00fake_executable");
+        // Spoofed content renamed to .pdf
+        var maliciousExeBytes = new byte[] { 0x4D, 0x5A, 0x00, 0x00, 0x01, 0x02 };
         using var maliciousStream = new MemoryStream(maliciousExeBytes);
 
         await Assert.ThrowsAsync<ArgumentException>(() =>

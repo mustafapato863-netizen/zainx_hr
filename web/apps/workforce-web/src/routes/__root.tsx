@@ -13,7 +13,7 @@ function RootComponent() {
     <div className="flex h-screen w-full bg-slate-50 text-slate-900" dir={i18n.dir()}>
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 p-4">
         <h1 className="font-bold text-xl mb-8">ZainX Platform</h1>
-        <nav className="flex flex-col gap-2">
+        <nav className="flex flex-col gap-1.5">
           <Link 
             to="/" 
             className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
@@ -26,6 +26,27 @@ function RootComponent() {
             className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
           >
             People
+          </Link>
+          <Link 
+            to="/attendance" 
+            data-testid="nav-attendance-link"
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
+            Attendance
+          </Link>
+          <Link 
+            to="/leave" 
+            data-testid="nav-leave-link"
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
+            Leave Management
+          </Link>
+          <Link 
+            to="/approvals" 
+            data-testid="nav-approvals-link"
+            className="py-2 px-3 hover:bg-slate-800 rounded cursor-pointer transition-colors block text-slate-200 hover:text-white"
+          >
+            Universal Approvals
           </Link>
           <div className="py-2 px-3 text-slate-500 rounded cursor-not-allowed">
             Administration

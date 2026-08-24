@@ -1,11 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 using Workforce.BuildingBlocks.Database;
+using Workforce.Modules.Approvals.Domain;
+using Workforce.Modules.Attendance.Domain;
 using Workforce.Modules.Documents.Domain;
 using Workforce.Modules.Documents.Infrastructure;
+using Workforce.Modules.Leave.Domain;
 using Workforce.Modules.Organization.Domain;
 using Workforce.Modules.People.Domain;
 using Workforce.SharedKernel.Primitives;
@@ -18,7 +24,7 @@ public static class WorkforceSecurityTestRunner
     public static int RunAllTests()
     {
         Console.WriteLine("============================================================");
-        Console.WriteLine(" ZAINX WORKFORCE — PHASE 2 INTEGRATION & SECURITY SUITE");
+        Console.WriteLine(" ZAINX WORKFORCE — PHASE 3 INTEGRATION & SECURITY SUITE");
         Console.WriteLine("============================================================");
 
         var stopwatch = Stopwatch.StartNew();
@@ -54,6 +60,7 @@ public static class WorkforceSecurityTestRunner
         var legalEntityA = LegalEntityId.New();
         var legalEntityB = LegalEntityId.New();
         var userA = UserId.New();
+        var empA = Guid.NewGuid();
         var piiService = new AesPiiEncryptionService();
 
         // 1. Boundary & Domain Tests
@@ -210,20 +217,8 @@ public static class WorkforceSecurityTestRunner
             if (h1 == h2) throw new Exception("Separate HMAC key must produce distinct blind index");
         });
 
-        // 4. Concurrency, Outbox, and Documents Tests
-        Console.WriteLine("\n[SUITE] ConcurrencyAndDocumentTests");
-        Run("Concurrency", "OptimisticConcurrency_Employment_ThrowsOnVersionMismatch", () =>
-        {
-            var emp = new Employment(Guid.NewGuid(), tenantA, Guid.NewGuid(), legalEntityA, "EMP-1002", new DateOnly(2024, 1, 1));
-            emp.Activate(1);
-            if (emp.RowVersion != 2u) throw new Exception("RowVersion should be 2");
-
-            bool threw = false;
-            try { emp.UpdateEmploymentDates(new DateOnly(2024, 2, 1), null, 1); }
-            catch (InvalidOperationException) { threw = true; }
-            if (!threw) throw new Exception("Stale version 1 must throw concurrency conflict");
-        });
-
+        // 4. Documents & Validation Tests
+        Console.WriteLine("\n[SUITE] DocumentsValidationTests");
         Run("DocumentSecurity", "MagicBytes_RejectsSpoofedFiles", () =>
         {
             var validPdf = Encoding.ASCII.GetBytes("%PDF-1.4 sample content");
@@ -232,7 +227,7 @@ public static class WorkforceSecurityTestRunner
                 DocumentSecurityValidator.ValidateContentSignatureAsync(s, "contract.pdf").GetAwaiter().GetResult();
             }
 
-            var spoofed = Encoding.ASCII.GetBytes("MZ\x90\x00executable");
+            var spoofed = new byte[] { 0x4D, 0x5A, 0x00, 0x00, 0x01 };
             using (var s = new MemoryStream(spoofed))
             {
                 bool threw = false;
@@ -253,6 +248,95 @@ public static class WorkforceSecurityTestRunner
             try { DocumentSecurityValidator.ValidateFileName("..\\windows\\system32\\cmd.exe"); }
             catch (ArgumentException) { threw2 = true; }
             if (!threw2) throw new Exception("Path traversal ..\\ must be rejected");
+        });
+
+        // 5. Phase 3 Attendance Tests
+        Console.WriteLine("\n[SUITE] Phase3AttendanceTests");
+        Run("Attendance", "ClockEvent_Provenance_IsImmutable", () =>
+        {
+            var captured = DateTime.UtcNow.AddHours(-8);
+            var evt = new ClockEvent(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, captured, captured, "TERM-01");
+            if (evt.SourceDeviceId != "TERM-01") throw new Exception("Device ID mismatch");
+            if (evt.Type != ClockType.In) throw new Exception("ClockType mismatch");
+        });
+
+        Run("Attendance", "AttendanceDay_Evaluation_CalculatesMinutes", () =>
+        {
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24), "Africa/Cairo");
+            var start = new DateTime(2026, 8, 24, 7, 0, 0, DateTimeKind.Utc);
+            var end = new DateTime(2026, 8, 24, 15, 30, 0, DateTimeKind.Utc);
+            var evts = new List<ClockEvent>
+            {
+                new(Guid.NewGuid(), tenantA, empA, ClockType.In, ClockSource.BiometricDevice, start, start),
+                new(Guid.NewGuid(), tenantA, empA, ClockType.Out, ClockSource.BiometricDevice, end, end)
+            };
+            day.Evaluate(evts, null);
+            if (day.TotalWorkedMinutes != 510) throw new Exception($"Expected 510 mins, got {day.TotalWorkedMinutes}");
+            if (day.Status != AttendanceStatus.Reviewed) throw new Exception("Expected Reviewed status");
+        });
+
+        Run("Attendance", "AttendanceDay_Adjustment_AuditHistoryAndConcurrency", () =>
+        {
+            var day = new AttendanceDay(Guid.NewGuid(), tenantA, legalEntityA, empA, new DateOnly(2026, 8, 24));
+            day.ApplyAdjustment(480, "Correction", userA.Value, 1);
+            if (day.TotalWorkedMinutes != 480 || day.RowVersion != 2u) throw new Exception("Adjustment failed to update minutes or row version");
+
+            bool threw = false;
+            try { day.ApplyAdjustment(500, "Stale", userA.Value, 1); }
+            catch (InvalidOperationException) { threw = true; }
+            if (!threw) throw new Exception("Optimistic concurrency conflict not thrown on stale version");
+        });
+
+        // 6. Phase 3 Leave Tests
+        Console.WriteLine("\n[SUITE] Phase3LeaveTests");
+        Run("Leave", "LeaveBalance_Reservation_EnforcesSufficientBalance", () =>
+        {
+            var balance = new LeaveBalance(Guid.NewGuid(), tenantA, empA, Guid.NewGuid(), 2026, 21, 0, 5, 0);
+            if (balance.AvailableDays != 16) throw new Exception("Available days mismatch");
+            balance.ReservePendingDays(5, 1);
+            if (balance.AvailableDays != 11) throw new Exception("Available days after reservation mismatch");
+
+            bool threw = false;
+            try { balance.ReservePendingDays(12, 2); }
+            catch (InvalidOperationException) { threw = true; }
+            if (!threw) throw new Exception("Over-reservation did not throw InsufficientBalance");
+        });
+
+        Run("Leave", "LeaveRequest_StateTransitions_Workflow", () =>
+        {
+            var req = new LeaveRequest(Guid.NewGuid(), tenantA, legalEntityA, empA, Guid.NewGuid(), new DateOnly(2026, 9, 1), new DateOnly(2026, 9, 5), 5.0m, "Vacation");
+            if (req.Status != LeaveRequestStatus.Draft) throw new Exception("Request should be Draft");
+            req.Submit(Guid.NewGuid(), 1);
+            if (req.Status != LeaveRequestStatus.PendingApproval) throw new Exception("Request should be PendingApproval");
+            req.Approve(2);
+            if (req.Status != LeaveRequestStatus.Approved) throw new Exception("Request should be Approved");
+        });
+
+        // 7. Phase 3 Approvals Tests
+        Console.WriteLine("\n[SUITE] Phase3ApprovalsTests");
+        Run("Approvals", "ApprovalRequest_MultiStepRouting_AdvancesStepOrder", () =>
+        {
+            var appReq = new ApprovalRequest(Guid.NewGuid(), tenantA, legalEntityA, "leave", Guid.NewGuid(), "LeaveRequest", "Leave: 5 Days", userA.Value, empA, totalSteps: 2);
+            var mgr = Guid.NewGuid();
+            var hr = Guid.NewGuid();
+            appReq.AddStep(new ApprovalStep(Guid.NewGuid(), appReq.Id, 1, mgr));
+            appReq.AddStep(new ApprovalStep(Guid.NewGuid(), appReq.Id, 2, hr));
+
+            appReq.ApproveCurrentStep(mgr, "Mgr Ok", 1);
+            if (appReq.CurrentStepOrder != 2 || appReq.Status != ApprovalStatus.Pending) throw new Exception("Step 1 did not advance to step 2");
+
+            appReq.ApproveCurrentStep(hr, "HR Ok", 2);
+            if (appReq.Status != ApprovalStatus.Approved) throw new Exception("Final step did not mark Approved");
+        });
+
+        Run("Approvals", "ApprovalRequest_Rejection_TerminatesWorkflow", () =>
+        {
+            var appReq = new ApprovalRequest(Guid.NewGuid(), tenantA, legalEntityA, "attendance", Guid.NewGuid(), "Adjustment", "Adjust: +60", userA.Value, empA, totalSteps: 2);
+            var mgr = Guid.NewGuid();
+            appReq.AddStep(new ApprovalStep(Guid.NewGuid(), appReq.Id, 1, mgr));
+
+            appReq.RejectCurrentStep(mgr, "Rejected by policy", 1);
+            if (appReq.Status != ApprovalStatus.Rejected) throw new Exception("Rejection did not mark Rejected");
         });
 
         stopwatch.Stop();

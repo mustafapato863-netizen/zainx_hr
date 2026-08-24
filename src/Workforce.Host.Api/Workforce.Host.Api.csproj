@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
-    <UseAppHost>false</UseAppHost>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
@@ -22,6 +21,9 @@
     <ProjectReference Include="..\Modules\Organization\Workforce.Modules.Organization.csproj" />
     <ProjectReference Include="..\Modules\People\Workforce.Modules.People.csproj" />
     <ProjectReference Include="..\Modules\Documents\Workforce.Modules.Documents.csproj" />
+    <ProjectReference Include="..\Modules\Attendance\Workforce.Modules.Attendance.csproj" />
+    <ProjectReference Include="..\Modules\Leave\Workforce.Modules.Leave.csproj" />
+    <ProjectReference Include="..\Modules\Approvals\Workforce.Modules.Approvals.csproj" />
   </ItemGroup>
 
 </Project>

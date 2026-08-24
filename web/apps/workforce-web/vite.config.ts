@@ -52,8 +52,14 @@ export default defineConfig({
           ) {
             return 'people-workspace';
           }
-          if (id.includes('packages/people/src/components/DocumentsTab')) {
-            return 'people-documents';
+          if (id.includes('packages/attendance')) {
+            return 'module-attendance';
+          }
+          if (id.includes('packages/leave')) {
+            return 'module-leave';
+          }
+          if (id.includes('packages/approvals')) {
+            return 'module-approvals';
           }
         },
       },

@@ -490,16 +490,287 @@ legalEntityId?: string;
 };
 
 export type GetApiV1PeopleEmployeesParams = {
-search?: string;
-departmentId?: string;
-status?: string;
-/**
- * @pattern ^-?(?:0|[1-9]\d*)$
- */
-page?: number | string;
-/**
- * @pattern ^-?(?:0|[1-9]\d*)$
- */
-pageSize?: number | string;
+  search?: string;
+  departmentId?: string;
+  status?: string;
+  /**
+   * @pattern ^-?(?:0|[1-9]\d*)$
+   */
+  page?: number | string;
+  /**
+   * @pattern ^-?(?:0|[1-9]\d*)$
+   */
+  pageSize?: number | string;
 };
+
+// ==========================================
+// Phase 3 — Attendance Module Contracts
+// ==========================================
+
+export enum ClockType {
+  In = 0,
+  Out = 1,
+  BreakStart = 2,
+  BreakEnd = 3
+}
+
+export enum ClockSource {
+  WebPortal = 0,
+  MobileApp = 1,
+  BiometricDevice = 2,
+  Kiosk = 3,
+  SystemGenerated = 4
+}
+
+export enum AttendanceStatus {
+  Unreviewed = 0,
+  Reviewed = 1,
+  Approved = 2,
+  Locked = 3
+}
+
+export enum AttendanceExceptionType {
+  MissingClockIn = 0,
+  MissingClockOut = 1,
+  LateArrival = 2,
+  EarlyDeparture = 3,
+  UnexpectedAbsence = 4,
+  OvertimeUnscheduled = 5
+}
+
+export enum AttendanceExceptionStatus {
+  Pending = 0,
+  Resolved = 1,
+  Waived = 2,
+  Escalated = 3
+}
+
+export interface ClockEventDto {
+  id: string;
+  employmentId: string;
+  type: number;
+  source: number;
+  capturedAtUtc: string;
+  receivedAtUtc: string;
+  sourceDeviceId?: string | null;
+  correlationId?: string | null;
+  actorUserId?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface AttendanceExceptionDto {
+  id: string;
+  attendanceDayId: string;
+  tenantId: string;
+  employmentId: string;
+  employeeNameEn?: string;
+  employeeNameAr?: string;
+  type: number;
+  typeName: string;
+  status: number;
+  statusName: string;
+  details: string;
+  resolutionNotes?: string | null;
+  resolvedByUserId?: string | null;
+  resolvedAtUtc?: string | null;
+  createdAtUtc: string;
+}
+
+export interface AttendanceAdjustmentDto {
+  id: string;
+  attendanceDayId: string;
+  employmentId: string;
+  adjustedWorkedMinutes: number;
+  beforeWorkedMinutes: number;
+  afterWorkedMinutes: number;
+  reason: string;
+  actorUserId: string;
+  createdAtUtc: string;
+  approvalRequestId?: string | null;
+}
+
+export interface AttendanceDayDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  employmentId: string;
+  employeeNameEn?: string;
+  employeeNameAr?: string;
+  employeeNumber?: string;
+  departmentNameEn?: string;
+  businessDate: string;
+  timezoneId: string;
+  status: number;
+  statusName: string;
+  scheduledStartUtc?: string | null;
+  scheduledEndUtc?: string | null;
+  scheduledMinutes: number;
+  firstClockInUtc?: string | null;
+  lastClockOutUtc?: string | null;
+  totalWorkedMinutes: number;
+  lateMinutes: number;
+  earlyDepartureMinutes: number;
+  isAbsent: boolean;
+  rowVersion: number;
+  exceptions?: AttendanceExceptionDto[];
+  adjustments?: AttendanceAdjustmentDto[];
+}
+
+export interface CaptureClockRequest {
+  employmentId: string;
+  type: number;
+  source: number;
+  capturedAtUtc?: string | null;
+  sourceDeviceId?: string | null;
+  correlationId?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+export interface AdjustAttendanceRequest {
+  adjustedWorkedMinutes: number;
+  reason: string;
+  rowVersion: number;
+}
+
+export interface ResolveExceptionRequest {
+  resolutionNotes: string;
+  waive?: boolean;
+}
+
+// ==========================================
+// Phase 3 — Leave Module Contracts
+// ==========================================
+
+export enum LeaveCategory {
+  Annual = 0,
+  Sick = 1,
+  Maternity = 2,
+  Paternity = 3,
+  Bereavement = 4,
+  Hajj = 5,
+  Marriage = 6,
+  Unpaid = 7,
+  Emergency = 8
+}
+
+export enum LeaveRequestStatus {
+  Draft = 0,
+  PendingApproval = 1,
+  Approved = 2,
+  Rejected = 3,
+  Cancelled = 4
+}
+
+export interface LeaveTypeDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  category: number;
+  categoryName: string;
+  isPaid: boolean;
+  requiresAttachment: boolean;
+  allowHalfDay: boolean;
+  isActive: boolean;
+}
+
+export interface LeaveBalanceDto {
+  id: string;
+  employmentId: string;
+  leaveTypeId: string;
+  leaveTypeNameEn: string;
+  leaveTypeNameAr: string;
+  year: number;
+  entitledDays: number;
+  accruedDays: number;
+  usedDays: number;
+  pendingDays: number;
+  availableDays: number;
+  rowVersion: number;
+}
+
+export interface LeaveRequestDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  employmentId: string;
+  employeeNameEn?: string;
+  employeeNameAr?: string;
+  employeeNumber?: string;
+  departmentNameEn?: string;
+  leaveTypeId: string;
+  leaveTypeNameEn: string;
+  leaveTypeNameAr: string;
+  startDate: string;
+  endDate: string;
+  durationDays: number;
+  durationMinutes: number;
+  status: number;
+  statusName: string;
+  reason: string;
+  attachmentDocumentId?: string | null;
+  approvalRequestId?: string | null;
+  rejectionReason?: string | null;
+  createdAt: string;
+  rowVersion: number;
+}
+
+export interface CreateLeaveRequest {
+  employmentId: string;
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  durationDays?: number;
+  reason: string;
+  attachmentDocumentId?: string | null;
+}
+
+export interface RejectLeaveRequest {
+  rejectionReason: string;
+  rowVersion: number;
+}
+
+// ==========================================
+// Phase 3 — Approvals Module Contracts
+// ==========================================
+
+export enum ApprovalStatus {
+  Pending = 0,
+  Approved = 1,
+  Rejected = 2,
+  Cancelled = 3
+}
+
+export interface ApprovalItemDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  domain: string;
+  sourceEntityId: string;
+  sourceEntityType: string;
+  title: string;
+  summary: string;
+  requesterUserId: string;
+  subjectEmploymentId: string;
+  subjectEmployeeNameEn?: string;
+  subjectEmployeeNameAr?: string;
+  currentStepOrder: number;
+  totalSteps: number;
+  status: number;
+  statusName: string;
+  createdAtUtc: string;
+  rowVersion: number;
+  assignedApproverId: string;
+  stepOrder: number;
+}
+
+export interface ApprovalDecisionRequest {
+  comments?: string | null;
+  rowVersion: number;
+}
+
 
