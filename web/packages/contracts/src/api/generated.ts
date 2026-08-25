@@ -5260,7 +5260,7 @@ export const postApiV1LeaveRequestsIdCancel = (
   
 
 
-export const getPostApiV1LeaveRequestsIdCancelMutationOptions = <TError = ErrorType<void | ProblemDetails>,
+export const getPostApiV1LeaveRequestsIdCancelMutationOptions = <TError = ErrorType<ProblemDetails>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
 ): UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext> => {
 
@@ -5287,9 +5287,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type PostApiV1LeaveRequestsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>>
     export type PostApiV1LeaveRequestsIdCancelMutationBody = LeaveCancellationRequest
-    export type PostApiV1LeaveRequestsIdCancelMutationError = ErrorType<void | ProblemDetails>
+    export type PostApiV1LeaveRequestsIdCancelMutationError = ErrorType<ProblemDetails>
 
-    export const usePostApiV1LeaveRequestsIdCancel = <TError = ErrorType<void | ProblemDetails>,
+    export const usePostApiV1LeaveRequestsIdCancel = <TError = ErrorType<ProblemDetails>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>,

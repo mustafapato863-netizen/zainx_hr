@@ -287,9 +287,12 @@ export interface ApplicationSummaryDto {
  */
 export type ApprovalCancellationInputRowVersion = number | string;
 
+export type ApprovalCancellationInputReason = string | null;
+
 export interface ApprovalCancellationInput {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   rowVersion: ApprovalCancellationInputRowVersion;
+  reason?: ApprovalCancellationInputReason;
 }
 
 export type ApprovalDelegationDtoExpiresAtUtc = null | string;
