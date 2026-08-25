@@ -27,15 +27,16 @@ export const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({
     lastNameEn: '',
     firstNameAr: '',
     lastNameAr: '',
-    dateOfBirth: '1995-05-15',
-    gender: 'Male',
-    nationality: 'SA',
+    employeeNumber: '',
+    dateOfBirth: '',
+    gender: undefined,
+    nationality: undefined,
     nationalIdentifier: '',
     primaryEmail: '',
     phoneNumber: '',
-    hireDate: new Date().toISOString().split('T')[0],
+    hireDate: '',
     organizationUnitId: departments[0]?.id || '',
-    locationId: locations[0]?.id || '',
+    locationId: locations[0]?.id,
     jobTitleEn: '',
     jobTitleAr: ''
   });
@@ -49,8 +50,22 @@ export const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.firstNameEn || !formData.lastNameEn || !formData.nationalIdentifier || !formData.jobTitleEn) {
-      setErrorMsg('Please fill in all mandatory fields.');
+    const missingFields = [
+      ['employeeNumber', formData.employeeNumber],
+      ['firstNameEn', formData.firstNameEn],
+      ['lastNameEn', formData.lastNameEn],
+      ['firstNameAr', formData.firstNameAr],
+      ['lastNameAr', formData.lastNameAr],
+      ['dateOfBirth', formData.dateOfBirth],
+      ['nationalIdentifier', formData.nationalIdentifier],
+      ['hireDate', formData.hireDate],
+      ['organizationUnitId', formData.organizationUnitId],
+      ['jobTitleEn', formData.jobTitleEn],
+      ['jobTitleAr', formData.jobTitleAr]
+    ].filter(([, value]) => !String(value ?? '').trim()).map(([field]) => field);
+
+    if (missingFields.length > 0) {
+      setErrorMsg(`Please provide all required employee fields: ${missingFields.join(', ')}.`);
       return;
     }
 
@@ -123,7 +138,14 @@ export const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({
                 placeholder="10XXXXXXXX"
               />
             </Field>
-            <Field label="Date of Birth / تاريخ الميلاد">
+            <Field label="Employee Number / الرقم الوظيفي *" isRequired>
+              <Input
+                value={formData.employeeNumber || ''}
+                onChange={(e) => handleChange('employeeNumber', e.target.value)}
+                placeholder="e.g. EMP-000123"
+              />
+            </Field>
+            <Field label="Date of Birth / تاريخ الميلاد *" isRequired>
               <Input
                 type="date"
                 value={formData.dateOfBirth}
@@ -184,7 +206,7 @@ export const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({
             <Field label="Location / الموقع">
               <select
                 value={formData.locationId || ''}
-                onChange={(e) => handleChange('locationId', e.target.value)}
+                onChange={(e) => handleChange('locationId', e.target.value || undefined)}
                 style={{
                   width: '100%',
                   padding: '0.5rem',
@@ -213,7 +235,7 @@ export const CreateEmployeeModal: React.FC<CreateEmployeeModalProps> = ({
                 placeholder="أخصائي أول موارد بشرية"
               />
             </Field>
-            <Field label="Hire Date / تاريخ المباشرة">
+            <Field label="Hire Date / تاريخ المباشرة *" isRequired>
               <Input
                 type="date"
                 value={formData.hireDate}

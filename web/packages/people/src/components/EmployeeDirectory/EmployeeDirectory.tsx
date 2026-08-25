@@ -1,8 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import {
   PageHeader,
-  ZainXDataGrid,
-  ZainXColumnDef,
   FilterBar,
   FilterItem,
   DensitySwitcher,
@@ -16,9 +14,9 @@ import {
   EmptyState,
   NoResults,
   ErrorState,
-  Skeleton,
-  ICellRendererParams
+  Skeleton
 } from '@zainx/design-system';
+import { ZainXDataGrid, type ZainXColumnDef, type ICellRendererParams } from '@zainx/design-system/components/ZainXDataGrid/ZainXDataGrid';
 import { EmployeeSummaryDto } from '@zainx/contracts';
 
 export interface EmployeeDirectoryProps {
@@ -275,7 +273,7 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
   }
 
   return (
-    <div className="zainx-employee-directory" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', padding: '1.5rem' }}>
+    <div className="zainx-employee-directory flex flex-col gap-4 p-4 sm:p-6">
       {/* Page Header */}
       <PageHeader
         title="Employee Directory / دليل الموظفين"
@@ -283,7 +281,7 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
         badge={<Badge variant="neutral">{filteredEmployees.length} Total / إجمالي</Badge>}
         actions={
           <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-            <Button variant="primary" onClick={onCreateEmployee}>
+            <Button variant="primary" onClick={onCreateEmployee} data-testid="open-create-employee-modal-btn">
               + Add Employee / إضافة موظف
             </Button>
           </div>
@@ -291,12 +289,13 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
       />
 
       {/* Toolbar & Filters */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flex: 1, minWidth: '320px' }}>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex w-full flex-wrap items-center gap-3 lg:w-auto lg:flex-1">
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
             aria-label="Filter by Department"
+            className="w-full sm:w-auto"
             style={{
               padding: '0.5rem 0.875rem',
               borderRadius: 'var(--zainx-radius-md, 6px)',
@@ -318,6 +317,7 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             aria-label="Filter by Status"
+            className="w-full sm:w-auto"
             style={{
               padding: '0.5rem 0.875rem',
               borderRadius: 'var(--zainx-radius-md, 6px)',
@@ -334,7 +334,7 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
           </select>
         </div>
 
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+        <div className="flex flex-wrap items-center gap-3">
           <DensitySwitcher density={density} onChange={setDensity} />
           <ColumnChooser
             columns={columnItems}
@@ -392,27 +392,29 @@ export const EmployeeDirectory: React.FC<EmployeeDirectoryProps> = ({
           onClearFilters={handleClearAllFilters}
         />
       ) : (
-        <div style={{ minHeight: '480px', width: '100%' }}>
-          <ZainXDataGrid<EmployeeSummaryDto>
-            rowData={filteredEmployees}
-            columnDefs={columnDefs}
-            density={density}
-            gridOptions={{
-              pagination: true,
-              paginationPageSize: 20,
-              rowSelection: 'multiple',
-              onRowClicked: (event) => {
-                if (event.data && onSelectEmployee) {
-                  onSelectEmployee(event.data);
+        <div className="min-h-[480px] w-full overflow-x-auto">
+          <div className="h-full min-w-[1100px]">
+            <ZainXDataGrid<EmployeeSummaryDto>
+              rowData={filteredEmployees}
+              columnDefs={columnDefs}
+              density={density}
+              gridOptions={{
+                pagination: true,
+                paginationPageSize: 20,
+                rowSelection: 'multiple',
+                onRowClicked: (event) => {
+                  if (event.data && onSelectEmployee) {
+                    onSelectEmployee(event.data);
+                  }
+                },
+                onSelectionChanged: (event) => {
+                  const selected = event.api.getSelectedRows();
+                  const ids = selected.map((r: EmployeeSummaryDto) => r.id).filter(Boolean) as string[];
+                  setSelectedIds(ids);
                 }
-              },
-              onSelectionChanged: (event) => {
-                const selected = event.api.getSelectedRows();
-                const ids = selected.map((r: EmployeeSummaryDto) => r.id).filter(Boolean) as string[];
-                setSelectedIds(ids);
-              }
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
       )}
     </div>

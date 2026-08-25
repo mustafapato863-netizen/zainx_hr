@@ -89,3 +89,24 @@ public class SensitiveRevealResponse
     public string RevealedAt { get; set; } = string.Empty;
     public int ExpirySeconds { get; set; } = 60;
 }
+
+public sealed class SelfServiceProfileUpdateRequest
+{
+    public string? PrimaryEmail { get; set; }
+    public string? PhoneNumber { get; set; }
+    public uint RowVersion { get; set; }
+}
+
+public sealed class UserEmploymentLinkRequest
+{
+    public Guid UserId { get; set; }
+    public Guid EmploymentId { get; set; }
+}
+
+public sealed class UserEmploymentLinkDto
+{
+    public Guid UserId { get; set; }
+    public Guid EmploymentId { get; set; }
+    public string LegalEntityId { get; set; } = string.Empty;
+    public DateTime LinkedAtUtc { get; set; }
+}

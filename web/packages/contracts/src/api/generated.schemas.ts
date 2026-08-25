@@ -4,6 +4,196 @@
  * Workforce.Host.Api | v1
  * OpenAPI spec version: 1.0.0
  */
+export interface CreateLegalEntityRequest {
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  countryCode: string;
+  currencyCode: string;
+  timezoneId: string;
+}
+
+export interface CreateCostCenterRequest {
+  code: string;
+  nameEn: string;
+  nameAr: string;
+}
+
+export interface CostCenterDto {
+  id: string;
+  tenantId: string;
+  legalEntityId: string;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  isActive: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type LegalEntityDtoRowVersion = number | string;
+
+export interface LegalEntityDto {
+  id: string;
+  tenantId: string;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  countryCode: string;
+  currencyCode: string;
+  timezoneId: string;
+  isActive: boolean;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LegalEntityDtoRowVersion;
+}
+
+export type TenantContextDtoActiveLegalEntityId = null | string;
+
+export interface TenantContextDto {
+  tenant: TenantDto;
+  legalEntities: LegalEntityDto[];
+  activeLegalEntityId: TenantContextDtoActiveLegalEntityId;
+}
+
+export interface TenantDto {
+  id: string;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  isActive: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateLegalEntityRequestRowVersion = number | string;
+
+export interface UpdateLegalEntityRequest {
+  nameEn: string;
+  nameAr: string;
+  countryCode: string;
+  currencyCode: string;
+  timezoneId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: UpdateLegalEntityRequestRowVersion;
+}
+
+export interface AiActionDefinition {
+  actionCode: string;
+  description: string;
+  targetModule: string;
+  requiredPermission: string;
+  inputSchemaJson: string;
+  sensitivity: string;
+  requiresConfirmation?: boolean;
+  effectiveDatePolicy?: string;
+  concurrencyPolicy?: string;
+  idempotencyPolicy?: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AiActionProposalDtoExpectedRowVersion = number | string;
+
+export type AiActionProposalDtoEffectiveDateUtc = null | string;
+
+export type AiActionProposalDtoConfirmedAtUtc = null | string;
+
+export type AiActionProposalDtoCompletedAtUtc = null | string;
+
+export type AiActionProposalDtoErrorMessage = null | string;
+
+export interface AiActionProposalDto {
+  id: string;
+  conversationId: string;
+  actionCode: string;
+  targetEntityType: string;
+  targetEntityId: string;
+  status: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: AiActionProposalDtoExpectedRowVersion;
+  effectiveDateUtc: AiActionProposalDtoEffectiveDateUtc;
+  beforeSnapshotJson: string;
+  afterSnapshotJson: string;
+  impactSummaryJson: string;
+  requiredPermission: string;
+  proposalHash: string;
+  createdAtUtc: string;
+  expiresAtUtc: string;
+  confirmedAtUtc: AiActionProposalDtoConfirmedAtUtc;
+  completedAtUtc: AiActionProposalDtoCompletedAtUtc;
+  errorMessage: AiActionProposalDtoErrorMessage;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AiMessageResponseDtoTokensUsed = number | string;
+
+export interface AiMessageResponseDto {
+  messageId: string;
+  senderRole: string;
+  content: string;
+  sourceCategory: AiSourceCategory;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  tokensUsed: AiMessageResponseDtoTokensUsed;
+  createdAtUtc: string;
+  sources: SourceReferenceDto[];
+  toolExecutions: ToolExecutionDto[];
+}
+
+export type AiProposalExecutionResponseDtoErrorMessage = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AiProposalExecutionResponseDtoNewRowVersion = null | number | string;
+
+export interface AiProposalExecutionResponseDto {
+  proposalId: string;
+  actionCode: string;
+  status: string;
+  success: boolean;
+  resultPayloadJson: string;
+  errorMessage: AiProposalExecutionResponseDtoErrorMessage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  newRowVersion: AiProposalExecutionResponseDtoNewRowVersion;
+  executedAtUtc: string;
+}
+
+export type AiSourceCategory = number;
+
+export type AiToolDefinitionInputSchemaJson = null | string;
+
+export type AiToolDefinitionOutputSchemaJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AiToolDefinitionTimeoutSeconds = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type AiToolDefinitionMaxResultSizeChars = number | string;
+
+export interface AiToolDefinition {
+  toolCode: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  requiredPermission: string;
+  dataClassification?: string;
+  inputSchemaJson?: AiToolDefinitionInputSchemaJson;
+  outputSchemaJson?: AiToolDefinitionOutputSchemaJson;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  timeoutSeconds?: AiToolDefinitionTimeoutSeconds;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  maxResultSizeChars?: AiToolDefinitionMaxResultSizeChars;
+  isReadOnly?: boolean;
+}
+
 export type ApplicationSource = null | string;
 
 export type ApplicationDisposedAtUtc = null | string;
@@ -100,6 +290,30 @@ export type ApprovalCancellationInputRowVersion = number | string;
 export interface ApprovalCancellationInput {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   rowVersion: ApprovalCancellationInputRowVersion;
+}
+
+export type ApprovalDelegationDtoExpiresAtUtc = null | string;
+
+export type ApprovalDelegationDtoRevokedAtUtc = null | string;
+
+export interface ApprovalDelegationDto {
+  id: string;
+  approvalRequestId: string;
+  stepOrder: number;
+  delegatedFromUserId: string;
+  delegatedToUserId: string;
+  reason: string;
+  createdAtUtc: string;
+  expiresAtUtc: ApprovalDelegationDtoExpiresAtUtc;
+  revokedAtUtc: ApprovalDelegationDtoRevokedAtUtc;
+}
+
+export type ApprovalDelegationInputExpiresAtUtc = null | string;
+
+export interface ApprovalDelegationInput {
+  delegateToUserId: string;
+  reason: string;
+  expiresAtUtc?: ApprovalDelegationInputExpiresAtUtc;
 }
 
 /**
@@ -263,6 +477,17 @@ export interface ApproveBatchRequest {
   expectedRowVersion: ApproveBatchRequestExpectedRowVersion;
 }
 
+export type AssignRoleRequestLegalEntityScopeId = null | string;
+
+export type AssignRoleRequestOrganizationUnitScopeId = null | string;
+
+export interface AssignRoleRequest {
+  userId: string;
+  roleId: string;
+  legalEntityScopeId: AssignRoleRequestLegalEntityScopeId;
+  organizationUnitScopeId: AssignRoleRequestOrganizationUnitScopeId;
+}
+
 export type AttendanceDayDtoFirstClockInUtc = null | string;
 
 export type AttendanceDayDtoLastClockOutUtc = null | string;
@@ -335,6 +560,42 @@ export interface AttendanceExceptionDto {
   createdAtUtc: string;
 }
 
+export type AuditRecordLegalEntityId = null | LegalEntityId;
+
+export type AuditRecordCorrelationId = null | string;
+
+export type AuditRecordIpAddress = null | string;
+
+export type AuditRecordUserAgent = null | string;
+
+export type AuditRecordReasonCode = null | string;
+
+export type AuditRecordChangesBeforeJson = null | string;
+
+export type AuditRecordChangesAfterJson = null | string;
+
+export type AuditRecordSafeMetadataJson = null | string;
+
+export interface AuditRecord {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: AuditRecordLegalEntityId;
+  actorUserId: string;
+  actorType: string;
+  actionCode: string;
+  entityType: string;
+  entityId: string;
+  occurredAtUtc: string;
+  correlationId?: AuditRecordCorrelationId;
+  ipAddress?: AuditRecordIpAddress;
+  userAgent?: AuditRecordUserAgent;
+  reasonCode?: AuditRecordReasonCode;
+  changesBeforeJson?: AuditRecordChangesBeforeJson;
+  changesAfterJson?: AuditRecordChangesAfterJson;
+  safeMetadataJson?: AuditRecordSafeMetadataJson;
+  dataClassification?: string;
+}
+
 export type BackgroundJobDtoCompletedAtUtc = null | string;
 
 export type BackgroundJobDtoError = null | string;
@@ -395,6 +656,12 @@ export interface CalculationTraceDto {
   roundingDelta: CalculationTraceDtoRoundingDelta;
   /** @pattern ^-?(?:0|[1-9]\d*)(?:\.\d+)?$ */
   finalAmount: CalculationTraceDtoFinalAmount;
+}
+
+export type CancelProposalRequestReason = null | string;
+
+export interface CancelProposalRequest {
+  reason: CancelProposalRequestReason;
 }
 
 export type CandidateLocation = null | string;
@@ -478,11 +745,76 @@ export type ClockType = number;
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
+export type CompanyPolicyVersion = number | string;
+
+export type CompanyPolicyEffectiveToUtc = null | string;
+
+export interface CompanyPolicy {
+  id: string;
+  tenantId: TenantId;
+  policyCode: string;
+  titleEn: string;
+  titleAr: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  version: CompanyPolicyVersion;
+  effectiveFromUtc: string;
+  effectiveToUtc: CompanyPolicyEffectiveToUtc;
+  contentEn: string;
+  contentAr: string;
+  classification?: string;
+  isActive?: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
 export type ConcurrencyActionRequestRowVersion = number | string;
 
 export interface ConcurrencyActionRequest {
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   rowVersion: ConcurrencyActionRequestRowVersion;
+}
+
+export type ConfirmProposalRequestReason = null | string;
+
+export interface ConfirmProposalRequest {
+  reason: ConfirmProposalRequestReason;
+}
+
+export type ConnectorType = number;
+
+export type ConversationDetailDtoContextEntityType = null | string;
+
+export type ConversationDetailDtoContextEntityId = null | string;
+
+export interface ConversationDetailDto {
+  id: string;
+  title: string;
+  contextEntityType: ConversationDetailDtoContextEntityType;
+  contextEntityId: ConversationDetailDtoContextEntityId;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  messages: AiMessageResponseDto[];
+}
+
+export type ConversationSummaryDtoContextEntityType = null | string;
+
+export type ConversationSummaryDtoContextEntityId = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ConversationSummaryDtoMessageCount = number | string;
+
+export interface ConversationSummaryDto {
+  id: string;
+  title: string;
+  contextEntityType: ConversationSummaryDtoContextEntityType;
+  contextEntityId: ConversationSummaryDtoContextEntityId;
+  createdAtUtc: string;
+  updatedAtUtc: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  messageCount: ConversationSummaryDtoMessageCount;
 }
 
 export type CreateApplicationRequestSource = null | string;
@@ -517,6 +849,62 @@ export interface CreateCandidateRequest {
   skillsJson: CreateCandidateRequestSkillsJson;
 }
 
+export type CreateConnectorRequestSecretCredential = null | string;
+
+export interface CreateConnectorRequest {
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  connectorType: ConnectorType;
+  direction: IntegrationDirection;
+  endpointUrl: string;
+  authType: IntegrationAuthType;
+  secretCredential: CreateConnectorRequestSecretCredential;
+  isActive: boolean;
+  eventSubscriptionsJson: string;
+  configJson: string;
+}
+
+export type CreateConversationRequestTitle = null | string;
+
+export type CreateConversationRequestContextEntityType = null | string;
+
+export type CreateConversationRequestContextEntityId = null | string;
+
+export interface CreateConversationRequest {
+  title?: CreateConversationRequestTitle;
+  contextEntityType?: CreateConversationRequestContextEntityType;
+  contextEntityId?: CreateConversationRequestContextEntityId;
+}
+
+export type SelfServiceProfileUpdateRequestPrimaryEmail = null | string;
+
+export type SelfServiceProfileUpdateRequestPhoneNumber = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SelfServiceProfileUpdateRequestRowVersion = number | string;
+
+export interface SelfServiceProfileUpdateRequest {
+  primaryEmail?: SelfServiceProfileUpdateRequestPrimaryEmail;
+  phoneNumber?: SelfServiceProfileUpdateRequestPhoneNumber;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: SelfServiceProfileUpdateRequestRowVersion;
+}
+
+export interface UserEmploymentLinkRequest {
+  userId: string;
+  employmentId: string;
+}
+
+export interface UserEmploymentLinkDto {
+  userId?: string;
+  employmentId?: string;
+  legalEntityId?: string;
+  linkedAtUtc?: string;
+}
+
 export type CreateEmployeeRequestLegalEntityId = null | string;
 
 export type CreateEmployeeRequestEmployeeNumber = null | string;
@@ -537,24 +925,24 @@ export type CreateEmployeeRequestManagerEmploymentId = null | string;
 
 export interface CreateEmployeeRequest {
   legalEntityId?: CreateEmployeeRequestLegalEntityId;
-  employeeNumber?: CreateEmployeeRequestEmployeeNumber;
-  firstNameEn?: string;
-  lastNameEn?: string;
-  firstNameAr?: string;
-  lastNameAr?: string;
-  dateOfBirth?: string;
+  employeeNumber: CreateEmployeeRequestEmployeeNumber;
+  firstNameEn: string;
+  lastNameEn: string;
+  firstNameAr: string;
+  lastNameAr: string;
+  dateOfBirth: string;
   gender?: CreateEmployeeRequestGender;
   nationality?: CreateEmployeeRequestNationality;
-  nationalIdentifier?: string;
+  nationalIdentifier: string;
   primaryEmail?: CreateEmployeeRequestPrimaryEmail;
   phoneNumber?: CreateEmployeeRequestPhoneNumber;
-  hireDate?: string;
-  organizationUnitId?: string;
+  hireDate: string;
+  organizationUnitId: string;
   positionId?: CreateEmployeeRequestPositionId;
   locationId?: CreateEmployeeRequestLocationId;
   managerEmploymentId?: CreateEmployeeRequestManagerEmploymentId;
-  jobTitleEn?: string;
-  jobTitleAr?: string;
+  jobTitleEn: string;
+  jobTitleAr: string;
 }
 
 /**
@@ -638,6 +1026,19 @@ export interface CreateOrganizationUnitRequest {
   effectiveTo?: CreateOrganizationUnitRequestEffectiveTo;
 }
 
+export type CreatePositionRequestLegalEntityId = null | string;
+
+export type CreatePositionRequestGrade = null | string;
+
+export interface CreatePositionRequest {
+  legalEntityId?: CreatePositionRequestLegalEntityId;
+  organizationUnitId: string;
+  jobCode: string;
+  titleEn: string;
+  titleAr: string;
+  grade?: CreatePositionRequestGrade;
+}
+
 export interface CreatePayrollPeriodRequest {
   code: string;
   periodStart: string;
@@ -649,6 +1050,39 @@ export interface CreatePayrollRunRequest {
   periodId: string;
   code: string;
   currency: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CreateProposalRequestExpectedRowVersion = number | string;
+
+export type CreateProposalRequestEffectiveDateUtc = null | string;
+
+export type CreateProposalRequestBeforeSnapshotJson = null | string;
+
+export type CreateProposalRequestAfterSnapshotJson = null | string;
+
+export type CreateProposalRequestImpactSummaryJson = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type CreateProposalRequestValidityMinutes = number | string;
+
+export interface CreateProposalRequest {
+  conversationId: string;
+  actionCode: string;
+  targetEntityType: string;
+  targetEntityId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: CreateProposalRequestExpectedRowVersion;
+  effectiveDateUtc: CreateProposalRequestEffectiveDateUtc;
+  beforeSnapshotJson: CreateProposalRequestBeforeSnapshotJson;
+  afterSnapshotJson: CreateProposalRequestAfterSnapshotJson;
+  impactSummaryJson: CreateProposalRequestImpactSummaryJson;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  validityMinutes?: CreateProposalRequestValidityMinutes;
 }
 
 export type CreateRequisitionRequestPositionId = null | string;
@@ -682,6 +1116,27 @@ export interface CreateRequisitionRequest {
   requisitionReason: CreateRequisitionRequestRequisitionReason;
   targetStartDate: CreateRequisitionRequestTargetStartDate;
 }
+
+export interface CreateRoleRequest {
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  description: string;
+  permissions: string[];
+}
+
+export interface CreateSavedViewRequest {
+  viewName: string;
+  isTenantShared: boolean;
+  filtersJson: string;
+  columnsJson: string;
+  sortJson: string;
+  groupingJson: string;
+}
+
+export type DeliveryChannel = number;
+
+export type DeliveryStatus = number;
 
 export type DocumentDetailDtoExpiryDate = null | string;
 
@@ -909,6 +1364,8 @@ export interface EmployeeSummaryDto {
   rowVersion?: EmployeeSummaryDtoRowVersion;
 }
 
+export type ExpiryAction = number;
+
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
@@ -952,6 +1409,84 @@ export interface HireCandidateRequest {
 }
 
 export type IFormFile = Blob;
+
+export type IntegrationAuthType = number;
+
+export type IntegrationConnectorEncryptedCredentials = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type IntegrationConnectorCredentialsKeyVersion = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type IntegrationConnectorRowVersion = number | string;
+
+export interface IntegrationConnector {
+  id: string;
+  tenantId: TenantId;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  connectorType: ConnectorType;
+  direction: IntegrationDirection;
+  endpointUrl: string;
+  authType: IntegrationAuthType;
+  encryptedCredentials?: IntegrationConnectorEncryptedCredentials;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  credentialsKeyVersion?: IntegrationConnectorCredentialsKeyVersion;
+  isActive?: boolean;
+  eventSubscriptionsJson?: string;
+  configJson?: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: IntegrationConnectorRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type IntegrationDeliveryJobAttemptCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type IntegrationDeliveryJobMaxAttempts = number | string;
+
+export type IntegrationDeliveryJobNextAttemptAtUtc = null | string;
+
+export type IntegrationDeliveryJobLastAttemptAtUtc = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type IntegrationDeliveryJobLastHttpStatus = null | number | string;
+
+export type IntegrationDeliveryJobLastErrorMessage = null | string;
+
+export interface IntegrationDeliveryJob {
+  id: string;
+  tenantId: TenantId;
+  connectorId: string;
+  eventId: string;
+  eventType: string;
+  status?: DeliveryStatus;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  attemptCount?: IntegrationDeliveryJobAttemptCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  maxAttempts?: IntegrationDeliveryJobMaxAttempts;
+  nextAttemptAtUtc?: IntegrationDeliveryJobNextAttemptAtUtc;
+  lastAttemptAtUtc?: IntegrationDeliveryJobLastAttemptAtUtc;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  lastHttpStatus?: IntegrationDeliveryJobLastHttpStatus;
+  lastErrorMessage?: IntegrationDeliveryJobLastErrorMessage;
+  payloadJson: string;
+  idempotencyKey: string;
+  createdAtUtc?: string;
+}
+
+export type IntegrationDirection = number;
 
 export type InterviewLocationOrMeetingUrl = null | string;
 
@@ -1138,6 +1673,16 @@ export interface LeaveDecisionRequest {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
+export type LeaveCancellationRequestRowVersion = number | string;
+
+export interface LeaveCancellationRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: LeaveCancellationRequestRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
 export type LeaveRejectionRequestRowVersion = number | string;
 
 export interface LeaveRejectionRequest {
@@ -1251,6 +1796,63 @@ export interface MoveApplicationStageRequest {
   expectedRowVersion: MoveApplicationStageRequestExpectedRowVersion;
 }
 
+export type NotificationDeepLinkUrl = null | string;
+
+export type NotificationReadAtUtc = null | string;
+
+export type NotificationSourceEventId = null | string;
+
+export type NotificationIdempotencyKey = null | string;
+
+export interface Notification {
+  id: string;
+  tenantId: TenantId;
+  recipientUserId: string;
+  category: string;
+  titleEn: string;
+  titleAr: string;
+  bodyEn: string;
+  bodyAr: string;
+  deepLinkUrl?: NotificationDeepLinkUrl;
+  channel?: DeliveryChannel;
+  status?: TransportStatus;
+  isRead?: boolean;
+  readAtUtc?: NotificationReadAtUtc;
+  isArchived?: boolean;
+  createdAtUtc?: string;
+  sourceEventId?: NotificationSourceEventId;
+  idempotencyKey?: NotificationIdempotencyKey;
+}
+
+export interface NotificationPreference {
+  id: string;
+  tenantId: TenantId;
+  userId: string;
+  category: string;
+  allowEmail?: boolean;
+  allowInApp?: boolean;
+  allowPush?: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type NotificationTemplateVersion = number | string;
+
+export interface NotificationTemplate {
+  id: string;
+  tenantId: TenantId;
+  templateCode: string;
+  locale: string;
+  subject: string;
+  bodyTemplate: string;
+  allowedVariablesJson: string;
+  channel: DeliveryChannel;
+  isActive?: boolean;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  version?: NotificationTemplateVersion;
+}
+
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
@@ -1340,6 +1942,28 @@ export interface OrganizationUnitDto {
   rowVersion?: OrganizationUnitDtoRowVersion;
 }
 
+export interface PositionDto {
+  id?: string;
+  tenantId?: string;
+  legalEntityId?: string;
+  organizationUnitId?: string;
+  jobCode?: string;
+  titleEn?: string;
+  titleAr?: string;
+  grade?: string;
+  isActive?: boolean;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type DeactivateOrganizationUnitRequestRowVersion = number | string;
+
+export interface DeactivateOrganizationUnitRequest {
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion: DeactivateOrganizationUnitRequestRowVersion;
+}
+
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
@@ -1393,6 +2017,56 @@ export interface PagedAttendanceDaysResponse {
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
+export type PagedAuditResultTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedAuditResultPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedAuditResultPageSize = number | string;
+
+export interface PagedAuditResult {
+  items: AuditRecord[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedAuditResultTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedAuditResultPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedAuditResultPageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedDeliveriesResultTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedDeliveriesResultPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedDeliveriesResultPageSize = number | string;
+
+export interface PagedDeliveriesResult {
+  items: IntegrationDeliveryJob[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedDeliveriesResultTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedDeliveriesResultPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedDeliveriesResultPageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
 export type PagedExceptionsResponseTotalCount = number | string;
 
 /**
@@ -1438,6 +2112,38 @@ export interface PagedLeaveRequestsResponse {
   page: PagedLeaveRequestsResponsePage;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   pageSize: PagedLeaveRequestsResponsePageSize;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedNotificationsResultTotalCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedNotificationsResultUnreadCount = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedNotificationsResultPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PagedNotificationsResultPageSize = number | string;
+
+export interface PagedNotificationsResult {
+  items: Notification[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: PagedNotificationsResultTotalCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  unreadCount: PagedNotificationsResultUnreadCount;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page: PagedNotificationsResultPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize: PagedNotificationsResultPageSize;
 }
 
 /**
@@ -1808,6 +2514,28 @@ export interface PipelineBoardDto {
   applications: ApplicationSummaryDto[];
 }
 
+export type PlatformSettingEffectiveEndDate = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type PlatformSettingRowVersion = number | string;
+
+export interface PlatformSetting {
+  id: string;
+  tenantId: TenantId;
+  category: string;
+  key: string;
+  valueJson: string;
+  effectiveStartDate: string;
+  effectiveEndDate: PlatformSettingEffectiveEndDate;
+  isCurrent: boolean;
+  changedByUserId: string;
+  changedAtUtc: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: PlatformSettingRowVersion;
+}
+
 export type ProblemDetailsType = null | string;
 
 export type ProblemDetailsTitle = null | string;
@@ -1828,6 +2556,18 @@ export interface ProblemDetails {
   status?: ProblemDetailsStatus;
   detail?: ProblemDetailsDetail;
   instance?: ProblemDetailsInstance;
+}
+
+export type QueueExportRequestFiltersAnyOf = {[key: string]: string};
+
+export type QueueExportRequestFilters = null | QueueExportRequestFiltersAnyOf;
+
+export type QueueExportRequestIdempotencyKey = null | string;
+
+export interface QueueExportRequest {
+  filters?: QueueExportRequestFilters;
+  outputFormat?: string;
+  idempotencyKey?: QueueExportRequestIdempotencyKey;
 }
 
 export type RecordClockRequestCapturedAtUtc = null | string;
@@ -1923,6 +2663,89 @@ export interface RejectApplicationRequest {
   expectedRowVersion: RejectApplicationRequestExpectedRowVersion;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ReportDefinitionVersion = number | string;
+
+export interface ReportDefinition {
+  reportCode: string;
+  nameEn: string;
+  nameAr: string;
+  domain: string;
+  descriptionEn: string;
+  descriptionAr: string;
+  allowedFiltersJson: string;
+  allowedColumnsJson: string;
+  requiredPermissionsJson: string;
+  dataClassification?: string;
+  supportedFormatsJson?: string;
+  executionMode?: ReportExecutionMode;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  version?: ReportDefinitionVersion;
+}
+
+export type ReportExecutionDataRowsItem = { [key: string]: unknown };
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ReportExecutionDataTotalCount = number | string;
+
+export interface ReportExecutionData {
+  columns: string[];
+  rows: ReportExecutionDataRowsItem[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  totalCount: ReportExecutionDataTotalCount;
+}
+
+export type ReportExecutionJobLegalEntityId = null | LegalEntityId;
+
+export type ReportExecutionJobCompletedAtUtc = null | string;
+
+export type ReportExecutionJobStorageKey = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ReportExecutionJobFileSizeBytes = number | string;
+
+export type ReportExecutionJobSha256Checksum = null | string;
+
+export type ReportExecutionJobErrorMessage = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ReportExecutionJobRowCount = number | string;
+
+export type ReportExecutionJobIdempotencyKey = null | string;
+
+export interface ReportExecutionJob {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: ReportExecutionJobLegalEntityId;
+  reportCode: string;
+  status?: ReportJobStatus;
+  requestedByUserId: string;
+  requestedAtUtc?: string;
+  completedAtUtc?: ReportExecutionJobCompletedAtUtc;
+  filtersJson?: string;
+  outputFormat?: string;
+  storageKey?: ReportExecutionJobStorageKey;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  fileSizeBytes?: ReportExecutionJobFileSizeBytes;
+  sha256Checksum?: ReportExecutionJobSha256Checksum;
+  errorMessage?: ReportExecutionJobErrorMessage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowCount?: ReportExecutionJobRowCount;
+  idempotencyKey?: ReportExecutionJobIdempotencyKey;
+}
+
+export type ReportExecutionMode = number;
+
+export type ReportJobStatus = number;
+
 export type RequisitionStatus = number;
 
 export type RescheduleInterviewRequestLocationOrMeetingUrl = null | string;
@@ -1945,9 +2768,131 @@ export interface ResolveExceptionRequest {
   notes: string;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RetentionPolicyRetentionDays = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RetentionPolicyRowVersion = number | string;
+
+export interface RetentionPolicy {
+  id: string;
+  tenantId: TenantId;
+  module: string;
+  dataCategory: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  retentionDays: RetentionPolicyRetentionDays;
+  actionOnExpiry: ExpiryAction;
+  isActive: boolean;
+  effectiveStartDate: string;
+  changedByUserId: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: RetentionPolicyRowVersion;
+}
+
 export interface RevealSensitiveFieldRequest {
   fieldName?: string;
   purpose?: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RoleRowVersion = number | string;
+
+export interface Role {
+  id: string;
+  tenantId: TenantId;
+  code: string;
+  nameEn: string;
+  nameAr: string;
+  description: string;
+  permissionsJson: string;
+  isSystemRole?: boolean;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  rowVersion?: RoleRowVersion;
+}
+
+export type RoleAssignmentLegalEntityScopeId = null | LegalEntityId;
+
+export type RoleAssignmentOrganizationUnitScopeId = null | string;
+
+export interface RoleAssignment {
+  id: string;
+  tenantId: TenantId;
+  userId: string;
+  roleId: string;
+  legalEntityScopeId: RoleAssignmentLegalEntityScopeId;
+  organizationUnitScopeId: RoleAssignmentOrganizationUnitScopeId;
+  assignedByUserId: string;
+  assignedAtUtc: string;
+}
+
+export type RunReportRequestFiltersAnyOf = {[key: string]: string};
+
+export type RunReportRequestFilters = null | RunReportRequestFiltersAnyOf;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RunReportRequestPage = number | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type RunReportRequestPageSize = number | string;
+
+export interface RunReportRequest {
+  filters?: RunReportRequestFilters;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  page?: RunReportRequestPage;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  pageSize?: RunReportRequestPageSize;
+}
+
+export type SavedReportViewLegalEntityId = null | LegalEntityId;
+
+export interface SavedReportView {
+  id: string;
+  tenantId: TenantId;
+  legalEntityId: SavedReportViewLegalEntityId;
+  reportCode: string;
+  viewName: string;
+  isTenantShared: boolean;
+  ownerUserId: string;
+  filtersJson?: string;
+  columnsJson?: string;
+  sortJson?: string;
+  groupingJson?: string;
+  createdAtUtc?: string;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SaveRetentionPolicyRequestRetentionDays = number | string;
+
+export interface SaveRetentionPolicyRequest {
+  module: string;
+  dataCategory: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  retentionDays: SaveRetentionPolicyRequestRetentionDays;
+  actionOnExpiry: ExpiryAction;
+  isActive: boolean;
+  effectiveStartDate: string;
+}
+
+export type SaveSettingRequestEffectiveEndDate = null | string;
+
+export interface SaveSettingRequest {
+  category: string;
+  key: string;
+  valueJson: string;
+  effectiveStartDate: string;
+  effectiveEndDate: SaveSettingRequestEffectiveEndDate;
 }
 
 export type ScheduleInterviewRequestLocationOrMeetingUrl = null | string;
@@ -1993,6 +2938,10 @@ export interface ScorecardSubmission {
   submittedAtUtc?: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   rowVersion?: ScorecardSubmissionRowVersion;
+}
+
+export interface SendMessageRequest {
+  prompt: string;
 }
 
 /**
@@ -2062,6 +3011,33 @@ export interface SettlementBatchDto {
   rowVersion: SettlementBatchDtoRowVersion;
 }
 
+export type SourceReferenceDtoEntityType = null | string;
+
+export type SourceReferenceDtoEntityId = null | string;
+
+export type SourceReferenceDtoPolicyCode = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type SourceReferenceDtoPolicyVersion = null | number | string;
+
+export type SourceReferenceDtoPayrollRunId = null | string;
+
+export interface SourceReferenceDto {
+  id: string;
+  sourceCategory: string;
+  title: string;
+  entityType: SourceReferenceDtoEntityType;
+  entityId: SourceReferenceDtoEntityId;
+  policyCode: SourceReferenceDtoPolicyCode;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  policyVersion: SourceReferenceDtoPolicyVersion;
+  payrollRunId: SourceReferenceDtoPayrollRunId;
+  metadataJson: string;
+  retrievedAtUtc: string;
+}
+
 export type StageKind = number;
 
 export interface StatutoryRuleDto {
@@ -2117,6 +3093,22 @@ export interface TenantId {
   value?: string;
 }
 
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type ToolExecutionDtoDurationMs = number | string;
+
+export interface ToolExecutionDto {
+  id: string;
+  toolCode: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  durationMs: ToolExecutionDtoDurationMs;
+  status: string;
+  createdAtUtc: string;
+}
+
+export type TransportStatus = number;
+
 export type UpdateCandidateRequestLocation = null | string;
 
 export type UpdateCandidateRequestHeadline = null | string;
@@ -2146,6 +3138,26 @@ export interface UpdateCandidateRequest {
   skillsJson: UpdateCandidateRequestSkillsJson;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   expectedRowVersion: UpdateCandidateRequestExpectedRowVersion;
+}
+
+export type UpdateConnectorRequestSecretCredential = null | string;
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateConnectorRequestExpectedRowVersion = number | string;
+
+export interface UpdateConnectorRequest {
+  nameEn: string;
+  nameAr: string;
+  endpointUrl: string;
+  authType: IntegrationAuthType;
+  secretCredential: UpdateConnectorRequestSecretCredential;
+  isActive: boolean;
+  eventSubscriptionsJson: string;
+  configJson: string;
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedRowVersion: UpdateConnectorRequestExpectedRowVersion;
 }
 
 /**
@@ -2204,6 +3216,13 @@ export interface UpdateOrganizationUnitRequest {
   rowVersion?: UpdateOrganizationUnitRequestRowVersion;
 }
 
+export interface UpdatePreferenceRequest {
+  category: string;
+  allowEmail: boolean;
+  allowInApp: boolean;
+  allowPush: boolean;
+}
+
 export type UpdateRequisitionRequestPositionId = null | string;
 
 export type UpdateRequisitionRequestLocationId = null | string;
@@ -2237,6 +3256,27 @@ export interface UpdateRequisitionRequest {
   targetStartDate: UpdateRequisitionRequestTargetStartDate;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   expectedRowVersion: UpdateRequisitionRequestExpectedRowVersion;
+}
+
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+export type UpdateRoleRequestExpectedVersion = number | string;
+
+export interface UpdateRoleRequest {
+  nameEn: string;
+  nameAr: string;
+  description: string;
+  permissions: string[];
+  /** @pattern ^-?(?:0|[1-9]\d*)$ */
+  expectedVersion: UpdateRoleRequestExpectedVersion;
+}
+
+export interface UpdateTemplateRequest {
+  subject: string;
+  bodyTemplate: string;
+  allowedVariablesJson: string;
+  isActive: boolean;
 }
 
 export interface WaiveExceptionRequest {
@@ -2277,6 +3317,73 @@ export interface WorkSchedule {
   effectivePeriod: EffectivePeriod;
   isActive?: boolean;
 }
+
+export type SelfServiceClockRequestSourceDeviceId = null | string;
+
+export type SelfServiceClockRequestLatitude = null | number;
+
+export type SelfServiceClockRequestLongitude = null | number;
+
+export interface SelfServiceClockRequest {
+  type: ClockType;
+  source?: ClockSource;
+  sourceDeviceId?: SelfServiceClockRequestSourceDeviceId;
+  latitude?: SelfServiceClockRequestLatitude;
+  longitude?: SelfServiceClockRequestLongitude;
+}
+
+export type SelfServiceClockResponseRowVersion = number | string;
+
+export interface SelfServiceClockResponse {
+  clockEventId: string;
+  attendanceDayId: string;
+  status: string;
+  rowVersion: SelfServiceClockResponseRowVersion;
+}
+
+export type PagedSelfServiceLeaveRequestsResponseTotalCount = number | string;
+
+export type PagedSelfServiceLeaveRequestsResponsePage = number | string;
+
+export type PagedSelfServiceLeaveRequestsResponsePageSize = number | string;
+
+export interface PagedSelfServiceLeaveRequestsResponse {
+  items: LeaveRequestDto[];
+  totalCount: PagedSelfServiceLeaveRequestsResponseTotalCount;
+  page: PagedSelfServiceLeaveRequestsResponsePage;
+  pageSize: PagedSelfServiceLeaveRequestsResponsePageSize;
+}
+
+export type SelfServiceLeaveRequestInputAttachmentDocumentId = null | string;
+
+export interface SelfServiceLeaveRequestInput {
+  leaveTypeId: string;
+  startDate: string;
+  endDate: string;
+  reason: string;
+  attachmentDocumentId?: SelfServiceLeaveRequestInputAttachmentDocumentId;
+}
+
+export type SelfServiceLeaveRequestResponseRowVersion = number | string;
+
+export interface SelfServiceLeaveRequestResponse {
+  requestId: string;
+  approvalRequestId: string;
+  status: string;
+  rowVersion: SelfServiceLeaveRequestResponseRowVersion;
+}
+
+export type GetApiV1AiPoliciesParams = {
+query?: string;
+effectiveDate?: string;
+};
+
+export type GetApiV1AiProposalsParams = {
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+limit?: number | string;
+};
 
 export type GetApiV1ApprovalsInboxParams = {
 /**
@@ -2325,8 +3432,33 @@ page?: number | string;
 pageSize?: number | string;
 };
 
+export type GetApiV1AuditParams = {
+ActorUserId?: string;
+ActionCode?: string;
+EntityType?: string;
+EntityId?: string;
+CorrelationId?: string;
+LegalEntityId?: string;
+FromUtc?: string;
+ToUtc?: string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+Page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+PageSize?: number | string;
+};
+
 export type GetApiV1ComplianceRulesParams = {
 jurisdiction?: Jurisdiction;
+};
+
+export type GetApiV1DocumentsExpiringParams = {
+days?: number;
+page?: number;
+pageSize?: number;
 };
 
 export type GetApiV1DocumentsParams = {
@@ -2354,6 +3486,23 @@ export type PostApiV1DocumentsIdVersionsBody = {
   File?: IFormFile;
 };
 
+export type GetApiV1AdminRoleAssignmentsParams = {
+userId?: string;
+};
+
+export type GetApiV1IntegrationsDeliveriesParams = {
+connectorId?: string;
+status?: DeliveryStatus;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
 export type GetApiV1LeaveBalancesParams = {
 employmentId?: string;
 /**
@@ -2378,8 +3527,47 @@ page?: number | string;
 pageSize?: number | string;
 };
 
+export type GetApiV1NotificationsParams = {
+unreadOnly?: boolean;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+page?: number | string;
+/**
+ * @pattern ^-?(?:0|[1-9]\d*)$
+ */
+pageSize?: number | string;
+};
+
 export type GetApiV1OrganizationUnitsParams = {
 legalEntityId?: string;
+};
+
+export type GetApiV1OrganizationPositionsParams = {
+legalEntityId?: string;
+organizationUnitId?: string;
+};
+
+export type GetApiV1SelfServiceTeamParams = {
+page?: number;
+pageSize?: number;
+};
+
+export type GetApiV1SelfServiceLeaveBalancesParams = {
+year?: number;
+};
+
+export type GetApiV1SelfServiceLeaveRequestsParams = {
+page?: number;
+pageSize?: number;
+};
+
+export type GetApiV1SelfServiceAttendanceTodayParams = {
+date?: null | string;
+};
+
+export type GetApiV1SelfServiceDocumentsIdDownloadParams = {
+version?: null | number;
 };
 
 export type GetApiV1PeopleEmployeesParams = {
@@ -2444,5 +3632,9 @@ page?: number | string;
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
 pageSize?: number | string;
+};
+
+export type GetApiV1OrganizationCostCentersParams = {
+legalEntityId?: null | string;
 };
 

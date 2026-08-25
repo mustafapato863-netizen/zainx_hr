@@ -2,6 +2,17 @@
 
 Each phase includes backend, DB, contracts, frontend, design system, testing, security/operations and a gate.
 
+## Current Accepted State — 2026-08-25
+
+- Phase 0: **PASS**
+- Phase 1A: **PASS**
+- Phase 1B: **PASS**
+- Phase 1C: **PASS / CLOSED**
+- Phase 2 — Organization + People + Documents: **APPROVED TO START**
+- Operating mode: **Restricted Audit Mode**
+- Current implementation checkpoint: [`HCM_GOAL_AUDIT_STATUS.md`](./HCM_GOAL_AUDIT_STATUS.md)
+- Production release: **NOT SEALED**; identity provider, database-backed integration, Worker/Playwright evidence, UAT, backup/restore and deployment gates remain open.
+
 ---
 
 # Phase 0 — Full Product Foundation
@@ -139,7 +150,7 @@ P0 DS passes the canonical quality matrix and can support Employee Directory wit
 
 ---
 
-# Phase 1C — Enterprise Engine & Integration Spikes
+# Phase 1C — Enterprise Engine & Integration Spikes — PASS / CLOSED
 
 ## Spikes
 - AG Grid Enterprise
@@ -166,7 +177,7 @@ No commercial/heavy dependency is silently committed without an approved technic
 
 ---
 
-# Phase 2 — Workforce Core: Organization + People + Documents
+# Phase 2 — Workforce Core: Organization + People + Documents — APPROVED TO START
 
 ## Backend
 - Organization implementation

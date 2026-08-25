@@ -1,163 +1,76 @@
-import React, { useState, Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { createRoute } from '@tanstack/react-router';
-import { Route as rootRoute } from './__root';
 import {
   AttendanceDayDto,
-  AttendanceExceptionDto
+  AttendanceExceptionDto,
+  useGetApiV1AttendanceDays,
+  useGetApiV1AttendanceExceptions,
+  usePostApiV1AttendanceDaysIdAdjustments,
+  usePostApiV1AttendanceDaysIdApprove,
+  usePostApiV1AttendanceExceptionsIdResolve,
 } from '@zainx/contracts';
+import { Route as rootRoute } from './__root';
 
-// Lazy load attendance components with strict route-level chunk isolation
-const AttendanceRecordsGrid = lazy(() =>
-  import('@zainx/attendance').then((m) => ({ default: m.AttendanceRecordsGrid }))
-);
-const AttendanceExceptionsQueue = lazy(() =>
-  import('@zainx/attendance').then((m) => ({ default: m.AttendanceExceptionsQueue }))
-);
-const AttendanceAdjustmentModal = lazy(() =>
-  import('@zainx/attendance').then((m) => ({ default: m.AttendanceAdjustmentModal }))
-);
-
-const AttendanceStatus = {
-  Locked: 'Locked',
-  Approved: 'Approved',
-  Reviewed: 'Reviewed',
-  Unreviewed: 'Unreviewed',
-} as const;
-
-// Initial fallback mock data for testing/offline rendering
-const initialRecords: AttendanceDayDto[] = [
-  {
-    id: '11111111-1111-1111-1111-111111111111',
-    tenantId: '22222222-2222-2222-2222-222222222222',
-    legalEntityId: '33333333-3333-3333-3333-333333333333',
-    employmentId: '44444444-4444-4444-4444-444444444444',
-    businessDate: '2026-08-24',
-    timeZoneId: 'Asia/Riyadh',
-    status: AttendanceStatus.Reviewed,
-    scheduledMinutes: 480,
-    firstClockInUtc: '2026-08-24T05:00:00Z',
-    lastClockOutUtc: '2026-08-24T13:30:00Z',
-    totalWorkedMinutes: 510,
-    lateMinutes: 0,
-    earlyDepartureMinutes: 0,
-    isAbsent: false,
-    rowVersion: 1
-  },
-  {
-    id: '22222222-2222-2222-2222-222222222222',
-    tenantId: '22222222-2222-2222-2222-222222222222',
-    legalEntityId: '33333333-3333-3333-3333-333333333333',
-    employmentId: '55555555-5555-5555-5555-555555555555',
-    businessDate: '2026-08-24',
-    timeZoneId: 'Asia/Riyadh',
-    status: AttendanceStatus.Unreviewed,
-    scheduledMinutes: 480,
-    firstClockInUtc: '2026-08-24T05:15:00Z',
-    lastClockOutUtc: null,
-    totalWorkedMinutes: 0,
-    lateMinutes: 15,
-    earlyDepartureMinutes: 0,
-    isAbsent: false,
-    rowVersion: 1
-  }
-];
-
-const initialExceptions: AttendanceExceptionDto[] = [
-  {
-    id: 'ex-01',
-    attendanceDayId: '22222222-2222-2222-2222-222222222222',
-    tenantId: '22222222-2222-2222-2222-222222222222',
-    employmentId: '55555555-5555-5555-5555-555555555555',
-    type: 'MissingClockOut',
-    status: 'Pending',
-    details: 'No clock-out recorded for shift ending at 16:30.',
-    resolutionNotes: null,
-    resolvedByUserId: null,
-    resolvedAtUtc: null,
-    createdAtUtc: '2026-08-24T14:00:00Z'
-  }
-];
+const AttendanceRecordsGrid = lazy(() => import('@zainx/attendance').then((m) => ({ default: m.AttendanceRecordsGrid })));
+const AttendanceExceptionsQueue = lazy(() => import('@zainx/attendance').then((m) => ({ default: m.AttendanceExceptionsQueue })));
+const AttendanceAdjustmentModal = lazy(() => import('@zainx/attendance').then((m) => ({ default: m.AttendanceAdjustmentModal })));
 
 export function AttendanceComponent() {
-  const [records, setRecords] = useState<AttendanceDayDto[]>(initialRecords);
-  const [exceptions, setExceptions] = useState<AttendanceExceptionDto[]>(initialExceptions);
   const [selectedRecordForAdjustment, setSelectedRecordForAdjustment] = useState<AttendanceDayDto | null>(null);
   const [isExceptionsDrawerOpen, setIsExceptionsDrawerOpen] = useState(false);
+  const daysQuery = useGetApiV1AttendanceDays({ page: 1, pageSize: 100 });
+  // The API contract uses AttendanceExceptionStatus.Open = 1. Keep the
+  // filtering server-side so the queue does not fetch resolved exceptions.
+  const exceptionsQuery = useGetApiV1AttendanceExceptions({ status: 1, page: 1, pageSize: 100 });
+  const approveMutation = usePostApiV1AttendanceDaysIdApprove();
+  const adjustMutation = usePostApiV1AttendanceDaysIdAdjustments();
+  const resolveMutation = usePostApiV1AttendanceExceptionsIdResolve();
 
-  const pendingExceptions = exceptions.filter((e) => e.status === 'Pending');
+  const records = daysQuery.data?.items ?? [];
+  const exceptions = exceptionsQuery.data?.items ?? [];
+  const pendingExceptions = exceptions.filter((exception) => String(exception.status) === 'Open' || String(exception.status) === 'Pending');
+  const refresh = async () => { await Promise.all([daysQuery.refetch(), exceptionsQuery.refetch()]); };
 
-  const handleAdjustRecord = (record: AttendanceDayDto) => {
-    setSelectedRecordForAdjustment(record);
+  const handleApproveRecord = async (record: AttendanceDayDto) => {
+    await approveMutation.mutateAsync({ id: record.id, data: { rowVersion: record.rowVersion } });
+    await daysQuery.refetch();
   };
 
-  const handleApproveRecord = (record: AttendanceDayDto) => {
-    setRecords((prev) =>
-      prev.map((r) =>
-        r.id === record.id
-          ? {
-              ...r,
-              status: AttendanceStatus.Approved,
-              rowVersion: Number(r.rowVersion || 0) + 1
-            }
-          : r
-      )
-    );
+  const handleSubmitAdjustment = async (dayId: string, adjustedMinutes: number, reason: string, rowVersion: number) => {
+    await adjustMutation.mutateAsync({ id: dayId, data: { adjustedWorkedMinutes: adjustedMinutes, reason, rowVersion } });
+    setSelectedRecordForAdjustment(null);
+    await daysQuery.refetch();
   };
 
-  const handleSubmitAdjustment = async (
-    dayId: string,
-    adjustedMinutes: number,
-    reason: string,
-    rowVersion: number
-  ) => {
-    setRecords((prev) =>
-      prev.map((r) => {
-        if (r.id === dayId) {
-          if (Number(r.rowVersion) !== rowVersion) {
-            throw new Error('Concurrency conflict: Record was updated by another process.');
-          }
-          return {
-            ...r,
-            totalWorkedMinutes: adjustedMinutes,
-            status: AttendanceStatus.Reviewed,
-            rowVersion: Number(r.rowVersion || 0) + 1
-          };
-        }
-        return r;
-      })
-    );
-  };
-
-  const handleResolveException = async (
-    exceptionId: string,
-    notes: string,
-    waive: boolean
-  ) => {
-    setExceptions((prev) => prev.filter((e) => e.id !== exceptionId));
+  const handleResolveException = async (exceptionId: string, notes: string, waive: boolean) => {
+    const resolvedNotes = waive ? `${notes} [Waived by authorized operator]` : notes;
+    await resolveMutation.mutateAsync({ id: exceptionId, data: { notes: resolvedNotes } });
+    await exceptionsQuery.refetch();
   };
 
   return (
-    <div className="space-y-6" data-testid="attendance-route-page">
-      <Suspense fallback={<div className="p-8 text-sm text-text-muted">Loading attendance module...</div>}>
+    <div className="mx-auto w-full max-w-[1440px] space-y-6" data-testid="attendance-route-page">
+      <Suspense fallback={<div className="rounded-lg border border-border-default bg-surface p-8 text-sm text-text-secondary">Loading attendance workspace…</div>}>
         <AttendanceRecordsGrid
           records={records}
+          isLoading={daysQuery.isLoading}
+          isError={daysQuery.isError}
           pendingExceptionsCount={pendingExceptions.length}
           onOpenExceptionsQueue={() => setIsExceptionsDrawerOpen(true)}
-          onAdjustRecord={handleAdjustRecord}
+          onAdjustRecord={setSelectedRecordForAdjustment}
           onApproveRecord={handleApproveRecord}
-          onRefresh={() => {}}
+          onRefresh={refresh}
         />
-
         <AttendanceAdjustmentModal
           isOpen={!!selectedRecordForAdjustment}
           record={selectedRecordForAdjustment}
           onClose={() => setSelectedRecordForAdjustment(null)}
           onSubmitAdjustment={handleSubmitAdjustment}
         />
-
         <AttendanceExceptionsQueue
           isOpen={isExceptionsDrawerOpen}
           exceptions={pendingExceptions}
+          isLoading={exceptionsQuery.isLoading}
           onClose={() => setIsExceptionsDrawerOpen(false)}
           onResolveException={handleResolveException}
         />
@@ -166,8 +79,4 @@ export function AttendanceComponent() {
   );
 }
 
-export const attendanceRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: '/attendance',
-  component: AttendanceComponent
-});
+export const attendanceRoute = createRoute({ getParentRoute: () => rootRoute, path: '/attendance', component: AttendanceComponent });

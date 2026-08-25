@@ -1,4 +1,5 @@
 // Icons & Foundations
+export * from "./foundations/brand"
 export * from "./components/Icon/Icon"
 
 // Core & Forms (React Aria Components based)
@@ -33,6 +34,7 @@ export * from "./components/Spinner/Spinner"
 export * from "./components/Skeleton/Skeleton"
 export * from "./components/JobStatus/JobStatus"
 export * from "./components/BrandAssembly/BrandAssembly"
+export * from "./components/BrandMark/BrandMark"
 export * from "./components/EmptyState/EmptyState"
 export * from "./components/EmptyState/NoResults"
 export * from "./components/ErrorState/ErrorState"
@@ -62,18 +64,11 @@ export * from "./components/Table/Table"
 export * from "./components/Pagination/Pagination"
 export * from "./components/Money/Money"
 export * from "./components/SensitiveValue/SensitiveValue"
-export * from "./components/ZainXDataGrid/ZainXDataGrid"
 export * from "./components/FilterBar/FilterBar"
 export * from "./components/SavedViews/SavedViews"
 export * from "./components/ColumnChooser/ColumnChooser"
 export * from "./components/DensitySwitcher/DensitySwitcher"
 export * from "./components/BulkActionBar/BulkActionBar"
-
-// Phase 1C Enterprise Engine Wrappers
-export * from "./components/ZainXScheduler/ZainXScheduler"
-export * from "./components/ZainXChart/ZainXChart"
-export * from "./components/ZainXRichTextEditor/ZainXRichTextEditor"
-export * from "./components/ZainXDnD/ZainXDnD"
 
 // Utilities
 export * from "./lib/utils"

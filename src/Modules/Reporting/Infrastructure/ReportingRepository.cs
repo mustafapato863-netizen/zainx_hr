@@ -36,6 +36,7 @@ public interface IReportingRepository
 
     Task CreateReportJobAsync(ReportExecutionJob job, CancellationToken ct = default);
     Task<ReportExecutionJob?> GetReportJobAsync(TenantId tenantId, Guid id, CancellationToken ct = default);
+    Task<ReportExecutionJob?> GetReportJobByIdempotencyAsync(TenantId tenantId, string idempotencyKey, CancellationToken ct = default);
     Task<IReadOnlyList<ReportExecutionJob>> GetPendingReportJobsAsync(int batchSize = 10, CancellationToken ct = default);
     Task UpdateReportJobAsync(ReportExecutionJob job, CancellationToken ct = default);
     Task<IReadOnlyList<ReportExecutionJob>> ListReportJobsAsync(TenantId tenantId, string? reportCode, int page, int pageSize, CancellationToken ct = default);
@@ -148,9 +149,9 @@ public class ReportingRepository : IReportingRepository
         {
             "HEADCOUNT_SUMMARY" => await RunHeadcountReportAsync(conn, tenantId, legalEntityId, filters, limit, offset, ct),
             "PAYROLL_RECONCILIATION" => await RunPayrollReconciliationReportAsync(conn, tenantId, legalEntityId, filters, limit, offset, ct),
-            "RECRUITMENT_FUNNEL" => await RunRecruitmentFunnelReportAsync(conn, tenantId, filters, limit, offset, ct),
-            "AUDIT_SECURITY_EVENTS" => await RunAuditSecurityReportAsync(conn, tenantId, filters, limit, offset, ct),
-            _ => await RunGenericFallbackReportAsync(conn, tenantId, reportCode, limit, offset, ct)
+            "RECRUITMENT_FUNNEL" => await RunRecruitmentFunnelReportAsync(conn, tenantId, legalEntityId, filters, limit, offset, ct),
+            "AUDIT_SECURITY_EVENTS" => await RunAuditSecurityReportAsync(conn, tenantId, legalEntityId, filters, limit, offset, ct),
+            _ => await RunGenericFallbackReportAsync(reportCode, ct)
         };
     }
 
@@ -170,11 +171,13 @@ public class ReportingRepository : IReportingRepository
             SELECT COUNT(*)
             FROM people.employments e
             JOIN people.persons p ON e.person_id = p.id
-            WHERE e.tenant_id = @tenantId;
+            WHERE e.tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR e.legal_entity_id = @legalEntityId);
         ";
 
         await using var countCmd = new NpgsqlCommand(countSql, conn);
         countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        countCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         var total = (long)(await countCmd.ExecuteScalarAsync(ct) ?? 0L);
 
         const string dataSql = @"
@@ -183,12 +186,14 @@ public class ReportingRepository : IReportingRepository
             FROM people.employments e
             JOIN people.persons p ON e.person_id = p.id
             WHERE e.tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR e.legal_entity_id = @legalEntityId)
             ORDER BY e.hire_date DESC
             LIMIT @limit OFFSET @offset;
         ";
 
         await using var dataCmd = new NpgsqlCommand(dataSql, conn);
         dataCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        dataCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         dataCmd.Parameters.AddWithValue("limit", limit);
         dataCmd.Parameters.AddWithValue("offset", offset);
 
@@ -224,32 +229,38 @@ public class ReportingRepository : IReportingRepository
         var cols = new List<string> { "employeeNumber", "employeeName", "basicSalary", "housingAllowance", "transportAllowance", "otherEarnings", "gosiEmployee", "gosiEmployer", "totalDeductions", "netPay" };
         var rows = new List<Dictionary<string, object?>>();
 
-        // Query only FINALIZED payroll runs to guarantee immutability
+        // Query only FINALIZED payroll runs (status = 6: Finalized) to guarantee immutability
         const string countSql = @"
             SELECT COUNT(*)
-            FROM payroll.payroll_results r
+            FROM payroll.payroll_employee_results r
             JOIN payroll.payroll_runs run ON r.payroll_run_id = run.id
-            WHERE run.tenant_id = @tenantId AND run.status = 'Finalized';
+            WHERE run.tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR run.legal_entity_id = @legalEntityId)
+              AND run.status >= 6;
         ";
 
         await using var countCmd = new NpgsqlCommand(countSql, conn);
         countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        countCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         var total = (long)(await countCmd.ExecuteScalarAsync(ct) ?? 0L);
 
         const string dataSql = @"
-            SELECT r.employee_id, 'Employee ' || SUBSTRING(r.employee_id::text, 1, 8),
+            SELECT r.employment_id, 'Employee ' || SUBSTRING(r.employment_id::text, 1, 8),
                    r.gross_pay * 0.60, r.gross_pay * 0.25, r.gross_pay * 0.15, 0.0,
-                   r.gosi_base * 0.0975, r.gosi_base * 0.1175,
+                   r.gross_pay * 0.0975, r.employer_contributions,
                    (r.gross_pay - r.net_pay), r.net_pay
-            FROM payroll.payroll_results r
+            FROM payroll.payroll_employee_results r
             JOIN payroll.payroll_runs run ON r.payroll_run_id = run.id
-            WHERE run.tenant_id = @tenantId AND run.status = 'Finalized'
+            WHERE run.tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR run.legal_entity_id = @legalEntityId)
+              AND run.status >= 6
             ORDER BY r.net_pay DESC
             LIMIT @limit OFFSET @offset;
         ";
 
         await using var dataCmd = new NpgsqlCommand(dataSql, conn);
         dataCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        dataCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         dataCmd.Parameters.AddWithValue("limit", limit);
         dataCmd.Parameters.AddWithValue("offset", offset);
 
@@ -278,6 +289,7 @@ public class ReportingRepository : IReportingRepository
     private static async Task<ReportExecutionData> RunRecruitmentFunnelReportAsync(
         NpgsqlConnection conn,
         TenantId tenantId,
+        LegalEntityId? legalEntityId,
         Dictionary<string, string> filters,
         int limit,
         int offset,
@@ -289,29 +301,33 @@ public class ReportingRepository : IReportingRepository
         const string countSql = @"
             SELECT COUNT(*)
             FROM recruitment.job_requisitions
-            WHERE tenant_id = @tenantId;
+            WHERE tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR legal_entity_id = @legalEntityId);
         ";
 
         await using var countCmd = new NpgsqlCommand(countSql, conn);
         countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        countCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         var total = (long)(await countCmd.ExecuteScalarAsync(ct) ?? 0L);
 
         const string dataSql = @"
-            SELECT req.req_code, req.title,
-                   (SELECT COUNT(*) FROM recruitment.job_applications a WHERE a.job_requisition_id = req.id),
-                   (SELECT COUNT(*) FROM recruitment.job_applications a WHERE a.job_requisition_id = req.id AND a.current_stage_code IN ('SCREENING', 'SHORTLIST', 'INTERVIEW', 'OFFER', 'HIRED')),
-                   (SELECT COUNT(*) FROM recruitment.job_applications a WHERE a.job_requisition_id = req.id AND a.current_stage_code IN ('INTERVIEW', 'OFFER', 'HIRED')),
-                   (SELECT COUNT(*) FROM recruitment.job_applications a WHERE a.job_requisition_id = req.id AND a.current_stage_code IN ('OFFER', 'HIRED')),
-                   (SELECT COUNT(*) FROM recruitment.job_applications a WHERE a.job_requisition_id = req.id AND a.current_stage_code = 'HIRED'),
+            SELECT req.requisition_number, req.title_en,
+                   (SELECT COUNT(*) FROM recruitment.applications a WHERE a.requisition_id = req.id),
+                   (SELECT COUNT(*) FROM recruitment.applications a WHERE a.requisition_id = req.id AND a.status IN (1, 2, 3, 4)),
+                   (SELECT COUNT(*) FROM recruitment.applications a WHERE a.requisition_id = req.id AND a.status IN (2, 3, 4)),
+                   (SELECT COUNT(*) FROM recruitment.applications a WHERE a.requisition_id = req.id AND a.status IN (3, 4)),
+                   (SELECT COUNT(*) FROM recruitment.applications a WHERE a.requisition_id = req.id AND a.status = 4),
                    18.5
             FROM recruitment.job_requisitions req
             WHERE req.tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR req.legal_entity_id = @legalEntityId)
             ORDER BY req.created_at_utc DESC
             LIMIT @limit OFFSET @offset;
         ";
 
         await using var dataCmd = new NpgsqlCommand(dataSql, conn);
         dataCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        dataCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         dataCmd.Parameters.AddWithValue("limit", limit);
         dataCmd.Parameters.AddWithValue("offset", offset);
 
@@ -338,6 +354,7 @@ public class ReportingRepository : IReportingRepository
     private static async Task<ReportExecutionData> RunAuditSecurityReportAsync(
         NpgsqlConnection conn,
         TenantId tenantId,
+        LegalEntityId? legalEntityId,
         Dictionary<string, string> filters,
         int limit,
         int offset,
@@ -349,23 +366,27 @@ public class ReportingRepository : IReportingRepository
         const string countSql = @"
             SELECT COUNT(*)
             FROM audit.audit_records
-            WHERE tenant_id = @tenantId;
+            WHERE tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR legal_entity_id = @legalEntityId);
         ";
 
         await using var countCmd = new NpgsqlCommand(countSql, conn);
         countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        countCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         var total = (long)(await countCmd.ExecuteScalarAsync(ct) ?? 0L);
 
         const string dataSql = @"
             SELECT occurred_at_utc, actor_user_id, actor_type, action_code, entity_type, entity_id, correlation_id, ip_address
             FROM audit.audit_records
             WHERE tenant_id = @tenantId
+              AND (@legalEntityId::uuid IS NULL OR legal_entity_id = @legalEntityId)
             ORDER BY occurred_at_utc DESC
             LIMIT @limit OFFSET @offset;
         ";
 
         await using var dataCmd = new NpgsqlCommand(dataSql, conn);
         dataCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        dataCmd.Parameters.AddWithValue("legalEntityId", (object?)legalEntityId?.Value ?? DBNull.Value);
         dataCmd.Parameters.AddWithValue("limit", limit);
         dataCmd.Parameters.AddWithValue("offset", offset);
 
@@ -390,21 +411,15 @@ public class ReportingRepository : IReportingRepository
     }
 
     private static Task<ReportExecutionData> RunGenericFallbackReportAsync(
-        NpgsqlConnection conn,
-        TenantId tenantId,
         string reportCode,
-        int limit,
-        int offset,
         CancellationToken ct)
     {
-        var cols = new List<string> { "itemCode", "name", "status", "updatedAt" };
-        var rows = new List<Dictionary<string, object?>>
-        {
-            new() { ["itemCode"] = "ITEM-001", ["name"] = $"{reportCode} Operational Record A", ["status"] = "Active", ["updatedAt"] = DateTime.UtcNow.ToString("yyyy-MM-dd") },
-            new() { ["itemCode"] = "ITEM-002", ["name"] = $"{reportCode} Operational Record B", ["status"] = "Active", ["updatedAt"] = DateTime.UtcNow.ToString("yyyy-MM-dd") }
-        };
-
-        return Task.FromResult(new ReportExecutionData(cols, rows, 2));
+        // A report without a governed read model must remain explicitly empty.
+        // Never manufacture operational rows merely to make a grid look populated.
+        return Task.FromResult(new ReportExecutionData(
+            Array.Empty<string>(),
+            Array.Empty<Dictionary<string, object?>>(),
+            0));
     }
 
     public async Task<IReadOnlyList<SavedReportView>> ListSavedViewsAsync(TenantId tenantId, string reportCode, Guid userId, CancellationToken ct = default)
@@ -626,6 +641,31 @@ public class ReportingRepository : IReportingRepository
         }
 
         return null;
+    }
+
+    public async Task<ReportExecutionJob?> GetReportJobByIdempotencyAsync(
+        TenantId tenantId,
+        string idempotencyKey,
+        CancellationToken ct = default)
+    {
+        if (string.IsNullOrWhiteSpace(idempotencyKey)) return null;
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            SELECT id
+            FROM reporting.report_jobs
+            WHERE tenant_id = @tenantId AND idempotency_key = @idempotencyKey
+            LIMIT 1;
+        ";
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("idempotencyKey", idempotencyKey.Trim());
+        var value = await cmd.ExecuteScalarAsync(ct);
+        if (value is not Guid jobId) return null;
+
+        return await GetReportJobAsync(tenantId, jobId, ct);
     }
 
     public async Task<IReadOnlyList<ReportExecutionJob>> GetPendingReportJobsAsync(int batchSize = 10, CancellationToken ct = default)

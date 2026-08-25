@@ -1,0 +1,15 @@
+:root {
+  --zainx-brand-navy: #0A1330;
+  --zainx-brand-blue: #2563FF;
+  --zainx-brand-cyan: #00D4FF;
+  --zainx-brand-success: #22C55E;
+  --zainx-brand-neutral: #64748B;
+
+  --zainx-brand-gradient: linear-gradient(135deg, #123CCF 0%, #2563FF 48%, #00D4FF 100%);
+  --zainx-brand-focus: #2563FF;
+
+  --zainx-brand-radius-app: 24%;
+  --zainx-brand-motion-fast: 140ms;
+  --zainx-brand-motion-normal: 220ms;
+  --zainx-brand-motion-signature: 640ms;
+}

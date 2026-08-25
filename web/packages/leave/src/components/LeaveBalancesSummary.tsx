@@ -11,10 +11,13 @@ export interface LeaveBalancesSummaryProps {
 export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
   balances = [],
   isLoading = false,
-  onRequestLeave
+  onRequestLeave,
 }) => {
   return (
-    <div className="flex flex-col gap-4 p-6 bg-surface-primary rounded-xl border border-border-primary shadow-sm" data-testid="leave-balances-summary">
+    <div
+      className="flex flex-col gap-4 p-6 bg-surface-primary rounded-xl border border-border-primary shadow-sm"
+      data-testid="leave-balances-summary"
+    >
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border-primary pb-4">
         <div>
           <h2 className="text-lg font-bold text-text-primary">Authoritative Leave Balances</h2>
@@ -27,7 +30,7 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
           <button
             type="button"
             onClick={() => onRequestLeave?.()}
-            className="px-3.5 py-1.5 rounded-lg bg-brand-primary text-white text-xs font-semibold hover:bg-brand-primary/90 transition-colors shadow-sm"
+            className="px-3.5 py-1.5 rounded-lg bg-brand-primary text-text-inverse text-xs font-semibold hover:bg-brand-primary/90 transition-colors shadow-sm"
           >
             + Request Time Off
           </button>
@@ -35,7 +38,10 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="leave-balances-skeleton">
+        <div
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+          data-testid="leave-balances-skeleton"
+        >
           <Skeleton className="h-32 w-full rounded-xl" />
           <Skeleton className="h-32 w-full rounded-xl" />
           <Skeleton className="h-32 w-full rounded-xl" />
@@ -49,7 +55,10 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
           {balances.map((b) => {
             const total = Number(b.entitledDays || 21);
             const available = Number(b.availableDays || 0);
-            const percentUsed = Math.min(100, Math.round(((Number(b.usedDays || 0) + Number(b.pendingDays || 0)) / total) * 100));
+            const percentUsed = Math.min(
+              100,
+              Math.round(((Number(b.usedDays || 0) + Number(b.pendingDays || 0)) / total) * 100),
+            );
 
             return (
               <div
@@ -84,7 +93,9 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
                 <div className="mt-4 pt-3 border-t border-border-secondary grid grid-cols-3 text-center text-xs">
                   <div>
                     <span className="text-text-muted block text-[10px] uppercase">Entitled</span>
-                    <span className="font-semibold text-text-primary font-mono">{b.entitledDays}</span>
+                    <span className="font-semibold text-text-primary font-mono">
+                      {b.entitledDays}
+                    </span>
                   </div>
                   <div>
                     <span className="text-text-muted block text-[10px] uppercase">Used</span>
@@ -92,9 +103,7 @@ export const LeaveBalancesSummary: React.FC<LeaveBalancesSummaryProps> = ({
                   </div>
                   <div>
                     <span className="text-text-muted block text-[10px] uppercase">Reserved</span>
-                    <span className="font-semibold text-amber-600 dark:text-amber-400 font-mono">
-                      {b.pendingDays}
-                    </span>
+                    <span className="font-semibold text-warning font-mono">{b.pendingDays}</span>
                   </div>
                 </div>
               </div>

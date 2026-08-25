@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  Badge,
-  Button,
-  Money,
-  SensitiveValue,
-  Icon,
-} from '@zainx/design-system';
+import { Card, Badge, Button, Money, SensitiveValue, Icon } from '@zainx/design-system';
 import { SettlementBatch, SettlementBatchDetail } from '../types';
 
 interface SettlementBatchViewProps {
@@ -54,11 +47,12 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
     <div className="space-y-6" data-testid="settlement-view">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
+          <h2 className="text-xl font-semibold text-text-primary">
             Payment Settlement & Banking Disbursals
           </h2>
-          <p className="text-sm text-neutral-500">
-            Generate 1:1 reconciled payment instructions and neutral bank exports from finalized runs.
+          <p className="text-sm text-text-muted">
+            Generate 1:1 reconciled payment instructions and neutral bank exports from finalized
+            runs.
           </p>
         </div>
         {finalizedRunId && (
@@ -76,7 +70,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Batches List Column */}
         <div className="space-y-3">
-          <h3 className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">
+          <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
             Settlement Batches
           </h3>
           <div className="space-y-3">
@@ -86,28 +80,30 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
                 id={`settlement-batch-card-${b.id}`}
                 className={`p-4 cursor-pointer border transition-all ${
                   selectedBatchId === b.id
-                    ? 'border-blue-500 bg-blue-50/20 dark:bg-blue-900/10'
-                    : 'border-neutral-200 dark:border-neutral-800 hover:border-neutral-300'
+                    ? 'border-info bg-info-subtle/20 '
+                    : 'border-border-default hover:border-border-strong'
                 }`}
                 onClick={() => handleSelectBatch(b.id)}
               >
                 <div className="flex items-start justify-between">
                   <div>
-                    <h4 className="font-semibold text-sm text-neutral-900 dark:text-neutral-100">
-                      {b.batchNumber}
-                    </h4>
-                    <span className="text-xs text-neutral-500 block mt-0.5">
+                    <h4 className="font-semibold text-sm text-text-primary">{b.batchNumber}</h4>
+                    <span className="text-xs text-text-muted block mt-0.5">
                       Pay Date: {b.paymentDate}
                     </span>
                   </div>
-                  <Badge variant={b.status === 'Exported' || b.status === 'Reconciled' ? 'success' : 'neutral'}>
+                  <Badge
+                    variant={
+                      b.status === 'Exported' || b.status === 'Reconciled' ? 'success' : 'neutral'
+                    }
+                  >
                     {b.status}
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100 dark:border-neutral-800 text-xs">
-                  <span className="text-neutral-500">{b.instructionCount} Instructions</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                <div className="flex items-center justify-between mt-3 pt-2 border-t border-border-subtle text-xs">
+                  <span className="text-text-muted">{b.instructionCount} Instructions</span>
+                  <span className="font-bold text-success">
                     <Money amount={b.totalAmount} currency={b.currency} />
                   </span>
                 </div>
@@ -115,7 +111,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
             ))}
 
             {batches.length === 0 && (
-              <div className="p-8 text-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-400 text-xs">
+              <div className="p-8 text-center border-2 border-dashed border-border-default rounded-xl text-text-tertiary text-xs">
                 No settlement batches generated yet. Finalize a payroll run to disburse funds.
               </div>
             )}
@@ -125,16 +121,16 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
         {/* Selected Batch Detail Column */}
         <div className="col-span-2">
           {batchDetail ? (
-            <Card className="p-5 border border-neutral-200 dark:border-neutral-800 space-y-5">
+            <Card className="p-5 border border-border-default space-y-5">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-bold text-base text-neutral-900 dark:text-neutral-100">
+                    <h3 className="font-bold text-base text-text-primary">
                       {batchDetail.batchNumber}
                     </h3>
                     <Badge variant="success">1:1 Reconciled</Badge>
                   </div>
-                  <span className="text-xs text-neutral-500 font-mono">
+                  <span className="text-xs text-text-muted font-mono">
                     Batch ID: {batchDetail.id} | RowVersion: v{batchDetail.rowVersion}
                   </span>
                 </div>
@@ -163,9 +159,9 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
               </div>
 
               {/* Instruction Table */}
-              <div className="rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden">
+              <div className="rounded-xl border border-border-default overflow-hidden">
                 <table className="w-full text-left text-xs" id="table-payment-instructions">
-                  <thead className="bg-neutral-50 dark:bg-neutral-800/50 text-neutral-500 uppercase font-medium">
+                  <thead className="bg-surface-subtle text-text-muted uppercase font-medium">
                     <tr>
                       <th className="px-3 py-2.5">Beneficiary</th>
                       <th className="px-3 py-2.5">Bank Code</th>
@@ -174,23 +170,23 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
                       <th className="px-3 py-2.5 text-center">Status</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-neutral-200 dark:divide-neutral-800">
+                  <tbody className="divide-y divide-border-subtle divide-border-subtle">
                     {batchDetail.instructions.map((inst) => (
-                      <tr key={inst.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/30">
-                        <td className="px-3 py-2.5 font-medium text-neutral-900 dark:text-neutral-100">
+                      <tr key={inst.id} className="hover:bg-surface-card-hover">
+                        <td className="px-3 py-2.5 font-medium text-text-primary">
                           {inst.beneficiaryName}
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-neutral-600 dark:text-neutral-400">
+                        <td className="px-3 py-2.5 font-mono text-text-secondary">
                           {inst.bankCode}
                         </td>
-                        <td className="px-3 py-2.5 font-mono text-neutral-700 dark:text-neutral-300">
+                        <td className="px-3 py-2.5 font-mono text-text-secondary">
                           <SensitiveValue value={inst.accountMasked} maskedPlaceholder="••••••••" />
                         </td>
-                        <td className="px-3 py-2.5 text-right font-semibold text-emerald-600 dark:text-emerald-400">
+                        <td className="px-3 py-2.5 text-right font-semibold text-success">
                           <Money amount={inst.amount} currency={batchDetail.currency} />
                         </td>
                         <td className="px-3 py-2.5 text-center">
-                          <span className="px-2 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300 text-[10px]">
+                          <span className="px-2 py-0.5 rounded bg-surface-secondary text-text-secondary text-[10px]">
                             {inst.status}
                           </span>
                         </td>
@@ -201,7 +197,7 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
               </div>
             </Card>
           ) : (
-            <div className="p-12 text-center border-2 border-dashed border-neutral-200 dark:border-neutral-800 rounded-xl text-neutral-400 text-sm">
+            <div className="p-12 text-center border-2 border-dashed border-border-default rounded-xl text-text-tertiary text-sm">
               Select a settlement batch to inspect payment instructions and download banking files.
             </div>
           )}
@@ -214,20 +210,23 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
           <div
             role="dialog"
             aria-labelledby="generate-batch-dialog-title"
-            className="bg-white dark:bg-neutral-900 rounded-xl shadow-xl max-w-md w-full p-6 space-y-4 border border-neutral-200 dark:border-neutral-800"
+            className="bg-surface rounded-xl shadow-overlay max-w-md w-full p-6 space-y-4 border border-border-default"
           >
-            <h3 id="generate-batch-dialog-title" className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">
+            <h3
+              id="generate-batch-dialog-title"
+              className="text-lg font-semibold text-text-primary"
+            >
               Generate Settlement Batch
             </h3>
             <form onSubmit={handleGenerateSubmit} className="space-y-4">
               <div>
-                <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-text-secondary mb-1">
                   Batch Number
                 </label>
                 <input
                   id="input-batch-number"
                   type="text"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border-strong bg-surface text-text-primary"
                   value={batchNumber}
                   onChange={(e) => setBatchNumber(e.target.value)}
                   required
@@ -235,13 +234,13 @@ export const SettlementBatchView: React.FC<SettlementBatchViewProps> = ({
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1">
+                <label className="block text-xs font-medium text-text-secondary mb-1">
                   Payment Date
                 </label>
                 <input
                   id="input-payment-date"
                   type="date"
-                  className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+                  className="w-full px-3 py-2 text-sm rounded-lg border border-border-strong bg-surface text-text-primary"
                   value={paymentDate}
                   onChange={(e) => setPaymentDate(e.target.value)}
                   required

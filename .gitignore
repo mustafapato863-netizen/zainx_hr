@@ -5,6 +5,8 @@ dist/
 **/bin/
 **/obj/
 **/dist/
+**/artifacts/
+artifacts/
 **/storybook-static/
 storybook-static/
 **/node_modules/

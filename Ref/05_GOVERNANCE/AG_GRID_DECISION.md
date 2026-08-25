@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-ZainX Workforce evaluated `ag-grid-enterprise@33.1.1` and `ag-grid-react@33.1.1` against large operational datasets (10,000+ synthetic rows) to determine technical suitability, performance, accessibility, RTL behavior, and commercial licensing implications.
+ZainX Workforce evaluated the 33.1.x line against large operational datasets (10,000+ synthetic rows) to determine technical suitability, performance, accessibility, RTL behavior, and commercial licensing implications. The current web lockfile baseline is `ag-grid-enterprise@33.3.2` and `ag-grid-react@33.3.2`; the commercial restrictions remain unchanged.
 
 **Decision:**
 - **Technical Architecture:** **ACCEPT**. AG Grid is encapsulated strictly behind `@zainx/design-system` (`ZainXDataGrid`). Direct imports from feature packages (`@zainx/people`, `@zainx/payroll`, etc.) are prohibited and enforced by ESLint boundaries.

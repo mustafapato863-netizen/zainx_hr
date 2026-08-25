@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import {
-  ZainXDataGrid,
   Button,
   Badge,
   Card,
   Input,
 } from '@zainx/design-system';
+import { ZainXDataGrid } from '@zainx/design-system/components/ZainXDataGrid/ZainXDataGrid';
 import {
   useGetRequisitions,
   useOpenRequisition,
@@ -214,7 +214,7 @@ export const RequisitionsGrid: React.FC<RequisitionsGridProps> = ({ onSelectRequ
 
   return (
     <div className="space-y-4" data-testid="requisitions-grid-container">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-xl font-bold tracking-tight">Job Requisitions</h2>
           <p className="text-sm text-muted-foreground">
@@ -230,9 +230,9 @@ export const RequisitionsGrid: React.FC<RequisitionsGridProps> = ({ onSelectRequ
         </Button>
       </div>
 
-      <Card className="p-4">
-        <div className="flex items-center gap-4 mb-4">
-          <div className="w-72">
+      <Card className="overflow-hidden p-3 sm:p-4">
+        <div className="mb-4 flex flex-col items-stretch gap-3 xl:flex-row xl:items-center xl:gap-4">
+          <div className="w-full shrink-0 xl:w-72">
             <Input
               placeholder="Search by title or #..."
               value={searchTerm}
@@ -240,7 +240,7 @@ export const RequisitionsGrid: React.FC<RequisitionsGridProps> = ({ onSelectRequ
               id="input-search-requisitions"
             />
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2 overflow-x-auto pb-1">
             {['All', 'Open', 'PendingApproval', 'Draft', 'OnHold', 'Closed'].map((st) => (
               <Button
                 key={st}
@@ -254,12 +254,14 @@ export const RequisitionsGrid: React.FC<RequisitionsGridProps> = ({ onSelectRequ
           </div>
         </div>
 
-        <div className="h-[480px] w-full">
-          <ZainXDataGrid
-            rowData={filteredRequisitions}
-            columnDefs={columnDefs as any}
-            loading={isLoading}
-          />
+        <div className="h-[480px] w-full overflow-x-auto">
+          <div className="h-full min-w-[880px]">
+            <ZainXDataGrid
+              rowData={filteredRequisitions}
+              columnDefs={columnDefs as any}
+              loading={isLoading}
+            />
+          </div>
         </div>
       </Card>
 

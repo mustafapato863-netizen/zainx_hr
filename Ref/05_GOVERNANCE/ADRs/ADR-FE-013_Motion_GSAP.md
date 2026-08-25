@@ -8,7 +8,7 @@
 ZainX requires coherent micro-interactions, layout transitions, and BrandAssembly startup orchestration while guaranteeing strict accessibility and `prefers-reduced-motion` compliance under React 19.
 
 ## Decision
-1. Standardize on **Motion for React (`motion@12.4.3`)** as the platform-wide motion and animation engine.
+1. Standardize on **Motion for React (`motion@12.43.0`, current web lockfile baseline)** as the platform-wide motion and animation engine.
 2. **Reject GSAP dependency (`gsap`)**:
    - **Canonical Rationale:** Motion for React already satisfies all approved ZainX UI motion specifications and current `BrandAssembly` requirements (SVG path morphing, glow effects, staggered entrance, and timeline sequencing).
    - Adding GSAP would introduce a redundant second animation runtime, unnecessary bundle weight (~60kB+ minified), additional API surface for developers to learn, and increased long-term maintenance overhead without a demonstrated business or technical requirement.

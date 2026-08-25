@@ -11,7 +11,7 @@ export interface LeaveCalendarProps {
 export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({
   requests = [],
   isLoading = false,
-  onSelectDate
+  onSelectDate,
 }) => {
   const [currentMonth, setCurrentMonth] = useState<Date>(new Date(2026, 7, 1)); // August 2026
 
@@ -25,7 +25,11 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1));
   };
 
-  const daysInMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    currentMonth.getFullYear(),
+    currentMonth.getMonth() + 1,
+    0,
+  ).getDate();
   const firstDayIndex = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).getDay();
 
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -47,11 +51,7 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({
           <Button variant="outline" size="sm" onClick={prevMonth} aria-label="Previous Month">
             ◀
           </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setCurrentMonth(new Date(2026, 7, 1))}
-          >
+          <Button variant="outline" size="sm" onClick={() => setCurrentMonth(new Date(2026, 7, 1))}>
             Today
           </Button>
           <Button variant="outline" size="sm" onClick={nextMonth} aria-label="Next Month">
@@ -63,7 +63,10 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({
       {/* Grid */}
       <div className="grid grid-cols-7 gap-px rounded-xl border border-border-secondary bg-border-secondary overflow-hidden text-center">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((d) => (
-          <div key={d} className="bg-surface-secondary py-2 text-xs font-semibold text-text-secondary">
+          <div
+            key={d}
+            className="bg-surface-secondary py-2 text-xs font-semibold text-text-secondary"
+          >
             {d}
           </div>
         ))}
@@ -89,15 +92,13 @@ export const LeaveCalendar: React.FC<LeaveCalendarProps> = ({
                 <span
                   className={`text-xs font-semibold ${
                     isToday
-                      ? 'w-5 h-5 rounded-full bg-brand-primary text-white flex items-center justify-center'
+                      ? 'w-5 h-5 rounded-full bg-brand-primary text-text-inverse flex items-center justify-center'
                       : 'text-text-primary'
                   }`}
                 >
                   {d}
                 </span>
-                {dayLeaves.length > 0 && (
-                  <span className="w-2 h-2 rounded-full bg-brand-primary" />
-                )}
+                {dayLeaves.length > 0 && <span className="w-2 h-2 rounded-full bg-brand-primary" />}
               </div>
 
               <div className="space-y-1 overflow-y-auto max-h-14">

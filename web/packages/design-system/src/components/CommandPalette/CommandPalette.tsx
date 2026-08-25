@@ -15,10 +15,11 @@ export interface CommandItem {
 export interface CommandPaletteProps {
   isOpen: boolean
   onClose: () => void
+  onOpen?: () => void
   items?: CommandItem[]
 }
 
-export function CommandPalette({ isOpen, onClose, items = [] }: CommandPaletteProps) {
+export function CommandPalette({ isOpen, onClose, onOpen, items = [] }: CommandPaletteProps) {
   const [search, setSearch] = React.useState("")
   const inputRef = React.useRef<HTMLInputElement>(null)
 
@@ -35,9 +36,7 @@ export function CommandPalette({ isOpen, onClose, items = [] }: CommandPalettePr
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault()
         if (isOpen) onClose()
-        else {
-          // trigger open
-        }
+        else onOpen?.()
       }
       if (e.key === "Escape" && isOpen) {
         onClose()
@@ -57,7 +56,7 @@ export function CommandPalette({ isOpen, onClose, items = [] }: CommandPalettePr
   )
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-surface-overlay p-4 pt-20 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-surface-overlay p-4 pt-20 backdrop-blur-xs" role="dialog" aria-modal="true" aria-label="Command palette">
       <div className="w-full max-w-xl overflow-hidden rounded-xl border border-border-default bg-surface-raised shadow-2xl animate-in fade-in-0 zoom-in-95">
         <div className="flex items-center border-b border-border-default px-4 py-3">
           <Icon name="search" size="sm" className="text-text-tertiary me-3 shrink-0" />

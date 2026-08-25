@@ -14,6 +14,35 @@ public class DocumentsRepository
         _connectionString = connectionString;
     }
 
+    public async Task<DocumentTypeDto?> GetDocumentTypeAsync(Guid documentTypeId, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            SELECT id, code, name_en, name_ar, is_required, requires_expiry_date, allowed_mime_types, max_size_bytes
+            FROM documents.document_types
+            WHERE id = @id;
+        ";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", documentTypeId);
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (!await reader.ReadAsync(ct)) return null;
+
+        return new DocumentTypeDto
+        {
+            Id = reader.GetGuid(0),
+            Code = reader.GetString(1),
+            NameEn = reader.GetString(2),
+            NameAr = reader.GetString(3),
+            IsRequired = reader.GetBoolean(4),
+            RequiresExpiryDate = reader.GetBoolean(5),
+            AllowedMimeTypes = reader.GetString(6),
+            MaxSizeBytes = reader.GetInt64(7)
+        };
+    }
+
     public async Task<IReadOnlyList<DocumentTypeDto>> ListDocumentTypesAsync(CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
@@ -244,6 +273,154 @@ public class DocumentsRepository
 
         var result = await cmd.ExecuteScalarAsync(ct);
         return result?.ToString();
+    }
+
+    public async Task<IReadOnlyList<DocumentSummaryDto>> ListExpiringDocumentsAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        DateOnly fromDate,
+        DateOnly untilDate,
+        int page = 1,
+        int pageSize = 50,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            SELECT
+                d.id, d.tenant_id, d.legal_entity_id, d.owner_type, d.owner_id, d.document_type_id,
+                dt.code, dt.name_en, dt.name_ar, d.title, d.status, d.expiry_date, d.created_at,
+                v.version_number, v.file_name, v.file_size, v.content_type
+            FROM documents.documents d
+            INNER JOIN documents.document_types dt ON d.document_type_id = dt.id
+            LEFT JOIN LATERAL (
+                SELECT version_number, file_name, file_size, content_type
+                FROM documents.document_versions
+                WHERE document_id = d.id
+                ORDER BY version_number DESC
+                LIMIT 1
+            ) v ON TRUE
+            WHERE d.tenant_id = @tenantId
+              AND d.legal_entity_id = @legalEntityId
+              AND d.status = @active
+              AND d.expiry_date >= @fromDate
+              AND d.expiry_date <= @untilDate
+            ORDER BY d.expiry_date ASC, d.created_at ASC
+            LIMIT @limit OFFSET @offset;
+        ";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        cmd.Parameters.AddWithValue("active", (int)DocumentStatus.Active);
+        cmd.Parameters.AddWithValue("fromDate", fromDate.ToDateTime(TimeOnly.MinValue));
+        cmd.Parameters.AddWithValue("untilDate", untilDate.ToDateTime(TimeOnly.MinValue));
+        cmd.Parameters.AddWithValue("limit", Math.Clamp(pageSize, 1, 100));
+        cmd.Parameters.AddWithValue("offset", (Math.Max(1, page) - 1) * Math.Clamp(pageSize, 1, 100));
+
+        var list = new List<DocumentSummaryDto>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            list.Add(new DocumentSummaryDto
+            {
+                Id = reader.GetGuid(0),
+                TenantId = reader.GetGuid(1).ToString(),
+                LegalEntityId = reader.GetGuid(2).ToString(),
+                OwnerType = reader.GetString(3),
+                OwnerId = reader.GetGuid(4),
+                DocumentTypeId = reader.GetGuid(5),
+                DocumentTypeCode = reader.GetString(6),
+                DocumentTypeNameEn = reader.GetString(7),
+                DocumentTypeNameAr = reader.GetString(8),
+                Title = reader.GetString(9),
+                Status = ((DocumentStatus)reader.GetInt32(10)).ToString(),
+                ExpiryDate = reader.IsDBNull(11) ? null : DateOnly.FromDateTime(reader.GetDateTime(11)).ToString("yyyy-MM-dd"),
+                CreatedAt = reader.GetDateTime(12).ToString("o"),
+                LatestVersionNumber = reader.IsDBNull(13) ? 0 : reader.GetInt32(13),
+                LatestFileName = reader.IsDBNull(14) ? string.Empty : reader.GetString(14),
+                LatestFileSize = reader.IsDBNull(15) ? 0 : reader.GetInt64(15),
+                LatestContentType = reader.IsDBNull(16) ? string.Empty : reader.GetString(16)
+            });
+        }
+
+        return list;
+    }
+
+    public async Task<bool> ArchiveDocumentAsync(
+        Guid documentId,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid actorUserId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        const string updateSql = @"
+            UPDATE documents.documents
+            SET status = @archived
+            WHERE id = @id AND tenant_id = @tenantId AND legal_entity_id = @legalEntityId AND status = @active;
+        ";
+        await using var update = new NpgsqlCommand(updateSql, conn, tx);
+        update.Parameters.AddWithValue("archived", (int)DocumentStatus.Archived);
+        update.Parameters.AddWithValue("active", (int)DocumentStatus.Active);
+        update.Parameters.AddWithValue("id", documentId);
+        update.Parameters.AddWithValue("tenantId", tenantId.Value);
+        update.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        var changed = await update.ExecuteNonQueryAsync(ct);
+        if (changed == 0)
+        {
+            await tx.RollbackAsync(ct);
+            return false;
+        }
+
+        const string logSql = @"
+            INSERT INTO documents.document_access_logs
+                (id, tenant_id, legal_entity_id, document_id, actor_user_id, action)
+            VALUES (@id, @tenantId, @legalEntityId, @documentId, @actorUserId, @action);
+        ";
+        await using var log = new NpgsqlCommand(logSql, conn, tx);
+        log.Parameters.AddWithValue("id", Guid.NewGuid());
+        log.Parameters.AddWithValue("tenantId", tenantId.Value);
+        log.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        log.Parameters.AddWithValue("documentId", documentId);
+        log.Parameters.AddWithValue("actorUserId", actorUserId);
+        log.Parameters.AddWithValue("action", "archive");
+        await log.ExecuteNonQueryAsync(ct);
+
+        await tx.CommitAsync(ct);
+        return true;
+    }
+
+    public async Task RecordAccessAsync(
+        Guid documentId,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid actorUserId,
+        string action,
+        int? versionNumber = null,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            INSERT INTO documents.document_access_logs
+                (id, tenant_id, legal_entity_id, document_id, version_number, actor_user_id, action)
+            VALUES (@id, @tenantId, @legalEntityId, @documentId, @versionNumber, @actorUserId, @action);
+        ";
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", Guid.NewGuid());
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        cmd.Parameters.AddWithValue("documentId", documentId);
+        cmd.Parameters.AddWithValue("versionNumber", (object?)versionNumber ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("actorUserId", actorUserId);
+        cmd.Parameters.AddWithValue("action", action);
+        await cmd.ExecuteNonQueryAsync(ct);
     }
 
     public async Task CreateDocumentWithInitialVersionAsync(Document doc, DocumentVersion initialVersion, CancellationToken ct = default)

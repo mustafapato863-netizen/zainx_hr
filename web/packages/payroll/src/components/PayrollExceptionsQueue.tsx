@@ -48,18 +48,24 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
     <div
       role="dialog"
       aria-labelledby="exceptions-drawer-title"
-      className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-white dark:bg-neutral-900 shadow-2xl border-l border-neutral-200 dark:border-neutral-800 flex flex-col"
+      className="fixed inset-y-0 right-0 z-50 w-full max-w-xl bg-surface shadow-overlay border-l border-border-default flex flex-col"
     >
-      <div className="p-5 border-b border-neutral-200 dark:border-neutral-800 flex items-center justify-between">
+      <div className="p-5 border-b border-border-default flex items-center justify-between">
         <div>
-          <h3 id="exceptions-drawer-title" className="font-semibold text-lg text-neutral-900 dark:text-neutral-100">
+          <h3 id="exceptions-drawer-title" className="font-semibold text-lg text-text-primary">
             P7 Exceptions Queue
           </h3>
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-text-muted">
             Review calculation anomalies, regulatory limits, and blocking gates.
           </span>
         </div>
-        <Button id="btn-close-exceptions" variant="ghost" className="p-2" onPress={onClose} aria-label="Close Exceptions Queue">
+        <Button
+          id="btn-close-exceptions"
+          variant="ghost"
+          className="p-2"
+          onPress={onClose}
+          aria-label="Close Exceptions Queue"
+        >
           <Icon name="x" className="w-5 h-5" />
         </Button>
       </div>
@@ -69,25 +75,23 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
           <div
             key={ex.id}
             id={`exception-card-${ex.id}`}
-            className="p-4 rounded-xl border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-800/40 space-y-2"
+            className="p-4 rounded-xl border border-border-default bg-surface-subtle space-y-2"
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 {getSeverityBadge(ex.severity)}
-                <span className="font-semibold text-xs text-neutral-900 dark:text-neutral-100 font-mono">
+                <span className="font-semibold text-xs text-text-primary font-mono">
                   {ex.category}
                 </span>
               </div>
-              <Badge variant={ex.status === 'Open' ? 'warning' : 'success'}>
-                {ex.status}
-              </Badge>
+              <Badge variant={ex.status === 'Open' ? 'warning' : 'success'}>{ex.status}</Badge>
             </div>
 
-            <p className="text-sm text-neutral-800 dark:text-neutral-200">{ex.reason}</p>
-            <p className="text-xs text-neutral-500 italic">Guidance: {ex.resolutionGuidance}</p>
+            <p className="text-sm text-text-primary">{ex.reason}</p>
+            <p className="text-xs text-text-muted italic">Guidance: {ex.resolutionGuidance}</p>
 
             {ex.status === 'Open' && (
-              <div className="flex items-center gap-2 pt-2 border-t border-neutral-200 dark:border-neutral-700">
+              <div className="flex items-center gap-2 pt-2 border-t border-border-default">
                 <Button
                   id={`btn-resolve-ex-${ex.id}`}
                   variant="secondary"
@@ -103,7 +107,7 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
                   <Button
                     id={`btn-waive-ex-${ex.id}`}
                     variant="ghost"
-                    className="text-xs py-1 text-neutral-600 dark:text-neutral-400"
+                    className="text-xs py-1 text-text-secondary"
                     onPress={() => {
                       setSelectedEx(ex);
                       setActionType('waive');
@@ -116,20 +120,16 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
             )}
 
             {ex.status !== 'Open' && ex.resolutionNote && (
-              <div className="text-xs text-emerald-600 dark:text-emerald-400 pt-1">
-                Note: {ex.resolutionNote}
-              </div>
+              <div className="text-xs text-success pt-1">Note: {ex.resolutionNote}</div>
             )}
           </div>
         ))}
 
         {exceptions.length === 0 && (
-          <div className="p-8 text-center text-neutral-400">
-            <Icon name="check-circle" className="w-10 h-10 mx-auto text-emerald-500 mb-2" />
-            <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">
-              No Exceptions Found
-            </p>
-            <p className="text-xs text-neutral-500 mt-1">
+          <div className="p-8 text-center text-text-tertiary">
+            <Icon name="check-circle" className="w-10 h-10 mx-auto text-success mb-2" />
+            <p className="text-sm font-medium text-text-secondary">No Exceptions Found</p>
+            <p className="text-xs text-text-muted mt-1">
               All employee calculations and statutory validations passed cleanly.
             </p>
           </div>
@@ -138,20 +138,30 @@ export const PayrollExceptionsQueue: React.FC<PayrollExceptionsQueueProps> = ({
 
       {/* Action Sub-Modal */}
       {selectedEx && actionType && (
-        <div className="p-4 border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 space-y-3">
-          <h4 className="text-xs font-semibold text-neutral-900 dark:text-neutral-100 uppercase">
+        <div className="p-4 border-t border-border-default bg-surface space-y-3">
+          <h4 className="text-xs font-semibold text-text-primary uppercase">
             {actionType === 'resolve' ? 'Resolve Exception' : 'Waive Warning'}
           </h4>
           <input
             id="input-exception-note"
             type="text"
-            placeholder={actionType === 'resolve' ? 'Enter resolution note...' : 'Enter justification for waiver...'}
-            className="w-full px-3 py-2 text-sm rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
+            placeholder={
+              actionType === 'resolve'
+                ? 'Enter resolution note...'
+                : 'Enter justification for waiver...'
+            }
+            className="w-full px-3 py-2 text-sm rounded-lg border border-border-strong bg-surface text-text-primary"
             value={note}
             onChange={(e) => setNote(e.target.value)}
           />
           <div className="flex justify-end gap-2">
-            <Button variant="ghost" onPress={() => { setSelectedEx(null); setActionType(null); }}>
+            <Button
+              variant="ghost"
+              onPress={() => {
+                setSelectedEx(null);
+                setActionType(null);
+              }}
+            >
               Cancel
             </Button>
             <Button id="btn-submit-exception-action" variant="primary" onPress={handleAction}>

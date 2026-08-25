@@ -1,13 +1,13 @@
 import * as React from "react"
 import { cn } from "../../lib/utils"
+import { BrandMark } from "../BrandMark/BrandMark"
 
 /**
- * BRAND ASSEMBLY CHOREOGRAPHY — PROVISIONAL
- * 
- * NOTE:
- * - This component provides the baseline startup / login bootstrap presentation.
- * - Final official vector choreography will be verified when official brand assets are delivered.
- * - Includes mandatory reduced-motion fallback (`motion-reduce:animate-none`).
+ * BRAND ASSEMBLY CHOREOGRAPHY
+ *
+ * The mark is sourced from the approved Zain X HR Brand Kit. The animation is
+ * intentionally restrained and sourced from the approved raster artwork.
+ * Reduced-motion users receive the same mark without animated treatment.
  */
 
 export interface BrandAssemblyProps {
@@ -15,7 +15,7 @@ export interface BrandAssemblyProps {
   message?: string
 }
 
-export function BrandAssembly({ className, message = "Initializing ZainX Workforce Platform..." }: BrandAssemblyProps) {
+export function BrandAssembly({ className, message = "Initializing Zain X HR..." }: BrandAssemblyProps) {
   return (
     <div
       className={cn(
@@ -24,28 +24,13 @@ export function BrandAssembly({ className, message = "Initializing ZainX Workfor
       )}
     >
       <div className="relative mb-8 flex items-center justify-center">
-        {/* Ambient subtle glow with reduced-motion fallback */}
-        <div className="absolute -inset-4 rounded-full bg-primary/20 blur-xl animate-pulse motion-reduce:animate-none" />
-        
-        {/* Geometric ZainX Brand Assembly Icon */}
-        <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-surface border border-border-default shadow-2xl">
-          <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="48" height="48" rx="10" fill="currentColor" className="text-primary/10" />
-            <path
-              d="M14 16H34L20 32H34"
-              stroke="currentColor"
-              strokeWidth="4"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-primary"
-            />
-          </svg>
+        <div className="absolute -inset-8 rounded-full bg-primary/15 blur-3xl animate-pulse motion-reduce:animate-none" />
+        <div className="relative rounded-2xl border border-border-default bg-surface p-4 shadow-overlay motion-safe:animate-[brand-mark-enter_640ms_var(--ease-zainx)_both]">
+          <BrandMark compact className="h-20 w-20" />
         </div>
       </div>
 
-      <h1 className="text-2xl font-bold tracking-tight text-text-primary mb-2">
-        ZainX <span className="text-primary font-normal">Workforce</span>
-      </h1>
+      <h1 className="mb-2 text-2xl font-semibold tracking-tight text-text-primary">Zain X HR</h1>
       <p className="text-sm text-text-secondary max-w-xs">{message}</p>
 
       <div className="mt-8 h-1 w-48 overflow-hidden rounded-full bg-surface-subtle">

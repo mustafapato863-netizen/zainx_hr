@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeAll } from "vitest"
-import { render, screen, fireEvent } from "@testing-library/react"
+import { render, screen, fireEvent, act } from "@testing-library/react"
 import React from "react"
 import { Select, SelectItem } from "../components/Select/Select"
 import { ComboBox, ComboBoxItem } from "../components/ComboBox/ComboBox"
@@ -195,17 +195,21 @@ describe("ZainX Design System P0 Real Keyboard Interaction Matrix", () => {
 
   describe("8. DatePicker Keyboard Interaction", () => {
     it("renders date segments with keyboard focusable triggers", () => {
-      render(
-        <DatePicker
-          label="Contract Start Date"
-          defaultValue={parseDate("2026-08-01")}
-        />
-      )
+      act(() => {
+        render(
+          <DatePicker
+            label="Contract Start Date"
+            defaultValue={parseDate("2026-08-01")}
+          />
+        );
+      });
 
-      expect(screen.getByText("Contract Start Date")).toBeDefined()
-      const calendarBtn = screen.getByRole("button", { name: /calendar/i })
-      calendarBtn.focus()
-      expect(document.activeElement).toBe(calendarBtn)
-    })
-  })
-})
+      expect(screen.getByText("Contract Start Date")).toBeDefined();
+      const calendarBtn = screen.getByRole("button", { name: /calendar/i });
+      act(() => {
+        calendarBtn.focus();
+      });
+      expect(document.activeElement).toBe(calendarBtn);
+    });
+  });
+});

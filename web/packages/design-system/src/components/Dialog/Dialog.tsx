@@ -39,14 +39,14 @@ export function Dialog({
     >
       <RACModal
         className={cn(
-          "w-full max-w-lg overflow-hidden rounded-xl border border-border-default bg-surface-raised p-6 shadow-2xl outline-none enter:animate-in enter:zoom-in-95 enter:slide-in-from-bottom-2 exit:animate-out exit:zoom-out-95 exit:slide-out-to-bottom-2",
+          "flex max-h-[calc(100dvh-2rem)] w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border-default bg-surface-raised p-6 shadow-2xl outline-none enter:animate-in enter:zoom-in-95 enter:slide-in-from-bottom-2 exit:animate-out exit:zoom-out-95 exit:slide-out-to-bottom-2",
           className
         )}
       >
-        <RACDialog className="outline-none">
+        <RACDialog className="flex min-h-0 flex-1 flex-col outline-none">
           {({ close }) => (
             <>
-              <div className="flex items-center justify-between pb-3 border-b border-border-default">
+              <div className="flex shrink-0 items-center justify-between border-b border-border-default pb-3">
                 {title && (
                   <RACHeading slot="title" className="text-lg font-semibold text-text-primary">
                     {title}
@@ -60,10 +60,12 @@ export function Dialog({
                   <Icon name="x" size="sm" />
                 </button>
               </div>
-              {description && (
-                <p className="mt-2 text-sm text-text-secondary">{description}</p>
-              )}
-              <div className="mt-4">{children}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto pe-1">
+                {description && (
+                  <p className="mt-2 text-sm text-text-secondary">{description}</p>
+                )}
+                <div className="mt-4">{children}</div>
+              </div>
             </>
           )}
         </RACDialog>

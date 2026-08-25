@@ -1,0 +1,54 @@
+.zainx-intro {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 20px;
+  background: #fff;
+  color: #0A1330;
+}
+
+.zainx-intro__mark {
+  width: clamp(92px, 12vw, 148px);
+  height: auto;
+  animation: zainx-mark-in 640ms cubic-bezier(.2,.8,.2,1) both;
+}
+
+.zainx-intro__copy {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+}
+
+.zainx-intro__name {
+  font: 500 clamp(28px, 4vw, 44px)/1.1 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.035em;
+  overflow: hidden;
+  white-space: nowrap;
+  width: 0;
+  animation: zainx-type 900ms steps(9, end) 180ms forwards;
+}
+
+.zainx-intro__tagline {
+  font: 600 11px/1.2 ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  color: #64748B;
+  opacity: 0;
+  animation: zainx-fade 320ms ease 880ms forwards;
+}
+
+@keyframes zainx-mark-in {
+  from { opacity: 0; transform: translateY(4px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes zainx-type { to { width: 9ch; } }
+@keyframes zainx-fade { to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .zainx-intro__mark,
+  .zainx-intro__name,
+  .zainx-intro__tagline { animation: none; }
+  .zainx-intro__name { width: auto; }
+  .zainx-intro__tagline { opacity: 1; }
+}

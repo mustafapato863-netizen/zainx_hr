@@ -62,6 +62,41 @@ public class OrganizationUnit
         RowVersion = 1;
     }
 
+    public static OrganizationUnit Rehydrate(
+        Guid id,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        string code,
+        string nameEn,
+        string nameAr,
+        OrganizationUnitType type,
+        Guid? parentUnitId,
+        EffectivePeriod effectivePeriod,
+        Guid? managerPositionId,
+        bool isActive,
+        DateTime createdAt,
+        DateTime updatedAt,
+        uint rowVersion)
+    {
+        var unit = new OrganizationUnit(
+            id,
+            tenantId,
+            legalEntityId,
+            code,
+            nameEn,
+            nameAr,
+            type,
+            parentUnitId,
+            effectivePeriod,
+            managerPositionId);
+
+        unit.IsActive = isActive;
+        unit.CreatedAt = createdAt;
+        unit.UpdatedAt = updatedAt;
+        unit.RowVersion = rowVersion;
+        return unit;
+    }
+
     public void UpdateDetails(
         string nameEn,
         string nameAr,

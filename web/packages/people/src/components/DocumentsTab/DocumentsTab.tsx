@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Card,
   CardHeader,
@@ -12,11 +12,18 @@ import {
 } from '@zainx/design-system';
 import { DocumentSummaryDto, DocumentTypeDto } from '@zainx/contracts';
 
+export interface DocumentUploadData {
+  documentTypeId: string;
+  title: string;
+  expiryDate?: string;
+  file: File;
+}
+
 export interface DocumentsTabProps {
   documents: DocumentSummaryDto[];
   documentTypes: DocumentTypeDto[];
-  onUpload: (data: { documentTypeId: string; title: string; expiryDate?: string; file: File }) => Promise<void>;
-  onDownload: (docId: string) => void;
+  onUpload?: (data: DocumentUploadData) => Promise<void>;
+  onDownload?: (docId: string) => void;
 }
 
 export const DocumentsTab: React.FC<DocumentsTabProps> = ({
@@ -33,8 +40,19 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
+  useEffect(() => {
+    if (!docTypeId && documentTypes[0]?.id) {
+      setDocTypeId(documentTypes[0].id);
+    }
+  }, [docTypeId, documentTypes]);
+
   const handleUploadSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!onUpload) {
+      setErrorMsg('Document upload is unavailable for the current context.');
+      return;
+    }
+
     if (!file || !title || !docTypeId) {
       setErrorMsg('Please select a file, document type, and title.');
       return;
@@ -65,7 +83,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
       <CardHeader>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <CardTitle>Workforce Documents / مستندات الموظف</CardTitle>
-          <Button size="xs" variant="primary" onClick={() => setIsModalOpen(true)}>
+          <Button size="xs" variant="primary" onClick={() => setIsModalOpen(true)} disabled={!onUpload || documentTypes.length === 0}>
             + Upload / رفع مستند
           </Button>
         </div>
@@ -78,8 +96,10 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {documents.map((doc) => {
-              const docStatus = (doc.status || 'active').toLowerCase();
-              const docSizeKb = doc.latestFileSize ? (Number(doc.latestFileSize) / 1024).toFixed(1) : '0';
+              const docStatus = doc.status?.toLowerCase() ?? 'unknown';
+              const docSize = doc.latestFileSize
+                ? `${(Number(doc.latestFileSize) / 1024).toFixed(1)} KB`
+                : 'Size unavailable';
               return (
                 <div
                   key={doc.id}
@@ -96,10 +116,10 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
                     <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>{doc.title}</div>
                     <div style={{ fontSize: '0.8rem', color: 'var(--zainx-color-text-muted, #64748b)' }}>
                       Type: {doc.documentTypeNameEn} ({doc.documentTypeNameAr}) • File: {doc.latestFileName} (
-                      {docSizeKb} KB)
+                      {docSize})
                     </div>
                     {doc.expiryDate && (
-                      <div style={{ fontSize: '0.75rem', color: '#d97706', marginTop: '0.25rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--color-warning)', marginTop: '0.25rem' }}>
                         Expires: {doc.expiryDate}
                       </div>
                     )}
@@ -107,9 +127,9 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
 
                   <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
                     <Badge variant={docStatus === 'active' ? 'success' : 'neutral'}>
-                      {doc.status || 'Active'}
+                      {doc.status || 'Status unavailable'}
                     </Badge>
-                    <Button size="xs" variant="secondary" onClick={() => doc.id && onDownload(doc.id)}>
+                    <Button size="xs" variant="secondary" onClick={() => doc.id && onDownload?.(doc.id)}>
                       Download / تحميل
                     </Button>
                   </div>
@@ -135,8 +155,12 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
               </div>
             )}
 
-            <Field label="Document Type / نوع المستند *" isRequired>
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="document-type" className="text-sm font-medium text-text-primary after:ms-0.5 after:text-danger after:content-['*']">
+                Document Type / نوع المستند
+              </label>
               <select
+                id="document-type"
                 value={docTypeId}
                 onChange={(e) => setDocTypeId(e.target.value)}
                 style={{
@@ -152,7 +176,7 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
                   </option>
                 ))}
               </select>
-            </Field>
+            </div>
 
             <Field label="Document Title / عنوان المستند *" isRequired>
               <Input
@@ -170,14 +194,17 @@ export const DocumentsTab: React.FC<DocumentsTabProps> = ({
               />
             </Field>
 
-            <Field label="Select File / اختر الملف (PDF, PNG, JPG) *" isRequired>
-              <input
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="document-file" className="text-sm font-medium text-text-primary after:ms-0.5 after:text-danger after:content-['*']">
+                Select File / اختر الملف (PDF, PNG, JPG)
+              </label>
+              <Input
+                id="document-file"
                 type="file"
                 accept=".pdf,.png,.jpg,.jpeg"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
-                style={{ display: 'block', marginTop: '0.25rem', fontSize: '0.875rem' }}
               />
-            </Field>
+            </div>
 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1rem' }}>
               <Button variant="secondary" onClick={() => setIsModalOpen(false)} disabled={isUploading}>

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -94,7 +94,6 @@ public static class Assert
         throw new InvalidOperationException($"Expected exception of type '{typeof(T).Name}', but no exception was thrown.");
     }
 }
-
 public class Phase2SecurityIntegrationTests
 {
     private readonly TenantId _tenantA = TenantId.New();
@@ -316,8 +315,8 @@ public class Phase2SecurityIntegrationTests
             _tenantA,
             "Tariq",
             "Al-Mansoor",
-            "طارق",
-            "المنصور",
+            "Ø·Ø§Ø±Ù‚",
+            "Ø§Ù„Ù…Ù†ØµÙˆØ±",
             new DateOnly(1990, 5, 15),
             "Male",
             "SA",
@@ -391,7 +390,7 @@ public class Phase2SecurityIntegrationTests
             Guid.NewGuid(),
             Guid.NewGuid(),
             "Junior Engineer",
-            "مهندس مبتدئ",
+            "Ù…Ù‡Ù†Ø¯Ø³ Ù…Ø¨ØªØ¯Ø¦",
             new DateOnly(2024, 1, 1),
             null,
             null,

@@ -98,7 +98,7 @@ export function AdministrationWorkspace() {
   const [deliveries, setDeliveries] = useState<DeliveryItem[]>([]);
   const [auditRecords, setAuditRecords] = useState<AuditRecordItem[]>([]);
   const [availablePermissions, setAvailablePermissions] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   // Modal States
   const [showRoleModal, setShowRoleModal] = useState(false);
@@ -122,85 +122,97 @@ export function AdministrationWorkspace() {
   const [connSecret, setConnSecret] = useState('');
 
   const fetchRoles = async () => {
+    setLoadError(null);
     try {
       const res = await fetch('/api/v1/admin/roles');
-      if (res.ok) setRoles(await res.json());
+      if (!res.ok) throw new Error(`Roles request failed with HTTP ${res.status}.`);
+      const data = await res.json();
+      setRoles(Array.isArray(data) ? data : (data?.items || []));
+
       const pRes = await fetch('/api/v1/admin/permissions');
-      if (pRes.ok) setAvailablePermissions(await pRes.json());
+      if (!pRes.ok) throw new Error(`Permissions request failed with HTTP ${pRes.status}.`);
+      const pData = await pRes.json();
+      setAvailablePermissions(Array.isArray(pData) ? pData : (pData?.items || []));
     } catch {
-      setRoles([
-        { id: '1', code: 'SUPER_ADMIN', nameEn: 'Super Administrator', nameAr: 'المشرف العام', description: 'Full access', permissionsJson: '["*"]', isSystemRole: true, rowVersion: 1 },
-        { id: '2', code: 'HR_MANAGER', nameEn: 'HR Operations Manager', nameAr: 'مدير الموارد البشرية', description: 'HR workflows', permissionsJson: '["people.read", "people.write", "leave.read", "attendance.read"]', isSystemRole: true, rowVersion: 1 },
-        { id: '3', code: 'PAYROLL_ADMIN', nameEn: 'Payroll Specialist', nameAr: 'مسؤول الرواتب', description: 'Payroll execution', permissionsJson: '["payroll.read", "payroll.run", "payroll.result.read_sensitive"]', isSystemRole: true, rowVersion: 1 }
-      ]);
+      setRoles([]);
+      setAvailablePermissions([]);
+      setLoadError(isAr ? 'تعذر تحميل بيانات الأدوار والصلاحيات من الخدمة.' : 'Roles and permissions could not be loaded from the service.');
     }
   };
 
   const fetchAssignments = async () => {
+    setLoadError(null);
     try {
       const res = await fetch('/api/v1/admin/role-assignments');
-      if (res.ok) setAssignments(await res.json());
+      if (!res.ok) throw new Error(`Role assignments request failed with HTTP ${res.status}.`);
+      const data = await res.json();
+      setAssignments(Array.isArray(data) ? data : (data?.items || []));
     } catch {
       setAssignments([]);
+      setLoadError(isAr ? 'تعذر تحميل تعيينات الأدوار من الخدمة.' : 'Role assignments could not be loaded from the service.');
     }
   };
 
   const fetchSettings = async () => {
+    setLoadError(null);
     try {
       const res = await fetch('/api/v1/admin/settings');
-      if (res.ok) setSettings(await res.json());
+      if (!res.ok) throw new Error(`Settings request failed with HTTP ${res.status}.`);
+      const data = await res.json();
+      setSettings(Array.isArray(data) ? data : (data?.items || []));
     } catch {
-      setSettings([
-        { id: 's1', category: 'Compliance', key: 'GOSI_CONTRIBUTION_RATE', valueJson: '{"employee": 0.0975, "employer": 0.1175}', effectiveStartDate: '2026-01-01', isCurrent: true, rowVersion: 1 },
-        { id: 's2', category: 'Security', key: 'PASSWORD_EXPIRY_DAYS', valueJson: '{"days": 90}', effectiveStartDate: '2026-01-01', isCurrent: true, rowVersion: 1 }
-      ]);
+      setSettings([]);
+      setLoadError(isAr ? 'تعذر تحميل إعدادات المنصة من الخدمة.' : 'Platform settings could not be loaded from the service.');
     }
   };
 
   const fetchRetention = async () => {
+    setLoadError(null);
     try {
       const res = await fetch('/api/v1/admin/retention-policies');
-      if (res.ok) setRetentionPolicies(await res.json());
+      if (!res.ok) throw new Error(`Retention policies request failed with HTTP ${res.status}.`);
+      const data = await res.json();
+      setRetentionPolicies(Array.isArray(data) ? data : (data?.items || []));
     } catch {
-      setRetentionPolicies([
-        { id: 'r1', module: 'Audit', dataCategory: 'SecurityLogs', retentionDays: 2555, actionOnExpiry: 2, isActive: true, effectiveStartDate: '2026-01-01', rowVersion: 1 },
-        { id: 'r2', module: 'Recruitment', dataCategory: 'RejectedCandidateCV', retentionDays: 365, actionOnExpiry: 1, isActive: true, effectiveStartDate: '2026-01-01', rowVersion: 1 },
-        { id: 'r3', module: 'Payroll', dataCategory: 'MonthlySnapshots', retentionDays: 3650, actionOnExpiry: 2, isActive: true, effectiveStartDate: '2026-01-01', rowVersion: 1 }
-      ]);
+      setRetentionPolicies([]);
+      setLoadError(isAr ? 'تعذر تحميل سياسات الاحتفاظ من الخدمة.' : 'Retention policies could not be loaded from the service.');
     }
   };
 
   const fetchIntegrations = async () => {
+    setLoadError(null);
     try {
       const cRes = await fetch('/api/v1/integrations/connectors');
-      if (cRes.ok) setConnectors(await cRes.json());
+      if (!cRes.ok) throw new Error(`Connectors request failed with HTTP ${cRes.status}.`);
+      const cData = await cRes.json();
+      setConnectors(Array.isArray(cData) ? cData : (cData?.items || []));
+
       const dRes = await fetch('/api/v1/integrations/deliveries?pageSize=20');
-      if (dRes.ok) {
-        const dData = await dRes.json();
-        setDeliveries(dData.items || []);
-      }
+      if (!dRes.ok) throw new Error(`Delivery request failed with HTTP ${dRes.status}.`);
+      const dData = await dRes.json();
+      setDeliveries(Array.isArray(dData) ? dData : (dData?.items || []));
     } catch {
-      setConnectors([
-        { id: 'c1', code: 'GENERIC_WEBHOOK', nameEn: 'Enterprise Webhook Dispatcher', nameAr: 'مرسل الويب هوك للمؤسسة', connectorType: 1, direction: 1, endpointUrl: 'https://api.enterprise.com/webhooks/zainx', authType: 3, isActive: true, eventSubscriptionsJson: '["CandidateHiredEvent"]', rowVersion: 1 }
-      ]);
+      setConnectors([]);
+      setDeliveries([]);
+      setLoadError(isAr ? 'تعذر تحميل بيانات التكاملات من الخدمة.' : 'Integration data could not be loaded from the service.');
     }
   };
 
   const fetchAudit = async () => {
+    setLoadError(null);
     try {
       const res = await fetch('/api/v1/audit?pageSize=50');
-      if (res.ok) {
-        const data = await res.json();
-        setAuditRecords(data.items || []);
-      }
+      if (!res.ok) throw new Error(`Audit request failed with HTTP ${res.status}.`);
+      const data = await res.json();
+      setAuditRecords(Array.isArray(data) ? data : (data?.items || []));
     } catch {
-      setAuditRecords([
-        { id: 'a1', actorUserId: '11111111-1111-1111-1111-111111111111', actorType: 'User', actionCode: 'role.assigned', entityType: 'RoleAssignment', entityId: '22222222-2222-2222-2222-222222222222', occurredAtUtc: new Date().toISOString(), correlationId: 'corr-init-01', dataClassification: 'Restricted' }
-      ]);
+      setAuditRecords([]);
+      setLoadError(isAr ? 'تعذر تحميل سجل التدقيق من الخدمة.' : 'Audit records could not be loaded from the service.');
     }
   };
 
   useEffect(() => {
+    setLoadError(null);
     if (activeTab === 'ROLES') fetchRoles();
     else if (activeTab === 'ASSIGNMENTS') fetchAssignments();
     else if (activeTab === 'SETTINGS') fetchSettings();
@@ -304,18 +316,20 @@ export function AdministrationWorkspace() {
     try {
       await fetch(`/api/v1/integrations/deliveries/${id}/retry`, { method: 'POST' });
       fetchIntegrations();
-    } catch { }
+    } catch {
+      // ignore retry error
+    }
   };
 
   return (
     <div className="space-y-6" data-testid="administration-workspace">
       {/* Page Title */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div className="bg-surface p-6 rounded-xl border border-border-default shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-text-primary">
             {isAr ? 'إدارة المنصة والتحكم التشغيلي' : 'Platform Administration & Governance'}
           </h1>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-text-muted mt-1">
             {isAr
               ? 'إدارة الأدوار والصلاحيات، التكوينات المحددة زمنياً، التكاملات، وسجل التدقيق غير القابل للتعديل.'
               : 'Role-based access control, effective-dated settings, outbox integration webhooks, and immutable audit trails.'}
@@ -335,7 +349,7 @@ export function AdministrationWorkspace() {
               setPrivilegeError(null);
               setShowRoleModal(true);
             }}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-text-inverse font-semibold text-sm rounded-xl shadow-sm transition-colors flex items-center gap-2"
           >
             + {isAr ? 'إنشاء دور جديد' : 'Create Role'}
           </button>
@@ -352,15 +366,35 @@ export function AdministrationWorkspace() {
               setConnSecret('');
               setShowConnectorModal(true);
             }}
-            className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-sm rounded-xl shadow-sm transition-colors flex items-center gap-2"
+            className="px-4 py-2 bg-primary hover:bg-primary-hover text-text-inverse font-semibold text-sm rounded-xl shadow-sm transition-colors flex items-center gap-2"
           >
             + {isAr ? 'إضافة موصل تكاملي' : 'New Connector'}
           </button>
         )}
       </div>
 
+      {loadError && (
+        <div role="alert" className="flex items-center justify-between gap-4 rounded-xl border border-danger/30 bg-danger-subtle px-4 py-3 text-sm text-danger-subtle-text">
+          <span>{loadError}</span>
+          <button
+            type="button"
+            className="rounded-md border border-danger/30 px-3 py-1.5 text-xs font-semibold hover:bg-danger/10"
+            onClick={() => {
+              if (activeTab === 'ROLES') void fetchRoles();
+              else if (activeTab === 'ASSIGNMENTS') void fetchAssignments();
+              else if (activeTab === 'SETTINGS') void fetchSettings();
+              else if (activeTab === 'RETENTION') void fetchRetention();
+              else if (activeTab === 'INTEGRATIONS') void fetchIntegrations();
+              else void fetchAudit();
+            }}
+          >
+            {isAr ? 'إعادة المحاولة' : 'Retry'}
+          </button>
+        </div>
+      )}
+
       {/* Navigation Tabs */}
-      <div className="flex border-b border-slate-200 bg-white rounded-2xl p-2 gap-2 shadow-sm">
+      <div className="flex border-b border-border-default bg-surface rounded-xl p-2 gap-2 shadow-sm">
         {[
           { key: 'ROLES', labelEn: 'Roles & Permissions', labelAr: 'الأدوار والصلاحيات' },
           { key: 'ASSIGNMENTS', labelEn: 'Role Assignments', labelAr: 'تعيينات الأدوار' },
@@ -373,7 +407,7 @@ export function AdministrationWorkspace() {
             key={tab.key}
             data-testid={`admin-tab-${tab.key.toLowerCase()}`}
             onClick={() => setActiveTab(tab.key as any)}
-            className={`px-4 py-2.5 rounded-xl font-semibold text-xs transition-all ${activeTab === tab.key ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'}`}
+            className={`px-4 py-2.5 rounded-xl font-semibold text-xs transition-all ${activeTab === tab.key ? 'bg-surface-panel text-text-inverse shadow-sm' : 'text-text-secondary hover:text-text-primary hover:bg-surface-subtle'}`}
           >
             {isAr ? tab.labelAr : tab.labelEn}
           </button>
@@ -382,18 +416,18 @@ export function AdministrationWorkspace() {
 
       {/* TAB 1: Roles & Permissions */}
       {activeTab === 'ROLES' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+        <div className="bg-surface rounded-xl border border-border-default shadow-sm overflow-hidden p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-bold text-slate-800 text-sm">
+            <h2 className="font-bold text-text-primary text-sm">
               {isAr ? 'الأدوار المعرفة في النظام' : 'Defined System & Custom Roles'}
             </h2>
-            <span className="text-xs text-slate-400 font-medium">{roles.length} roles</span>
+            <span className="text-xs text-text-muted font-medium">{roles.length} roles</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Code</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Name</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Type</th>
@@ -402,18 +436,18 @@ export function AdministrationWorkspace() {
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {roles.map(r => (
-                  <tr key={r.id} data-testid={`role-row-${r.code}`} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-slate-900">{r.code}</td>
-                    <td className="py-3 px-4 text-slate-800 font-medium">{isAr ? r.nameAr : r.nameEn}</td>
+                  <tr key={r.id} data-testid={`role-row-${r.code}`} className="hover:bg-surface-subtle transition-colors">
+                    <td className="py-3 px-4 font-mono font-bold text-text-primary">{r.code}</td>
+                    <td className="py-3 px-4 text-text-primary font-medium">{isAr ? r.nameAr : r.nameEn}</td>
                     <td className="py-3 px-4">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${r.isSystemRole ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'}`}>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${r.isSystemRole ? 'bg-primary-subtle text-primary border-primary' : 'bg-success-subtle text-success border-success'}`}>
                         {r.isSystemRole ? 'System' : 'Custom'}
                       </span>
                     </td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-slate-500 max-w-xs truncate">{r.permissionsJson}</td>
-                    <td className="py-3 px-4 font-mono text-slate-400">v{r.rowVersion}</td>
+                    <td className="py-3 px-4 font-mono text-[11px] text-text-muted max-w-xs truncate">{r.permissionsJson}</td>
+                    <td className="py-3 px-4 font-mono text-text-muted">v{r.rowVersion}</td>
                     <td className="py-3 px-4">
                       <button
                         onClick={() => {
@@ -426,7 +460,7 @@ export function AdministrationWorkspace() {
                           setPrivilegeError(null);
                           setShowRoleModal(true);
                         }}
-                        className="text-indigo-600 hover:text-indigo-900 font-semibold"
+                        className="text-primary hover:text-primary-subtle-text font-semibold"
                       >
                         {isAr ? 'تعديل' : 'Edit'}
                       </button>
@@ -441,29 +475,29 @@ export function AdministrationWorkspace() {
 
       {/* TAB 2: Role Assignments */}
       {activeTab === 'ASSIGNMENTS' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+        <div className="bg-surface rounded-xl border border-border-default shadow-sm overflow-hidden p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'التعيينات النشطة' : 'Active Role Assignments'}</h2>
-            <span className="text-xs text-slate-400 font-medium">{assignments.length} assignments</span>
+            <h2 className="font-bold text-text-primary text-sm">{isAr ? 'التعيينات النشطة' : 'Active Role Assignments'}</h2>
+            <span className="text-xs text-text-muted font-medium">{assignments.length} assignments</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">User ID</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Role ID</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Scope</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Assigned At</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {assignments.map(a => (
-                  <tr key={a.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 font-mono text-slate-900">{a.userId}</td>
-                    <td className="py-3 px-4 font-mono text-slate-700">{a.roleId}</td>
-                    <td className="py-3 px-4 text-slate-500">{a.legalEntityScopeId || 'Tenant-Wide'}</td>
-                    <td className="py-3 px-4 text-slate-400">{new Date(a.assignedAtUtc).toLocaleString()}</td>
+                  <tr key={a.id} className="hover:bg-surface-subtle transition-colors">
+                    <td className="py-3 px-4 font-mono text-text-primary">{a.userId}</td>
+                    <td className="py-3 px-4 font-mono text-text-secondary">{a.roleId}</td>
+                    <td className="py-3 px-4 text-text-muted">{a.legalEntityScopeId || 'Tenant-Wide'}</td>
+                    <td className="py-3 px-4 text-text-muted">{new Date(a.assignedAtUtc).toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
@@ -474,16 +508,16 @@ export function AdministrationWorkspace() {
 
       {/* TAB 3: Platform Settings */}
       {activeTab === 'SETTINGS' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+        <div className="bg-surface rounded-xl border border-border-default shadow-sm overflow-hidden p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'الإعدادات المحددة زمنياً' : 'Effective-Dated Settings'}</h2>
-            <span className="text-xs text-slate-400 font-medium">{settings.length} parameters</span>
+            <h2 className="font-bold text-text-primary text-sm">{isAr ? 'الإعدادات المحددة زمنياً' : 'Effective-Dated Settings'}</h2>
+            <span className="text-xs text-text-muted font-medium">{settings.length} parameters</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Category</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Key</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Value</th>
@@ -491,15 +525,15 @@ export function AdministrationWorkspace() {
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {settings.map(s => (
-                  <tr key={s.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-900">{s.category}</td>
-                    <td className="py-3 px-4 font-mono text-indigo-700">{s.key}</td>
-                    <td className="py-3 px-4 font-mono text-slate-600 max-w-sm truncate">{s.valueJson}</td>
-                    <td className="py-3 px-4 text-slate-500">{s.effectiveStartDate}</td>
+                  <tr key={s.id} className="hover:bg-surface-subtle transition-colors">
+                    <td className="py-3 px-4 font-bold text-text-primary">{s.category}</td>
+                    <td className="py-3 px-4 font-mono text-primary">{s.key}</td>
+                    <td className="py-3 px-4 font-mono text-text-secondary max-w-sm truncate">{s.valueJson}</td>
+                    <td className="py-3 px-4 text-text-muted">{s.effectiveStartDate}</td>
                     <td className="py-3 px-4">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-success-subtle text-success border border-success">
                         Current
                       </span>
                     </td>
@@ -513,16 +547,16 @@ export function AdministrationWorkspace() {
 
       {/* TAB 4: Retention Policies */}
       {activeTab === 'RETENTION' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
+        <div className="bg-surface rounded-xl border border-border-default shadow-sm overflow-hidden p-6 space-y-4">
           <div className="flex justify-between items-center">
-            <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'سياسات دورة حياة البيانات' : 'Data Retention & Lifecycle Policies'}</h2>
-            <span className="text-xs text-slate-400 font-medium">{retentionPolicies.length} policies</span>
+            <h2 className="font-bold text-text-primary text-sm">{isAr ? 'سياسات دورة حياة البيانات' : 'Data Retention & Lifecycle Policies'}</h2>
+            <span className="text-xs text-text-muted font-medium">{retentionPolicies.length} policies</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Module</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Data Category</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Retention Period</th>
@@ -530,19 +564,19 @@ export function AdministrationWorkspace() {
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Active</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {retentionPolicies.map(rp => (
-                  <tr key={rp.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 font-bold text-slate-900">{rp.module}</td>
-                    <td className="py-3 px-4 font-mono text-slate-700">{rp.dataCategory}</td>
-                    <td className="py-3 px-4 text-slate-600 font-semibold">{rp.retentionDays} days</td>
+                  <tr key={rp.id} className="hover:bg-surface-subtle transition-colors">
+                    <td className="py-3 px-4 font-bold text-text-primary">{rp.module}</td>
+                    <td className="py-3 px-4 font-mono text-text-secondary">{rp.dataCategory}</td>
+                    <td className="py-3 px-4 text-text-secondary font-semibold">{rp.retentionDays} days</td>
                     <td className="py-3 px-4">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-800">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-subtle text-text-primary">
                         {rp.actionOnExpiry === 1 ? 'Anonymize' : rp.actionOnExpiry === 2 ? 'Archive' : 'Purge'}
                       </span>
                     </td>
                     <td className="py-3 px-4">
-                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${rp.isActive ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${rp.isActive ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger-subtle-text'}`}>
                         {rp.isActive ? 'Active' : 'Disabled'}
                       </span>
                     </td>
@@ -558,16 +592,16 @@ export function AdministrationWorkspace() {
       {activeTab === 'INTEGRATIONS' && (
         <div className="space-y-6">
           {/* Connectors Table */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="bg-surface rounded-xl border border-border-default shadow-sm p-6 space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'الموصلات النشطة' : 'Active Connectors'}</h2>
-              <span className="text-xs text-slate-400 font-medium">{connectors.length} configured</span>
+              <h2 className="font-bold text-text-primary text-sm">{isAr ? 'الموصلات النشطة' : 'Active Connectors'}</h2>
+              <span className="text-xs text-text-muted font-medium">{connectors.length} configured</span>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-border-default">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                  <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Code</th>
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Name</th>
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Endpoint URL</th>
@@ -576,16 +610,16 @@ export function AdministrationWorkspace() {
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Status</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border-subtle">
                   {connectors.map(c => (
-                    <tr key={c.id} data-testid={`connector-row-${c.code}`} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900">{c.code}</td>
-                      <td className="py-3 px-4 font-medium text-slate-800">{isAr ? c.nameAr : c.nameEn}</td>
-                      <td className="py-3 px-4 font-mono text-[11px] text-slate-600">{c.endpointUrl}</td>
-                      <td className="py-3 px-4 text-slate-500 font-semibold">{c.authType === 3 ? 'HMAC-SHA256' : 'None'}</td>
-                      <td className="py-3 px-4 font-mono text-[11px] text-slate-500 max-w-xs truncate">{c.eventSubscriptionsJson}</td>
+                    <tr key={c.id} data-testid={`connector-row-${c.code}`} className="hover:bg-surface-subtle transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-text-primary">{c.code}</td>
+                      <td className="py-3 px-4 font-medium text-text-primary">{isAr ? c.nameAr : c.nameEn}</td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-text-secondary">{c.endpointUrl}</td>
+                      <td className="py-3 px-4 text-text-muted font-semibold">{c.authType === 3 ? 'HMAC-SHA256' : 'None'}</td>
+                      <td className="py-3 px-4 font-mono text-[11px] text-text-muted max-w-xs truncate">{c.eventSubscriptionsJson}</td>
                       <td className="py-3 px-4">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${c.isActive ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-slate-100 text-slate-500'}`}>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${c.isActive ? 'bg-success-subtle text-success border border-success' : 'bg-surface-subtle text-text-muted'}`}>
                           {c.isActive ? 'Active' : 'Inactive'}
                         </span>
                       </td>
@@ -597,16 +631,16 @@ export function AdministrationWorkspace() {
           </div>
 
           {/* Deliveries Queue */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+          <div className="bg-surface rounded-xl border border-border-default shadow-sm p-6 space-y-4">
             <div className="flex justify-between items-center">
-              <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'سجل تسليم الأحداث الخارجية' : 'Outbound Delivery Event Queue'}</h2>
-              <span className="text-xs text-slate-400 font-medium">{deliveries.length} entries</span>
+              <h2 className="font-bold text-text-primary text-sm">{isAr ? 'سجل تسليم الأحداث الخارجية' : 'Outbound Delivery Event Queue'}</h2>
+              <span className="text-xs text-text-muted font-medium">{deliveries.length} entries</span>
             </div>
 
-            <div className="overflow-x-auto rounded-xl border border-slate-200">
+            <div className="overflow-x-auto rounded-xl border border-border-default">
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                  <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Event Type</th>
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Status</th>
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Attempts</th>
@@ -615,23 +649,23 @@ export function AdministrationWorkspace() {
                     <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Action</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-border-subtle">
                   {deliveries.map(d => (
-                    <tr key={d.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-slate-900">{d.eventType}</td>
+                    <tr key={d.id} className="hover:bg-surface-subtle transition-colors">
+                      <td className="py-3 px-4 font-mono font-bold text-text-primary">{d.eventType}</td>
                       <td className="py-3 px-4">
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${d.status === 3 || d.status === 'Delivered' ? 'bg-emerald-50 text-emerald-700' : d.status === 6 || d.status === 'DeadLettered' ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-700'}`}>
+                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${d.status === 3 || d.status === 'Delivered' ? 'bg-success-subtle text-success' : d.status === 6 || d.status === 'DeadLettered' ? 'bg-danger-subtle text-danger-subtle-text' : 'bg-warning-subtle text-warning-subtle-text'}`}>
                           {String(d.status)}
                         </span>
                       </td>
-                      <td className="py-3 px-4 font-mono text-slate-600">{d.attemptCount} / {d.maxAttempts}</td>
-                      <td className="py-3 px-4 font-mono font-semibold text-slate-700">{d.lastHttpStatus || '—'}</td>
-                      <td className="py-3 px-4 text-slate-400">{new Date(d.createdAtUtc).toLocaleString()}</td>
+                      <td className="py-3 px-4 font-mono text-text-secondary">{d.attemptCount} / {d.maxAttempts}</td>
+                      <td className="py-3 px-4 font-mono font-semibold text-text-secondary">{d.lastHttpStatus || '—'}</td>
+                      <td className="py-3 px-4 text-text-muted">{new Date(d.createdAtUtc).toLocaleString()}</td>
                       <td className="py-3 px-4">
                         {(d.status === 6 || d.status === 4 || d.status === 'DeadLettered') && (
                           <button
                             onClick={() => retryDelivery(d.id)}
-                            className="text-xs text-indigo-600 hover:text-indigo-900 font-bold"
+                            className="text-xs text-primary hover:text-primary-subtle-text font-bold"
                           >
                             Retry
                           </button>
@@ -648,23 +682,23 @@ export function AdministrationWorkspace() {
 
       {/* TAB 6: Audit Trail */}
       {activeTab === 'AUDIT' && (
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div className="bg-surface rounded-xl border border-border-default shadow-sm p-6 space-y-4">
           <div className="flex justify-between items-center">
             <div>
-              <h2 className="font-bold text-slate-800 text-sm">{isAr ? 'سجل التدقيق الأمني غير القابل للتعديل' : 'Immutable Security Audit Trail'}</h2>
-              <p className="text-xs text-slate-500 mt-0.5">
+              <h2 className="font-bold text-text-primary text-sm">{isAr ? 'سجل التدقيق الأمني غير القابل للتعديل' : 'Immutable Security Audit Trail'}</h2>
+              <p className="text-xs text-text-muted mt-0.5">
                 {isAr
                   ? 'سجل غير قابل للحذف أو التعديل على مستوى قاعدة البيانات مع حماية البيانات الحساسة.'
                   : 'Database-enforced append-only audit trail with sensitive PII redaction.'}
               </p>
             </div>
-            <span className="text-xs text-slate-400 font-medium">{auditRecords.length} records</span>
+            <span className="text-xs text-text-muted font-medium">{auditRecords.length} records</span>
           </div>
 
-          <div className="overflow-x-auto rounded-xl border border-slate-200">
+          <div className="overflow-x-auto rounded-xl border border-border-default">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="bg-slate-50 text-slate-700 border-b border-slate-200">
+                <tr className="bg-surface-subtle text-text-secondary border-b border-border-default">
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Timestamp</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Actor</th>
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Action</th>
@@ -674,23 +708,23 @@ export function AdministrationWorkspace() {
                   <th className="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Inspect</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-border-subtle">
                 {auditRecords.map(a => (
-                  <tr key={a.id} data-testid={`audit-row-${a.actionCode}`} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3 px-4 text-slate-500 font-mono text-[11px]">{new Date(a.occurredAtUtc).toLocaleString()}</td>
-                    <td className="py-3 px-4 font-mono font-medium text-slate-800">{a.actorUserId.substring(0, 8)}...</td>
-                    <td className="py-3 px-4 font-mono font-bold text-indigo-700">{a.actionCode}</td>
-                    <td className="py-3 px-4 text-slate-700">{a.entityType}: {a.entityId}</td>
-                    <td className="py-3 px-4 font-mono text-[11px] text-slate-400">{a.correlationId || '—'}</td>
+                  <tr key={a.id} data-testid={`audit-row-${a.actionCode}`} className="hover:bg-surface-subtle transition-colors">
+                    <td className="py-3 px-4 text-text-muted font-mono text-[11px]">{new Date(a.occurredAtUtc).toLocaleString()}</td>
+                    <td className="py-3 px-4 font-mono font-medium text-text-primary">{a.actorUserId.substring(0, 8)}...</td>
+                    <td className="py-3 px-4 font-mono font-bold text-primary">{a.actionCode}</td>
+                    <td className="py-3 px-4 text-text-secondary">{a.entityType}: {a.entityId}</td>
+                    <td className="py-3 px-4 font-mono text-[11px] text-text-muted">{a.correlationId || '—'}</td>
                     <td className="py-3 px-4">
-                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                      <span className="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-subtle text-text-secondary border border-border-default">
                         {a.dataClassification}
                       </span>
                     </td>
                     <td className="py-3 px-4">
                       <button
                         onClick={() => setInspectAudit(a)}
-                        className="text-xs text-indigo-600 hover:text-indigo-900 font-semibold"
+                        className="text-xs text-primary hover:text-primary-subtle-text font-semibold"
                       >
                         {isAr ? 'معاينة' : 'Diff'}
                       </button>
@@ -706,57 +740,57 @@ export function AdministrationWorkspace() {
       {/* Role Create / Edit Modal */}
       {showRoleModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">
+          <div className="bg-surface rounded-xl p-6 max-w-lg w-full shadow-overlay border border-border-default space-y-4">
+            <h3 className="text-lg font-bold text-text-primary">
               {selectedRole ? (isAr ? 'تعديل الدور' : 'Edit Role') : (isAr ? 'إنشاء دور جديد' : 'Create New Role')}
             </h3>
 
             {privilegeError && (
-              <div className="p-3 bg-red-50 border border-red-200 text-red-800 text-xs rounded-xl font-medium">
+              <div className="p-3 bg-danger-subtle border border-danger text-danger-subtle-text text-xs rounded-xl font-medium">
                 {privilegeError}
               </div>
             )}
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Code</label>
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Code</label>
                 <input
                   type="text"
                   disabled={!!selectedRole}
                   value={roleCode}
                   onChange={e => setRoleCode(e.target.value)}
                   placeholder="e.g. AUDITOR"
-                  className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2 disabled:bg-slate-100 uppercase"
+                  className="w-full text-sm border border-border-default rounded-xl px-3 py-2 disabled:bg-surface-subtle uppercase"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Name (EN)</label>
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Name (EN)</label>
                 <input
                   type="text"
                   value={roleNameEn}
                   onChange={e => setRoleNameEn(e.target.value)}
                   placeholder="Auditor"
-                  className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2"
+                  className="w-full text-sm border border-border-default rounded-xl px-3 py-2"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Name (AR)</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Name (AR)</label>
               <input
                 type="text"
                 value={roleNameAr}
                 onChange={e => setRoleNameAr(e.target.value)}
                 placeholder="مدقق"
-                className="w-full text-sm border border-slate-200 rounded-xl px-3 py-2"
+                className="w-full text-sm border border-border-default rounded-xl px-3 py-2"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Permissions</label>
-              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-slate-200 rounded-xl p-3 bg-slate-50">
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Permissions</label>
+              <div className="grid grid-cols-2 gap-2 max-h-48 overflow-y-auto border border-border-default rounded-xl p-3 bg-surface-subtle">
                 {availablePermissions.map(p => (
-                  <label key={p} className="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <label key={p} className="flex items-center gap-2 text-xs text-text-secondary cursor-pointer">
                     <input
                       type="checkbox"
                       checked={selectedPerms.includes(p)}
@@ -764,7 +798,7 @@ export function AdministrationWorkspace() {
                         if (e.target.checked) setSelectedPerms([...selectedPerms, p]);
                         else setSelectedPerms(selectedPerms.filter(x => x !== p));
                       }}
-                      className="rounded border-slate-300 text-indigo-600"
+                      className="rounded border-border-strong text-primary"
                     />
                     <span className="font-mono text-[11px]">{p}</span>
                   </label>
@@ -773,13 +807,13 @@ export function AdministrationWorkspace() {
             </div>
 
             <div className="flex justify-end gap-3 pt-2">
-              <button onClick={() => setShowRoleModal(false)} className="px-4 py-2 text-sm text-slate-600 hover:text-slate-900 font-medium">
+              <button onClick={() => setShowRoleModal(false)} className="px-4 py-2 text-sm text-text-secondary hover:text-text-primary font-medium">
                 Cancel
               </button>
               <button
                 data-testid="confirm-save-role-btn"
                 onClick={handleSaveRole}
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-semibold text-sm shadow-sm"
+                className="px-4 py-2 bg-primary hover:bg-primary-hover text-text-inverse rounded-xl font-semibold text-sm shadow-sm"
               >
                 Save
               </button>
@@ -791,27 +825,27 @@ export function AdministrationWorkspace() {
       {/* Connector Modal */}
       {showConnectorModal && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">{isAr ? 'إضافة موصل تكاملي جديد' : 'New Outbound Integration Connector'}</h3>
+          <div className="bg-surface rounded-xl p-6 max-w-md w-full shadow-overlay border border-border-default space-y-4">
+            <h3 className="text-lg font-bold text-text-primary">{isAr ? 'إضافة موصل تكاملي جديد' : 'New Outbound Integration Connector'}</h3>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Code</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Code</label>
               <input type="text" value={connCode} onChange={e => setConnCode(e.target.value)} placeholder="WEBHOOK_ERP" className="w-full text-sm border rounded-xl px-3 py-2 uppercase" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Name (EN)</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Name (EN)</label>
               <input type="text" value={connNameEn} onChange={e => setConnNameEn(e.target.value)} placeholder="ERP Dispatcher" className="w-full text-sm border rounded-xl px-3 py-2" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Endpoint URL</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Endpoint URL</label>
               <input type="text" value={connEndpoint} onChange={e => setConnEndpoint(e.target.value)} placeholder="https://api.thirdparty.com/webhook" className="w-full text-sm border rounded-xl px-3 py-2" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Secret Key (HMAC-SHA256)</label>
+              <label className="block text-xs font-semibold text-text-secondary mb-1">Secret Key (HMAC-SHA256)</label>
               <input type="password" value={connSecret} onChange={e => setConnSecret(e.target.value)} placeholder="••••••••••••" className="w-full text-sm border rounded-xl px-3 py-2" />
             </div>
             <div className="flex justify-end gap-3 pt-2">
-              <button onClick={() => setShowConnectorModal(false)} className="px-4 py-2 text-sm text-slate-600 font-medium">Cancel</button>
-              <button onClick={handleCreateConnector} className="px-4 py-2 bg-indigo-600 text-white rounded-xl font-semibold text-sm">Save Connector</button>
+              <button onClick={() => setShowConnectorModal(false)} className="px-4 py-2 text-sm text-text-secondary font-medium">Cancel</button>
+              <button onClick={handleCreateConnector} className="px-4 py-2 bg-primary text-text-inverse rounded-xl font-semibold text-sm">Save Connector</button>
             </div>
           </div>
         </div>
@@ -820,33 +854,33 @@ export function AdministrationWorkspace() {
       {/* Inspect Audit Diff Modal */}
       {inspectAudit && (
         <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
-            <h3 className="text-lg font-bold text-slate-900">
+          <div className="bg-surface rounded-xl p-6 max-w-lg w-full shadow-overlay border border-border-default space-y-4">
+            <h3 className="text-lg font-bold text-text-primary">
               {isAr ? 'معاينة التغييرات المسجلة' : 'Audit Change Detail & Diff'}
             </h3>
-            <div className="text-xs text-slate-600 space-y-1">
-              <div><strong>Action:</strong> <span className="font-mono text-indigo-700">{inspectAudit.actionCode}</span></div>
+            <div className="text-xs text-text-secondary space-y-1">
+              <div><strong>Action:</strong> <span className="font-mono text-primary">{inspectAudit.actionCode}</span></div>
               <div><strong>Entity:</strong> {inspectAudit.entityType} ({inspectAudit.entityId})</div>
               <div><strong>Correlation:</strong> <span className="font-mono">{inspectAudit.correlationId || '—'}</span></div>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Changes Before</label>
-                <pre className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono text-slate-700 overflow-x-auto h-32">
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Changes Before</label>
+                <pre className="p-3 bg-surface-subtle border border-border-default rounded-xl text-[10px] font-mono text-text-secondary overflow-x-auto h-32">
                   {inspectAudit.changesBeforeJson || '(None)'}
                 </pre>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Changes After</label>
-                <pre className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-[10px] font-mono text-slate-700 overflow-x-auto h-32">
+                <label className="block text-xs font-semibold text-text-secondary mb-1">Changes After</label>
+                <pre className="p-3 bg-surface-subtle border border-border-default rounded-xl text-[10px] font-mono text-text-secondary overflow-x-auto h-32">
                   {inspectAudit.changesAfterJson || '(None)'}
                 </pre>
               </div>
             </div>
 
             <div className="flex justify-end pt-2">
-              <button onClick={() => setInspectAudit(null)} className="px-4 py-2 bg-slate-900 text-white text-sm font-semibold rounded-xl">
+              <button onClick={() => setInspectAudit(null)} className="px-4 py-2 bg-surface-panel text-text-inverse text-sm font-semibold rounded-xl">
                 Close
               </button>
             </div>

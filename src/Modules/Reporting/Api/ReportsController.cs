@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -59,6 +60,11 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<ReportDefinition>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListReports(CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
         var reports = await _repository.ListDefinitionsAsync(ct);
         return Ok(reports);
     }
@@ -68,8 +74,17 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetReport(string reportCode, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
         var def = await _repository.GetDefinitionAsync(reportCode, ct);
         if (def == null) return NotFound();
+        if (!HasAllPermissions(def.GetRequiredPermissions()))
+        {
+            return AccessDenied("report-specific permission");
+        }
         return Ok(def);
     }
 
@@ -79,6 +94,21 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RunReport(string reportCode, [FromBody] RunReportRequest request, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Legal Entity Context Required",
+                Detail = "Select an authorized legal entity before running a report."
+            });
+        }
+
         var def = await _repository.GetDefinitionAsync(reportCode, ct);
         if (def == null) return NotFound();
 
@@ -112,6 +142,31 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> QueueExport(string reportCode, [FromBody] QueueExportRequest request, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.export"))
+        {
+            return AccessDenied("reports.export");
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Legal Entity Context Required",
+                Detail = "Select an authorized legal entity before exporting a report."
+            });
+        }
+
+        if (!string.Equals(request.OutputFormat, "CSV", StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Unsupported Export Format",
+                Detail = "The durable export worker currently supports CSV only."
+            });
+        }
+
         var def = await _repository.GetDefinitionAsync(reportCode, ct);
         if (def == null) return NotFound();
 
@@ -124,6 +179,28 @@ public class ReportsController : ControllerBase
                 Title = "Export Forbidden",
                 Detail = $"You do not have the required permissions to export report '{def.NameEn}'."
             });
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.IdempotencyKey))
+        {
+            var existing = await _repository.GetReportJobByIdempotencyAsync(
+                _userContext.TenantId,
+                request.IdempotencyKey,
+                ct);
+            if (existing != null)
+            {
+                if (existing.RequestedByUserId != _userContext.UserId.Value && !_userContext.HasPermission("admin"))
+                {
+                    return Conflict(new ProblemDetails
+                    {
+                        Status = StatusCodes.Status409Conflict,
+                        Title = "Idempotency Key Already Used",
+                        Detail = "The supplied idempotency key belongs to another report requester."
+                    });
+                }
+
+                return Accepted($"/api/v1/reports/jobs/{existing.Id}", existing);
+            }
         }
 
         var job = new ReportExecutionJob(
@@ -150,8 +227,13 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetJobStatus(Guid jobId, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
         var job = await _repository.GetReportJobAsync(_userContext.TenantId, jobId, ct);
-        if (job == null) return NotFound();
+        if (!CanAccessJob(job)) return NotFound();
         return Ok(job);
     }
 
@@ -161,7 +243,7 @@ public class ReportsController : ControllerBase
     public async Task<IActionResult> DownloadJobArtifact(Guid jobId, CancellationToken ct)
     {
         var job = await _repository.GetReportJobAsync(_userContext.TenantId, jobId, ct);
-        if (job == null || job.Status != ReportJobStatus.Completed || string.IsNullOrWhiteSpace(job.StorageKey))
+        if (!HasAnyPermission("reports.export") || !CanAccessJob(job) || job!.Status != ReportJobStatus.Completed || string.IsNullOrWhiteSpace(job.StorageKey))
         {
             return NotFound(new ProblemDetails { Status = 404, Title = "Report Export Artifact Not Available" });
         }
@@ -178,6 +260,11 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(IReadOnlyList<SavedReportView>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListSavedViews(string reportCode, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
         var views = await _repository.ListSavedViewsAsync(_userContext.TenantId, reportCode, _userContext.UserId.Value, ct);
         return Ok(views);
     }
@@ -186,6 +273,26 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(typeof(SavedReportView), StatusCodes.Status201Created)]
     public async Task<IActionResult> CreateSavedView(string reportCode, [FromBody] CreateSavedViewRequest request, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
+        if (request.IsTenantShared && !HasAnyPermission("reports.views.share"))
+        {
+            return AccessDenied("reports.views.share");
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Legal Entity Context Required",
+                Detail = "Select an authorized legal entity before saving a report view."
+            });
+        }
+
         var view = new SavedReportView(
             Guid.NewGuid(),
             _userContext.TenantId,
@@ -208,12 +315,26 @@ public class ReportsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<IActionResult> DeleteSavedView(string reportCode, Guid id, CancellationToken ct)
     {
+        if (!HasAnyPermission("reports.read", "reports.export"))
+        {
+            return AccessDenied("reports.read");
+        }
+
         var success = await _repository.DeleteSavedViewAsync(_userContext.TenantId, id, _userContext.UserId.Value, ct);
         return Ok(new { success });
     }
 
+    private bool CanAccessJob(ReportExecutionJob? job)
+    {
+        if (job == null || !_userContext.LegalEntityId.HasValue) return false;
+        if (job.LegalEntityId != _userContext.LegalEntityId.Value) return false;
+        return job.RequestedByUserId == _userContext.UserId.Value || _userContext.HasPermission("admin");
+    }
+
     private bool HasAllPermissions(HashSet<string> requiredPerms)
     {
+        if (_userContext.HasPermission("admin")) return true;
+
         var userPerms = _userContext.Permissions != null ? new HashSet<string>(_userContext.Permissions, StringComparer.OrdinalIgnoreCase) : new HashSet<string>();
         if (userPerms.Count == 0 || userPerms.Contains("*")) return true;
 
@@ -223,5 +344,22 @@ public class ReportsController : ControllerBase
         }
 
         return true;
+    }
+
+    private bool HasAnyPermission(params string[] permissions)
+    {
+        if (_userContext.HasPermission("admin")) return true;
+        return permissions.Any(_userContext.HasPermission);
+    }
+
+    private IActionResult AccessDenied(string permission)
+    {
+        return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
+        {
+            Status = StatusCodes.Status403Forbidden,
+            Title = "Report Access Denied",
+            Detail = $"The current user does not have permission '{permission}'.",
+            Instance = HttpContext.Request.Path
+        });
     }
 }

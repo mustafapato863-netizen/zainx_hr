@@ -5,36 +5,41 @@ test.describe('ZainX Workforce — Phase 2 Real End-to-End Enterprise Flow', () 
     // 1. Navigate to People directory
     await page.goto('/people');
     await expect(page.getByTestId('people-page-container')).toBeVisible({ timeout: 15000 });
-    await expect(page.locator('h2')).toContainText('People Directory');
+    await expect(page.getByRole('heading', { name: /Employee Directory/i })).toBeVisible();
 
     // 2. Open Add Employee Modal
     await page.getByTestId('open-create-employee-modal-btn').click();
     await expect(page.getByRole('dialog')).toBeVisible();
 
-    const uniqueEmpNo = `EMP-${Date.now().toString().slice(-5)}`;
+    const runId = Date.now().toString().slice(-5);
+    const firstNameEn = `Faisal${runId}`;
+    const createdName = `${firstNameEn} Al-Otaibi`;
+    const uniqueNationalId = `10${Date.now().toString().slice(-8)}`;
 
     // 3. Fill Employee Form
-    await page.getByLabel(/Employee Number/i).fill(uniqueEmpNo);
-    await page.getByLabel(/First Name \(EN\)/i).fill('Faisal');
-    await page.getByLabel(/Last Name \(EN\)/i).fill('Al-Otaibi');
-    await page.getByLabel(/First Name \(AR\)/i).fill('فيصل');
-    await page.getByLabel(/Last Name \(AR\)/i).fill('العتيبي');
-    await page.getByLabel(/National Identifier/i).fill('1098765432');
-    await page.getByLabel(/Primary Email/i).fill('faisal@zainx.com');
-    await page.getByLabel(/Job Title \(EN\)/i).fill('Principal Systems Architect');
-    await page.getByLabel(/Job Title \(AR\)/i).fill('مهندس معماري نظم رئيسي');
+    await page.getByLabel(/First Name \(English\)/i).fill(firstNameEn);
+    await page.getByLabel(/Last Name \(English\)/i).fill('Al-Otaibi');
+    await page.getByLabel(/الاسم الأول \(عربي\)/i).fill('فيصل');
+    await page.getByLabel(/اسم العائلة \(عربي\)/i).fill('العتيبي');
+    await page.getByLabel(/National ID/i).fill(uniqueNationalId);
+    await page.getByLabel(/Employee Number/i).fill(`EMP-${runId}`);
+    await page.getByLabel(/Date of Birth/i).fill('1990-01-01');
+    await page.getByLabel(/Work Email/i).fill(`faisal-${runId}@zainx.com`);
+    await page.getByLabel(/Job Title \(English\)/i).fill('Principal Systems Architect');
+    await page.getByLabel(/المسمى الوظيفي \(عربي\)/i).fill('مهندس معماري نظم رئيسي');
     await page.getByLabel(/Hire Date/i).fill('2024-01-01');
 
     // Submit employee creation
-    await page.getByRole('button', { name: /Save Employee|Submit|Create/i }).click();
+    await page.getByRole('button', { name: /Save Employee/i }).click();
     await expect(page.getByRole('dialog')).toBeHidden({ timeout: 10000 });
 
     // 4. Verify in directory
-    await page.getByPlaceholder(/Search employees/i).fill(uniqueEmpNo);
-    await expect(page.getByText('Faisal Al-Otaibi')).toBeVisible({ timeout: 10000 });
+    await page.getByPlaceholder(/Filter results/i).fill(createdName);
+    const createdEmployee = page.getByText(createdName, { exact: true });
+    await expect(createdEmployee).toBeVisible({ timeout: 10000 });
 
     // 5. Select employee to open Workspace
-    await page.getByText('Faisal Al-Otaibi').click();
+    await createdEmployee.click();
     await expect(page.getByText('Principal Systems Architect')).toBeVisible({ timeout: 10000 });
 
     // 6. Test Concurrency & Assignment Change
@@ -63,7 +68,7 @@ test.describe('ZainX Workforce — Phase 2 Real End-to-End Enterprise Flow', () 
     await page.getByTestId('lang-switch-btn').click();
 
     // Verify RTL Direction
-    const rootContainer = page.locator('div[dir]');
+    const rootContainer = page.getByTestId('app-shell-root');
     await expect(rootContainer).toHaveAttribute('dir', 'rtl');
 
     // Verify Arabic Headings and Directory

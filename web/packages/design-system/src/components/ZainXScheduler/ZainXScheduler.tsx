@@ -1,13 +1,10 @@
 import * as React from "react"
-import FullCalendar from "@fullcalendar/react"
-import dayGridPlugin from "@fullcalendar/daygrid"
-import timeGridPlugin from "@fullcalendar/timegrid"
-import listPlugin from "@fullcalendar/list"
-import interactionPlugin from "@fullcalendar/interaction"
 import type { EventInput, EventClickArg, DateSelectArg } from "@fullcalendar/core"
+import type FullCalendar from "@fullcalendar/react"
 import { cn } from "../../lib/utils"
 import { Button } from "../Button/Button"
 import { Icon } from "../Icon/Icon"
+import FullCalendarView from "./FullCalendarView"
 
 export interface ZainXSchedulerEvent extends EventInput {
   id: string
@@ -33,17 +30,6 @@ export interface ZainXSchedulerProps {
   editable?: boolean
 }
 
-/**
- * ZainXScheduler
- *
- * Encapsulates FullCalendar standard open-source scheduling capabilities
- * behind a unified, accessible, and RTL-compliant component contract.
- *
- * ACCESSIBILITY & FALLBACK MANDATE:
- * Drag-and-drop is NEVER the sole interaction mechanism.
- * The accessible toolbar action provides a direct command/form alternative
- * for creating and managing schedule events via keyboard and screen readers.
- */
 export function ZainXScheduler({
   className,
   events = [],
@@ -119,7 +105,6 @@ export function ZainXScheduler({
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Accessible Form/Action Trigger (Non-drag Alternative) */}
           {onAddEventRequest && (
             <Button variant="primary" size="xs" onPress={onAddEventRequest}>
               <Icon name="plus" size="xs" />
@@ -127,7 +112,6 @@ export function ZainXScheduler({
             </Button>
           )}
 
-          {/* View Mode Switcher */}
           <div className="flex rounded-md border border-border-default bg-surface-subtle p-0.5 text-xs">
             <button
               type="button"
@@ -183,25 +167,16 @@ export function ZainXScheduler({
 
       {/* Calendar View Container */}
       <div className={cn("zainx-calendar-wrapper", isRtl && "fc-direction-rtl")}>
-        <FullCalendar
-          ref={calendarRef}
-          plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
-          initialView={initialView}
-          headerToolbar={false} // Uses custom accessible header above
+        <FullCalendarView
+          calendarRef={calendarRef}
           events={events}
-          editable={editable}
-          selectable={true}
+          initialView={initialView}
           locale={locale}
-          direction={isRtl ? "rtl" : "ltr"}
+          isRtl={isRtl}
           height={height}
-          eventClick={onEventClick}
-          select={onDateSelect}
-          eventTimeFormat={{
-            hour: "2-digit",
-            minute: "2-digit",
-            meridiem: "short",
-            hour12: true,
-          }}
+          editable={editable}
+          onEventClick={onEventClick}
+          onDateSelect={onDateSelect}
         />
       </div>
     </div>

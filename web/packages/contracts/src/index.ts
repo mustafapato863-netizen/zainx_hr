@@ -69,5 +69,20 @@ export const useSubmitOfferForApproval = usePostApiV1RecruitmentOffersIdSubmitAp
 export const useApproveOffer = usePostApiV1RecruitmentOffersIdApprove;
 export const useIssueOffer = usePostApiV1RecruitmentOffersIdIssue;
 export const useAcceptOffer = usePostApiV1RecruitmentOffersIdAccept;
-
 export const useGetPipelines = useGetApiV1RecruitmentPipelinesDefault;
+
+import {
+  useGetApiV1AiActions,
+  usePostApiV1AiProposals,
+  useGetApiV1AiProposals,
+  useGetApiV1AiProposalsId,
+  usePostApiV1AiProposalsIdConfirm,
+  usePostApiV1AiProposalsIdCancel
+} from './api/generated';
+
+export const useGetAiActions = useGetApiV1AiActions;
+export const useCreateAiProposal = usePostApiV1AiProposals;
+export const useGetAiProposals = useGetApiV1AiProposals;
+export const useGetAiProposalById = useGetApiV1AiProposalsId;
+export const useConfirmAiProposal = usePostApiV1AiProposalsIdConfirm;
+export const useCancelAiProposal = usePostApiV1AiProposalsIdCancel;

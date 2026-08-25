@@ -5,6 +5,9 @@ import {
   useGetApiV1PeopleEmployees, 
   useGetApiV1PeopleEmployeesId, 
   useGetApiV1Documents,
+  useGetApiV1DocumentsTypes,
+  getApiV1DocumentsIdDownload,
+  usePostApiV1DocumentsUpload,
   useGetApiV1OrganizationUnits,
   useGetApiV1OrganizationLocations,
   usePostApiV1PeopleEmployees,
@@ -13,9 +16,8 @@ import {
   CreateEmployeeRequest,
   ChangeAssignmentRequest,
   EmployeeSummaryDto,
-  OrganizationUnitDto,
-  LocationDto
 } from '@zainx/contracts';
+import { Icon, PageHeader } from '@zainx/design-system';
 
 // Lazy load people components with strict route-level chunk isolation
 const EmployeeDirectory = lazy(() => import('@zainx/people/components/EmployeeDirectory/EmployeeDirectory').then(m => ({ default: m.EmployeeDirectory })));
@@ -28,6 +30,7 @@ export function PeopleComponent() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isChangeAssignmentModalOpen, setIsChangeAssignmentModalOpen] = useState(false);
   const [concurrencyConflictError, setConcurrencyConflictError] = useState<string | null>(null);
+  const [documentError, setDocumentError] = useState<string | null>(null);
 
   // 1. Directory Query
   const { data: directoryData, isLoading: isDirLoading, refetch: refetchDirectory } = useGetApiV1PeopleEmployees();
@@ -47,7 +50,7 @@ export function PeopleComponent() {
   );
 
   // 4. Employee Documents Query
-  const { data: documentsData } = useGetApiV1Documents(
+  const { data: documentsData, refetch: refetchDocuments } = useGetApiV1Documents(
     {
       ownerType: 'Employee',
       ownerId: selectedEmployeeId || ''
@@ -58,21 +61,23 @@ export function PeopleComponent() {
       }
     }
   );
+  const { data: documentTypesData } = useGetApiV1DocumentsTypes();
 
   // 5. Mutations
   const createEmployeeMutation = usePostApiV1PeopleEmployees();
   const changeAssignmentMutation = usePostApiV1PeopleEmployeesIdAssignment();
   const revealPiiMutation = usePostApiV1PeopleEmployeesIdRevealSensitive();
+  const uploadDocumentMutation = usePostApiV1DocumentsUpload();
 
   const handleCreateEmployee = async (formData: CreateEmployeeRequest) => {
     try {
       await createEmployeeMutation.mutateAsync({
         data: formData
       });
+      await refetchDirectory();
       setIsCreateModalOpen(false);
-      refetchDirectory();
     } catch (err: any) {
-      alert(`Creation failed: ${err.message}`);
+      throw new Error(err?.message || 'Creation failed. Please review the form and try again.', { cause: err });
     }
   };
 
@@ -121,44 +126,51 @@ export function PeopleComponent() {
     }
   };
 
-  const defaultUnits: OrganizationUnitDto[] = unitsData && unitsData.length > 0 ? unitsData : [
-    {
-      id: '11111111-2222-3333-4444-555555555555',
-      tenantId: '22222222-2222-2222-2222-222222222222',
-      legalEntityId: '33333333-3333-3333-3333-333333333333',
-      code: 'ENG-01',
-      nameEn: 'Engineering',
-      nameAr: 'الهندسة',
-      type: 'Department',
-      isActive: true,
-      effectiveFrom: '2024-01-01',
-      rowVersion: 1
-    }
-  ];
+  const handleUploadDocument = async (data: { documentTypeId: string; title: string; expiryDate?: string; file: File }) => {
+    if (!selectedEmployeeId) throw new Error('Select an employee before uploading a document.');
 
-  const defaultLocations: LocationDto[] = locationsData && locationsData.length > 0 ? locationsData : [
-    {
-      id: 'aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee',
-      tenantId: '22222222-2222-2222-2222-222222222222',
-      legalEntityId: '33333333-3333-3333-3333-333333333333',
-      code: 'HQ-RUH',
-      nameEn: 'Riyadh Headquarters',
-      nameAr: 'المقر الرئيسي بالرياض',
-      city: 'Riyadh',
-      country: 'SA',
-      isActive: true
+    setDocumentError(null);
+    await uploadDocumentMutation.mutateAsync({
+      data: {
+        OwnerType: 'Employee',
+        OwnerId: selectedEmployeeId,
+        DocumentTypeId: data.documentTypeId,
+        Title: data.title,
+        ExpiryDate: data.expiryDate,
+        File: data.file
+      }
+    });
+    await refetchProfile();
+    await refetchDocuments();
+  };
+
+  const handleDownloadDocument = async (documentId: string) => {
+    try {
+      setDocumentError(null);
+      const blob = await getApiV1DocumentsIdDownload(documentId);
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = 'workforce-document';
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setDocumentError('The document could not be downloaded from the service.');
     }
-  ];
+  };
+
+  const availableUnits = unitsData ?? [];
+  const availableLocations = locationsData ?? [];
 
   return (
     <div className="space-y-6" data-testid="people-page-container">
       {concurrencyConflictError && (
         <div 
           data-testid="concurrency-conflict-banner" 
-          className="p-4 bg-amber-50 border border-amber-300 rounded-lg flex items-center justify-between text-amber-900"
+          className="flex items-center justify-between rounded-lg border border-warning/30 bg-warning-subtle p-4 text-warning-subtle-text"
         >
           <div className="flex items-center gap-2">
-            <span className="font-semibold">⚠️ Conflict Detected:</span>
+            <span className="inline-flex items-center gap-1.5 font-semibold"><Icon name="alert-triangle" size="sm" aria-hidden="true" />Conflict Detected:</span>
             <span>{concurrencyConflictError}</span>
           </div>
           <button 
@@ -167,30 +179,42 @@ export function PeopleComponent() {
               setConcurrencyConflictError(null);
               refetchProfile();
             }}
-            className="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-sm font-medium"
+            className="rounded-md bg-warning px-3 py-1 text-sm font-medium text-white hover:bg-warning-hover"
           >
             Refresh & Review
           </button>
         </div>
       )}
 
-      <Suspense fallback={<div className="p-8 text-center text-slate-500 font-medium">Loading Workforce Experience...</div>}>
+      {documentError && (
+        <div role="alert" className="flex items-center justify-between rounded-lg border border-danger/30 bg-danger-subtle p-4 text-danger-subtle-text">
+          <span>{documentError}</span>
+          <button type="button" className="text-sm font-medium underline" onClick={() => setDocumentError(null)}>
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      <Suspense fallback={<div className="space-y-5" aria-busy="true"><PageHeader title="Employee Directory / دليل الموظفين" subtitle="Authoritative workforce master data / السجل الرئيسي للقوى العاملة" /><div className="rounded-lg border border-border-default bg-surface-subtle p-8 text-center text-sm font-medium text-text-secondary"><div className="mx-auto mb-3 h-8 w-8 animate-pulse rounded-full bg-primary-subtle" />Loading Workforce Experience...</div></div>}>
         {selectedEmployeeId && profileData ? (
           <div className="space-y-4">
             <button 
               data-testid="back-to-directory-btn"
               onClick={() => setSelectedEmployeeId(null)}
-              className="text-sm font-medium text-indigo-600 hover:underline flex items-center gap-1"
+                className="flex items-center gap-1 text-sm font-medium text-text-link hover:underline"
             >
-              ← Back to Directory
+              <Icon name="arrow-left" size="sm" aria-hidden="true" />Back to Directory
             </button>
 
             <EmployeeWorkspace 
               profile={profileData} 
               documents={documentsData || []} 
+              documentTypes={documentTypesData || []}
               isLoading={isProfileLoading}
               onBack={() => setSelectedEmployeeId(null)}
               onChangeAssignment={() => setIsChangeAssignmentModalOpen(true)}
+              onUploadDocument={handleUploadDocument}
+              onDownloadDocument={handleDownloadDocument}
               onRevealSensitive={handleRevealSensitive}
             />
 
@@ -199,8 +223,8 @@ export function PeopleComponent() {
                 isOpen={isChangeAssignmentModalOpen}
                 onClose={() => setIsChangeAssignmentModalOpen(false)}
                 onSubmit={handleChangeAssignment}
-                departments={defaultUnits}
-                locations={defaultLocations}
+                departments={availableUnits}
+                locations={availableLocations}
                 currentRowVersion={Number(profileData.rowVersion) || 1}
               />
             )}
@@ -220,8 +244,8 @@ export function PeopleComponent() {
                 isOpen={isCreateModalOpen} 
                 onClose={() => setIsCreateModalOpen(false)} 
                 onSubmit={handleCreateEmployee}
-                departments={defaultUnits}
-                locations={defaultLocations}
+                departments={availableUnits}
+                locations={availableLocations}
               />
             )}
           </div>

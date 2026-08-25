@@ -56,8 +56,8 @@ describe("ZainXRichTextEditor Security & Sanitization Contract Suite", () => {
   })
 
   describe("Structured ProseMirror JSON Contract", () => {
-    it("renders structured JSON document cleanly without XSS risks", () => {
-      const jsonContent = {
+    it("renders structured JSON document cleanly without XSS risks", async () => {
+      const jsonContent: ZainXRichTextJSON = {
         type: "doc",
         content: [
           {
@@ -77,8 +77,8 @@ describe("ZainXRichTextEditor Security & Sanitization Contract Suite", () => {
       }
 
       render(<ZainXRichTextEditor jsonValue={jsonContent} />)
-      expect(screen.getByText("Security Engineering Lead")).toBeDefined()
-      expect(screen.getByText("zero trust")).toBeDefined()
+      expect(await screen.findByText("Security Engineering Lead")).toBeDefined()
+      expect(await screen.findByText("zero trust")).toBeDefined()
     })
   })
 })

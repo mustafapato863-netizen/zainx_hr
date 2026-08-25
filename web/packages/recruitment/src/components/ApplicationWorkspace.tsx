@@ -148,7 +148,7 @@ export const ApplicationWorkspace: React.FC<ApplicationWorkspaceProps> = ({
             {!isStatus(application.status, 'Hired', 3) && (
               <Button
                 variant="primary"
-                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                className="bg-success hover:bg-success-hover text-text-inverse"
                 onClick={() => setIsHireOpen(true)}
                 id="btn-open-hire-modal"
               >

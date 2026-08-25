@@ -87,6 +87,26 @@ public static class ApprovalsMigrations
                 occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 processed_at_utc TIMESTAMPTZ
             );
+
+            CREATE TABLE IF NOT EXISTS approvals.delegations (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                approval_request_id UUID NOT NULL REFERENCES approvals.approval_requests(id) ON DELETE CASCADE,
+                step_order INT NOT NULL,
+                delegated_from_user_id UUID NOT NULL,
+                delegated_to_user_id UUID NOT NULL,
+                reason TEXT NOT NULL,
+                created_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                expires_at_utc TIMESTAMPTZ NULL,
+                revoked_at_utc TIMESTAMPTZ NULL,
+                CONSTRAINT ck_approval_delegation_distinct_users CHECK (delegated_from_user_id <> delegated_to_user_id),
+                CONSTRAINT uq_approval_delegation_once UNIQUE (approval_request_id, step_order, delegated_from_user_id, delegated_to_user_id)
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_approval_delegations_active_target
+                ON approvals.delegations(tenant_id, legal_entity_id, delegated_to_user_id, expires_at_utc)
+                WHERE revoked_at_utc IS NULL;
         """;
 
         await cmd.ExecuteNonQueryAsync();

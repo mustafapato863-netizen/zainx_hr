@@ -32,6 +32,7 @@ public class PeopleController : ControllerBase
 
     [HttpGet("employees")]
     [ProducesResponseType(typeof(PagedResult<EmployeeSummaryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetEmployees(
         [FromQuery] string? search,
         [FromQuery] Guid? departmentId,
@@ -41,6 +42,11 @@ public class PeopleController : ControllerBase
         CancellationToken ct = default)
     {
         var userContext = _userContext;
+        if (!HasAnyPermission("people.employee.read"))
+        {
+            return AccessDenied("people.employee.read");
+        }
+
         var result = await _repository.QueryDirectoryAsync(
             userContext.TenantId,
             userContext.LegalEntityId,
@@ -57,9 +63,15 @@ public class PeopleController : ControllerBase
     [HttpGet("employees/{id:guid}")]
     [ProducesResponseType(typeof(EmployeeProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> GetEmployeeById(Guid id, CancellationToken ct)
     {
         var userContext = _userContext;
+        if (!HasAnyPermission("people.employee.read"))
+        {
+            return AccessDenied("people.employee.read");
+        }
+
         var profile = await _repository.GetEmployeeProfileAsync(id, userContext.TenantId, userContext.LegalEntityId, ct);
         if (profile == null)
         {
@@ -78,20 +90,76 @@ public class PeopleController : ControllerBase
     [HttpPost("employees")]
     [ProducesResponseType(typeof(EmployeeProfileDto), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateEmployee([FromBody] CreateEmployeeRequest request, CancellationToken ct)
     {
         var userContext = _userContext;
-        var legalEntity = userContext.LegalEntityId ?? (request.LegalEntityId.HasValue ? new LegalEntityId(request.LegalEntityId.Value) : LegalEntityId.New());
+        if (!HasAnyPermission("people.employee.create"))
+        {
+            return AccessDenied("people.employee.create");
+        }
+
+        var missingFields = new List<string>();
+        if (string.IsNullOrWhiteSpace(request.EmployeeNumber)) missingFields.Add("employeeNumber");
+        if (string.IsNullOrWhiteSpace(request.FirstNameEn)) missingFields.Add("firstNameEn");
+        if (string.IsNullOrWhiteSpace(request.LastNameEn)) missingFields.Add("lastNameEn");
+        if (string.IsNullOrWhiteSpace(request.FirstNameAr)) missingFields.Add("firstNameAr");
+        if (string.IsNullOrWhiteSpace(request.LastNameAr)) missingFields.Add("lastNameAr");
+        if (string.IsNullOrWhiteSpace(request.DateOfBirth)) missingFields.Add("dateOfBirth");
+        if (string.IsNullOrWhiteSpace(request.NationalIdentifier)) missingFields.Add("nationalIdentifier");
+        if (string.IsNullOrWhiteSpace(request.HireDate)) missingFields.Add("hireDate");
+        if (request.OrganizationUnitId == Guid.Empty) missingFields.Add("organizationUnitId");
+        if (string.IsNullOrWhiteSpace(request.JobTitleEn)) missingFields.Add("jobTitleEn");
+        if (string.IsNullOrWhiteSpace(request.JobTitleAr)) missingFields.Add("jobTitleAr");
+
+        if (missingFields.Count > 0)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Incomplete Employee Master Data",
+                Detail = $"The following fields are required and must be supplied explicitly: {string.Join(", ", missingFields)}.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        var legalEntity = request.LegalEntityId.HasValue
+            ? new LegalEntityId(request.LegalEntityId.Value)
+            : userContext.LegalEntityId;
+
+        if (!legalEntity.HasValue)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Legal Entity Context Required",
+                Detail = "An authorized legal entity is required to create an employee.",
+                Instance = HttpContext.Request.Path
+            });
+        }
+
+        if (!userContext.IsAuthorizedForLegalEntity(legalEntity.Value))
+        {
+            return AccessDenied("the requested legal entity");
+        }
 
         var personId = Guid.NewGuid();
         var employmentId = Guid.NewGuid();
         var assignmentId = Guid.NewGuid();
 
-        var dob = DateOnly.TryParse(request.DateOfBirth, out var parsedDob) ? parsedDob : new DateOnly(1990, 1, 1);
-        var hireDate = DateOnly.TryParse(request.HireDate, out var parsedHire) ? parsedHire : DateOnly.FromDateTime(DateTime.UtcNow);
+        if (!DateOnly.TryParse(request.DateOfBirth, out var dob) || !DateOnly.TryParse(request.HireDate, out var hireDate))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Invalid Employee Dates",
+                Detail = "dateOfBirth and hireDate must be valid ISO dates in yyyy-MM-dd format.",
+                Instance = HttpContext.Request.Path
+            });
+        }
 
         // Encrypt National ID and generate blind index hash
-        var plainNatId = string.IsNullOrWhiteSpace(request.NationalIdentifier) ? "1000000000" : request.NationalIdentifier;
+        var plainNatId = request.NationalIdentifier.Trim();
         var encryptedNatId = _piiEncryptionService.Encrypt(plainNatId);
         var natIdHash = _piiEncryptionService.ComputeSearchHash(plainNatId);
         var maskedNatId = _piiEncryptionService.MaskNationalId(plainNatId);
@@ -105,7 +173,10 @@ public class PeopleController : ControllerBase
             request.LastNameAr,
             dob,
             request.Gender ?? "Unspecified",
-            request.Nationality ?? "SA",
+            // Nationality is optional master data. Preserve "not provided" as an
+            // empty value instead of inventing a value or exceeding the persisted
+            // ISO-code-compatible VARCHAR(10) column with "Unspecified".
+            request.Nationality?.Trim() ?? string.Empty,
             encryptedNatId,
             natIdHash,
             maskedNatId,
@@ -113,15 +184,13 @@ public class PeopleController : ControllerBase
             request.PhoneNumber ?? string.Empty
         );
 
-        var empNumber = string.IsNullOrWhiteSpace(request.EmployeeNumber)
-            ? $"EMP-{Random.Shared.Next(100000, 999999)}"
-            : request.EmployeeNumber;
+        var empNumber = request.EmployeeNumber!.Trim();
 
         var employment = new Employment(
             employmentId,
             userContext.TenantId,
             personId,
-            legalEntity,
+            legalEntity.Value,
             empNumber,
             hireDate,
             null,
@@ -144,7 +213,7 @@ public class PeopleController : ControllerBase
 
         await _repository.CreateEmployeeAsync(person, employment, assignment, ct);
 
-        var createdProfile = await _repository.GetEmployeeProfileAsync(employmentId, userContext.TenantId, userContext.LegalEntityId, ct);
+        var createdProfile = await _repository.GetEmployeeProfileAsync(employmentId, userContext.TenantId, legalEntity.Value, ct);
         return CreatedAtAction(nameof(GetEmployeeById), new { id = employmentId }, createdProfile);
     }
 
@@ -152,12 +221,18 @@ public class PeopleController : ControllerBase
     [ProducesResponseType(typeof(EmployeeProfileDto), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ChangeAssignment(
         Guid id,
         [FromBody] ChangeAssignmentRequest request,
         CancellationToken ct)
     {
         var userContext = _userContext;
+        if (!HasAnyPermission("people.employee.update", "people.employment.manage"))
+        {
+            return AccessDenied("people.employee.update");
+        }
+
         var effectiveFrom = DateOnly.TryParse(request.EffectiveFrom, out var parsedEff)
             ? parsedEff
             : DateOnly.FromDateTime(DateTime.UtcNow);
@@ -215,15 +290,9 @@ public class PeopleController : ControllerBase
         var userContext = _userContext;
         
         // 1. Permission check
-        if (!userContext.HasPermission("people.employee.reveal_pii") && !userContext.HasPermission("admin"))
+        if (!HasAnyPermission("people.employee.reveal_pii"))
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
-            {
-                Status = StatusCodes.Status403Forbidden,
-                Title = "Access Denied",
-                Detail = "The current user does not have permission 'people.employee.reveal_pii' to reveal sensitive PII.",
-                Instance = HttpContext.Request.Path
-            });
+            return AccessDenied("people.employee.reveal_pii");
         }
 
         var correlationId = HttpContext.Items["CorrelationId"]?.ToString() ?? Guid.NewGuid().ToString();
@@ -256,6 +325,28 @@ public class PeopleController : ControllerBase
             PlaintextValue = plaintext,
             RevealedAt = DateTime.UtcNow.ToString("o"),
             ExpirySeconds = 60
+        });
+    }
+
+    private bool HasAnyPermission(params string[] permissions)
+    {
+        if (_userContext.HasPermission("admin")) return true;
+        foreach (var permission in permissions)
+        {
+            if (_userContext.HasPermission(permission)) return true;
+        }
+
+        return false;
+    }
+
+    private IActionResult AccessDenied(string permission)
+    {
+        return StatusCode(StatusCodes.Status403Forbidden, new ProblemDetails
+        {
+            Status = StatusCodes.Status403Forbidden,
+            Title = "Access Denied",
+            Detail = $"The current user does not have permission '{permission}'.",
+            Instance = HttpContext.Request.Path
         });
     }
 }

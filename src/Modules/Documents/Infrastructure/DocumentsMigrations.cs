@@ -53,6 +53,20 @@ public static class DocumentsMigrations
             CREATE INDEX IF NOT EXISTS ix_documents_owner ON documents.documents(tenant_id, owner_type, owner_id);
             CREATE INDEX IF NOT EXISTS ix_doc_versions_doc ON documents.document_versions(document_id, version_number DESC);
 
+            CREATE TABLE IF NOT EXISTS documents.document_access_logs (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                document_id UUID NOT NULL REFERENCES documents.documents(id) ON DELETE CASCADE,
+                version_number INT NULL,
+                actor_user_id UUID NOT NULL,
+                action VARCHAR(50) NOT NULL,
+                occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_document_access_logs_document
+                ON documents.document_access_logs(tenant_id, document_id, occurred_at_utc DESC);
+
             -- Seed standard Document Types if table is empty
             INSERT INTO documents.document_types (id, code, name_en, name_ar, is_required, requires_expiry_date)
             VALUES 

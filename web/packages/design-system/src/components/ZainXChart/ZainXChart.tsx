@@ -28,16 +28,6 @@ export interface ZainXChartProps {
   customOptions?: EChartsOption
 }
 
-/**
- * ZainXChart
- *
- * Encapsulates Apache ECharts behind a standardized semantic theme contract.
- *
- * ACCESSIBILITY & MULTIMODAL MANDATE:
- * Charts must NEVER be the sole representation of critical operational metrics.
- * ZainXChart automatically provides an accessible data table alternative
- * and screen-reader data summaries.
- */
 export function ZainXChart({
   className,
   title,
@@ -106,7 +96,7 @@ export function ZainXChart({
         series: [
           {
             type: "pie",
-            radius: ["45%", "75%"],
+            radius: ["50%", "75%"],
             avoidLabelOverlap: false,
             itemStyle: {
               borderRadius: 6,
@@ -122,6 +112,7 @@ export function ZainXChart({
                 show: true,
                 fontSize: 14,
                 fontWeight: "bold",
+                color: textColor,
               },
             },
             data: data.map((d) => ({ name: d.label, value: d.value })),
@@ -130,95 +121,113 @@ export function ZainXChart({
       }
     }
 
+    if (type === "stacked-bar" && categories.length > 0) {
+      return {
+        ...baseConfig,
+        legend: {
+          top: "top",
+          textStyle: { color: textColor },
+        },
+        xAxis: {
+          type: "category",
+          data: labels,
+          axisLine: { lineStyle: { color: gridLineColor } },
+          axisLabel: { color: textColor },
+        },
+        yAxis: {
+          type: "value",
+          splitLine: { lineStyle: { color: gridLineColor, type: "dashed" } },
+          axisLabel: { color: textColor },
+        },
+        series: categories.map((cat, idx) => ({
+          name: cat,
+          type: "bar",
+          stack: "total",
+          data: labels.map((l) => data.find((d) => d.label === l && d.category === cat)?.value || 0),
+          itemStyle: {
+            color: idx === 0 ? primaryColor : idx === 1 ? secondaryColor : "#10b981",
+          },
+        })),
+      }
+    }
+
     return {
       ...baseConfig,
       xAxis: {
         type: "category",
         data: labels,
-        inverse: isRtl,
         axisLine: { lineStyle: { color: gridLineColor } },
         axisLabel: { color: textColor },
       },
       yAxis: {
         type: "value",
-        position: isRtl ? "right" : "left",
         splitLine: { lineStyle: { color: gridLineColor, type: "dashed" } },
         axisLabel: { color: textColor },
       },
       series: [
         {
           data: data.map((d) => d.value),
-          type: type === "area" ? "line" : (type === "bar" || type === "stacked-bar" ? "bar" : "line"),
-          smooth: type === "line" || type === "area",
-          areaStyle: type === "area" ? { opacity: 0.25, color: primaryColor } : undefined,
-          itemStyle: {
-            color: primaryColor,
-            borderRadius: type === "bar" ? [4, 4, 0, 0] : 0,
-          },
+          type: type === "area" || type === "time-series" ? "line" : (type as any),
+          smooth: type === "area" || type === "time-series",
+          areaStyle: type === "area" || type === "time-series" ? { opacity: 0.2, color: primaryColor } : undefined,
+          itemStyle: { color: primaryColor },
+          lineStyle: { width: 3, color: primaryColor },
         },
       ],
     }
-  }, [type, data, customOptions, isRtl, isDark, primaryColor, secondaryColor, textColor, gridLineColor, surfaceColor, unit])
+  }, [customOptions, data, categories, type, isRtl, textColor, surfaceColor, gridLineColor, primaryColor, secondaryColor, unit])
 
   return (
     <div className={cn("rounded-lg border border-border-default bg-surface p-4 shadow-xs", className)}>
-      {/* Header with Title and Mode Toggle */}
-      <div className="mb-3 flex items-center justify-between gap-2 border-b border-border-subtle pb-2.5">
+      {/* Header & Accessibility Mode Switcher */}
+      <div className="mb-4 flex items-center justify-between gap-4 border-b border-border-subtle pb-3">
         <div>
-          {title && <h3 className="text-sm font-semibold text-text-primary">{title}</h3>}
-          {description && <p className="text-xs text-text-tertiary">{description}</p>}
+          {title && <h3 className="text-base font-semibold text-text-primary">{title}</h3>}
+          {description && <p className="text-xs text-text-secondary">{description}</p>}
         </div>
 
         {allowTableView && (
-          <Button
-            variant="ghost"
-            size="xs"
-            onPress={() => setViewAsTable(!viewAsTable)}
-            aria-label={viewAsTable ? "Switch to Graphical Chart" : "Switch to Accessible Table"}
-          >
-            <Icon name={viewAsTable ? "bar-chart-2" : "table"} size="xs" />
-            <span>{viewAsTable ? (isRtl ? "رسم بياني" : "Chart View") : (isRtl ? "جدول البيانات" : "Table View")}</span>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant={viewAsTable ? "secondary" : "ghost"}
+              size="xs"
+              aria-label={viewAsTable ? "Switch to graphical view" : "Switch to accessible table"}
+              onPress={() => setViewAsTable(!viewAsTable)}
+            >
+              <Icon name={viewAsTable ? "bar-chart-2" : "table"} size="xs" />
+              <span className="ms-1.5 hidden sm:inline">
+                {viewAsTable ? (isRtl ? "عرض الرسم البياني" : "View Chart") : (isRtl ? "عرض كجدول" : "View Table")}
+              </span>
+            </Button>
+          </div>
         )}
       </div>
 
-      {/* Screen-reader summary for non-visual assistive tech */}
-      <div className="sr-only" aria-live="polite">
-        {title ? `${title}: ` : ""}
-        {data.map((d) => `${d.label}: ${d.value} ${unit}`).join(", ")}
-      </div>
-
-      {/* Content Rendering: Interactive Chart or Accessible Semantic Table */}
+      {/* Graphical / Accessible Table Rendering */}
       {viewAsTable ? (
-        <div className="overflow-x-auto max-h-[300px]">
-          <Table>
+        <div className="overflow-x-auto" style={{ minHeight: height }}>
+          <Table aria-label={title || "Chart Data Table"}>
             <TableHeader>
               <TableRow>
-                <TableHead>{isRtl ? "البند / التاريخ" : "Item / Metric"}</TableHead>
+                <TableHead>{isRtl ? "الفئة / التسمية" : "Category / Label"}</TableHead>
+                {categories.length > 0 && <TableHead>{isRtl ? "النوع" : "Group"}</TableHead>}
                 <TableHead>{isRtl ? "القيمة" : "Value"}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {data.map((item, idx) => (
-                <TableRow key={idx}>
-                  <TableCell>{item.label}</TableCell>
-                  <TableCell className="font-medium">
-                    {item.formattedValue || `${item.value} ${unit}`}
-                  </TableCell>
+              {data.map((dp, idx) => (
+                <TableRow key={`${dp.label}-${dp.category || idx}`}>
+                  <TableCell className="font-medium">{dp.label}</TableCell>
+                  {categories.length > 0 && <TableCell>{dp.category || "-"}</TableCell>}
+                  <TableCell className="font-mono">{dp.formattedValue || `${dp.value} ${unit}`}</TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </div>
       ) : (
-        <div style={{ height }}>
-          <ReactECharts
-            option={option}
-            style={{ height: "100%", width: "100%" }}
-            opts={{ renderer: "svg" }}
-            notMerge={true}
-            lazyUpdate={true}
-          />
+        <div style={{ height, width: "100%" }} role="img" aria-label={title || "Operational Chart"}>
+          <ReactECharts option={option} style={{ height: "100%", width: "100%" }} opts={{ renderer: "svg" }} />
         </div>
       )}
     </div>

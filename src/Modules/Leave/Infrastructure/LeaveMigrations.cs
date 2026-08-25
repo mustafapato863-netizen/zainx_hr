@@ -88,6 +88,33 @@ public static class LeaveMigrations
             CREATE INDEX IF NOT EXISTS ix_leave_requests_query
                 ON leave.leave_requests (tenant_id, legal_entity_id, employment_id, status);
 
+            -- 4b. Auditable balance transactions. Mutable balance projections remain
+            -- query-optimized state; every reservation, approval, release, cancel,
+            -- accrual, or adjustment is recorded here as the authoritative trail.
+            CREATE TABLE IF NOT EXISTS leave.leave_transactions (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                employment_id UUID NOT NULL,
+                leave_type_id UUID NOT NULL REFERENCES leave.leave_types(id) ON DELETE RESTRICT,
+                leave_request_id UUID NULL REFERENCES leave.leave_requests(id) ON DELETE SET NULL,
+                transaction_type VARCHAR(60) NOT NULL,
+                transaction_days NUMERIC(6, 2) NOT NULL,
+                used_days_before NUMERIC(6, 2) NOT NULL,
+                used_days_after NUMERIC(6, 2) NOT NULL,
+                pending_days_before NUMERIC(6, 2) NOT NULL,
+                pending_days_after NUMERIC(6, 2) NOT NULL,
+                actor_user_id UUID NULL,
+                reason TEXT NOT NULL DEFAULT '',
+                occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_leave_transactions_request_type
+                ON leave.leave_transactions (leave_request_id, transaction_type)
+                WHERE leave_request_id IS NOT NULL;
+            CREATE INDEX IF NOT EXISTS ix_leave_transactions_scope
+                ON leave.leave_transactions (tenant_id, legal_entity_id, employment_id, occurred_at_utc DESC);
+
             -- 5. Outbox Messages
             CREATE TABLE IF NOT EXISTS leave.outbox_messages (
                 id UUID PRIMARY KEY,

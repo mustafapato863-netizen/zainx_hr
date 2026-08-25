@@ -1,6 +1,6 @@
 # ZainX ADR Register v4.1
 
-**Last Updated:** August 24, 2026 (Phase 1C Completed)
+**Last Updated:** August 25, 2026 (Phase 1C Closed; Phase 2 Approved to Start)
 
 | ADR | Decision | Required | Status |
 |---|---|---|:---:|
@@ -28,3 +28,7 @@
 | ADR-SEC-002 | Sensitive-data reveal/audit policy | Before People | **ACCEPTED** |
 | ADR-PAY-001 | Frontend orchestration only; backend owns payroll truth | Before Payroll | **ACCEPTED** |
 | ADR-AI-001 | AI 7A read-only before 7B mutations | Before AI | **ACCEPTED** |
+
+## Current governance state
+
+Phase 0, Phase 1A, Phase 1B and Phase 1C are accepted as PASS. Phase 2 is approved to start under Restricted Audit Mode. This register preserves the accepted architecture decisions; it does not represent production readiness or completion of the HCM Core release gate.

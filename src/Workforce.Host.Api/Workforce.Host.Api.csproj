@@ -33,6 +33,8 @@
     <ProjectReference Include="..\Modules\Integrations\Workforce.Modules.Integrations.csproj" />
     <ProjectReference Include="..\Modules\Identity\Workforce.Modules.Identity.csproj" />
     <ProjectReference Include="..\Modules\Reporting\Workforce.Modules.Reporting.csproj" />
+    <ProjectReference Include="..\Modules\Ai\Workforce.Modules.Ai.csproj" />
+    <ProjectReference Include="..\Modules\Tenancy\Workforce.Modules.Tenancy.csproj" />
   </ItemGroup>
 
 </Project>

@@ -18,9 +18,9 @@ Feature modules (`@zainx/people`, `@zainx/payroll`, etc.) may consume the design
 
 ---
 
-## 2. AG Grid 33.1.x Capability Classification
+## 2. AG Grid 33.3.x Capability Classification
 
-Verified against `ag-grid-community@33.1.1` and `ag-grid-enterprise@33.1.1`:
+Verified against the current web lockfile baseline `ag-grid-community@33.3.2` and `ag-grid-enterprise@33.3.2`:
 
 ### A. COMMUNITY-SAFE Capabilities (Approved for Phase 2 Production Use)
 These features operate natively in the free/open-source AG Grid Community engine:

@@ -1,25 +1,30 @@
 import React, { useState } from 'react';
-import { Button } from '@zainx/design-system';
+import { Button } from '@zainx/design-system/components/Button/Button';
 import { AttendanceDayDto } from '@zainx/contracts';
 
 export interface AttendanceAdjustmentModalProps {
   record: AttendanceDayDto | null;
   isOpen: boolean;
   onClose: () => void;
-  onSubmitAdjustment?: (dayId: string, adjustedMinutes: number, reason: string, rowVersion: number) => Promise<void>;
+  onSubmitAdjustment?: (
+    dayId: string,
+    adjustedMinutes: number,
+    reason: string,
+    rowVersion: number,
+  ) => Promise<void>;
 }
 
 export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps> = ({
   record,
   isOpen,
   onClose,
-  onSubmitAdjustment
+  onSubmitAdjustment,
 }) => {
   const [adjustedHours, setAdjustedHours] = useState<number>(() =>
-    record ? Math.floor(Number(record.totalWorkedMinutes || 0) / 60) : 8
+    record ? Math.floor(Number(record.totalWorkedMinutes || 0) / 60) : 8,
   );
   const [adjustedMins, setAdjustedMins] = useState<number>(() =>
-    record ? Number(record.totalWorkedMinutes || 0) % 60 : 0
+    record ? Number(record.totalWorkedMinutes || 0) % 60 : 0,
   );
   const [reason, setReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +49,9 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
       await onSubmitAdjustment?.(record.id, newMinutes, reason, Number(record.rowVersion));
       onClose();
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to apply adjustment. Please verify version concurrency.');
+      setErrorMessage(
+        err.message || 'Failed to apply adjustment. Please verify version concurrency.',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -58,14 +65,15 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
       aria-labelledby="adjust-attendance-title"
       data-testid="attendance-adjustment-modal"
     >
-      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-2xl border border-border-primary">
+      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-overlay border border-border-primary">
         <div className="flex items-center justify-between border-b border-border-primary pb-4">
           <div>
             <h2 id="adjust-attendance-title" className="text-lg font-bold text-text-primary">
               Adjust Attendance Record
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
-              {(record as any).employeeNameEn || 'Employee'} ({(record as any).employeeNumber || 'EMP-XXXX'}) — {record.businessDate}
+              {(record as any).employeeNameEn || 'Employee'} (
+              {(record as any).employeeNumber || 'EMP-XXXX'}) — {record.businessDate}
             </p>
           </div>
           <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close adjustment modal">
@@ -74,7 +82,7 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
         </div>
 
         {errorMessage && (
-          <div className="mt-4 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400">
+          <div className="mt-4 rounded-lg bg-danger-subtle border border-danger p-3 text-xs text-danger">
             {errorMessage}
           </div>
         )}
@@ -98,7 +106,9 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
               <p className="text-lg font-bold text-brand-primary mt-1 font-mono">
                 {adjustedHours}h {adjustedMins}m
               </p>
-              <span className={`text-xs font-medium ${deltaMinutes >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+              <span
+                className={`text-xs font-medium ${deltaMinutes >= 0 ? 'text-success' : 'text-danger'}`}
+              >
                 {deltaMinutes >= 0 ? `+${deltaMinutes}` : deltaMinutes} mins difference
               </span>
             </div>
@@ -107,7 +117,10 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
           {/* Time Input Inputs */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="adjust-hours" className="block text-xs font-medium text-text-secondary mb-1">
+              <label
+                htmlFor="adjust-hours"
+                className="block text-xs font-medium text-text-secondary mb-1"
+              >
                 Hours
               </label>
               <input
@@ -121,7 +134,10 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
               />
             </div>
             <div>
-              <label htmlFor="adjust-minutes" className="block text-xs font-medium text-text-secondary mb-1">
+              <label
+                htmlFor="adjust-minutes"
+                className="block text-xs font-medium text-text-secondary mb-1"
+              >
                 Minutes
               </label>
               <input
@@ -130,7 +146,9 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
                 min={0}
                 max={59}
                 value={adjustedMins}
-                onChange={(e) => setAdjustedMins(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))}
+                onChange={(e) =>
+                  setAdjustedMins(Math.min(59, Math.max(0, parseInt(e.target.value) || 0)))
+                }
                 className="w-full rounded-lg border border-border-secondary bg-surface-primary px-3 py-2 text-sm text-text-primary focus:border-brand-primary focus:outline-none"
               />
             </div>
@@ -138,7 +156,10 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
 
           {/* Reason Input */}
           <div>
-            <label htmlFor="adjust-reason" className="block text-xs font-medium text-text-secondary mb-1">
+            <label
+              htmlFor="adjust-reason"
+              className="block text-xs font-medium text-text-secondary mb-1"
+            >
               Adjustment Reason & Audit Justification (Required)
             </label>
             <textarea
@@ -157,7 +178,12 @@ export const AttendanceAdjustmentModal: React.FC<AttendanceAdjustmentModalProps>
             <Button variant="outline" size="md" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
-            <Button variant="primary" size="md" type="submit" disabled={isSubmitting || !reason.trim()}>
+            <Button
+              variant="primary"
+              size="md"
+              type="submit"
+              disabled={isSubmitting || !reason.trim()}
+            >
               {isSubmitting ? 'Saving Adjustment...' : 'Apply Adjustment'}
             </Button>
           </div>

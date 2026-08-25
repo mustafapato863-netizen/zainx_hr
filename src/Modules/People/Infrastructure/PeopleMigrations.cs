@@ -108,6 +108,47 @@ public static class PeopleMigrations
                 created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
             );
 
+            -- ESS/MSS identity projection. User and Employee remain separate
+            -- aggregates; this table records the explicit, auditable link.
+            CREATE TABLE IF NOT EXISTS people.user_employment_links (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                user_id UUID NOT NULL,
+                employment_id UUID NOT NULL REFERENCES people.employments(id),
+                linked_by_user_id UUID NOT NULL,
+                linked_at_utc TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                unlinked_at_utc TIMESTAMPTZ NULL,
+                row_version INT NOT NULL DEFAULT 1,
+                CONSTRAINT chk_user_employment_link_dates CHECK (unlinked_at_utc IS NULL OR unlinked_at_utc >= linked_at_utc)
+            );
+
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_user_employment_link_active_user
+                ON people.user_employment_links (tenant_id, legal_entity_id, user_id)
+                WHERE unlinked_at_utc IS NULL;
+
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_user_employment_link_active_employment
+                ON people.user_employment_links (tenant_id, legal_entity_id, employment_id)
+                WHERE unlinked_at_utc IS NULL;
+
+            CREATE INDEX IF NOT EXISTS ix_user_employment_links_history
+                ON people.user_employment_links (tenant_id, legal_entity_id, user_id, linked_at_utc DESC);
+
+            CREATE TABLE IF NOT EXISTS people.self_service_audit_records (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                actor_user_id UUID NOT NULL,
+                target_user_id UUID NULL,
+                employment_id UUID NOT NULL,
+                action_code VARCHAR(100) NOT NULL,
+                changed_fields_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+                occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            );
+
+            CREATE INDEX IF NOT EXISTS ix_self_service_audit_scope
+                ON people.self_service_audit_records (tenant_id, legal_entity_id, employment_id, occurred_at_utc DESC);
+
             -- Database Integrity: Unique index for single active current assignment
             CREATE UNIQUE INDEX IF NOT EXISTS uq_assignments_single_current ON people.employment_assignments (employment_id) WHERE is_current = TRUE;
 

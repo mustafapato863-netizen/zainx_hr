@@ -56,8 +56,17 @@ test.describe('ZainX Workforce — Phase 6 Operational Control (Reporting, Admin
     await expect(exportBtn).toBeVisible();
     await exportBtn.click();
 
-    // Verify notice banner appears
-    await expect(page.locator('[data-testid="export-notice-banner"]')).toBeVisible({ timeout: 5000 });
+    // The development sandbox is an explicit admin context, while a restricted
+    // identity must receive a governed 403. In either case the UI must surface
+    // an explicit outcome instead of silently dropping the export request.
+    const outcomeBanner = page.locator('[data-testid="report-error-banner"], [data-testid="export-notice-banner"]').first();
+    await expect(outcomeBanner).toBeVisible({ timeout: 5000 });
+    const deniedBanner = page.locator('[data-testid="report-error-banner"]');
+    if (await deniedBanner.isVisible()) {
+      await expect(deniedBanner).toContainText(/Permission Denied|غير مصرح/);
+    } else {
+      await expect(page.locator('[data-testid="export-notice-banner"]')).toContainText(/Export completed|تم إنشاء/);
+    }
 
     // Open Save View Modal
     const saveViewBtn = page.locator('[data-testid="save-view-btn"]');

@@ -60,8 +60,21 @@ public static class OrganizationMigrations
                 CONSTRAINT uq_location_code UNIQUE (tenant_id, legal_entity_id, code)
             );
 
+            CREATE TABLE IF NOT EXISTS organization.cost_centers (
+                id UUID PRIMARY KEY,
+                tenant_id UUID NOT NULL,
+                legal_entity_id UUID NOT NULL,
+                code VARCHAR(50) NOT NULL,
+                name_en VARCHAR(200) NOT NULL,
+                name_ar VARCHAR(200) NOT NULL,
+                is_active BOOLEAN NOT NULL DEFAULT TRUE,
+                created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                CONSTRAINT uq_cost_center_code UNIQUE (tenant_id, legal_entity_id, code)
+            );
+
             CREATE INDEX IF NOT EXISTS ix_org_units_tenant_parent ON organization.organization_units(tenant_id, parent_unit_id);
             CREATE INDEX IF NOT EXISTS ix_positions_unit ON organization.positions(organization_unit_id);
+            CREATE INDEX IF NOT EXISTS ix_cost_centers_tenant_entity ON organization.cost_centers(tenant_id, legal_entity_id, is_active);
         ";
 
         await using var cmd = new NpgsqlCommand(sql, conn);

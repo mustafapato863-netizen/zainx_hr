@@ -44,3 +44,14 @@ public class PositionDto
     public string Grade { get; set; } = string.Empty;
     public bool IsActive { get; set; }
 }
+
+public class CostCenterDto
+{
+    public Guid Id { get; set; }
+    public string TenantId { get; set; } = string.Empty;
+    public string LegalEntityId { get; set; } = string.Empty;
+    public string Code { get; set; } = string.Empty;
+    public string NameEn { get; set; } = string.Empty;
+    public string NameAr { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+}

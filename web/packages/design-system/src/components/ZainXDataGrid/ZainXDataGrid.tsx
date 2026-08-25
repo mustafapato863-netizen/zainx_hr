@@ -1,17 +1,13 @@
 import * as React from "react"
-import { AgGridReact } from "ag-grid-react"
-import { ModuleRegistry, AllEnterpriseModule } from "ag-grid-enterprise"
 import type { ColDef, GridOptions, GridReadyEvent, RowSelectedEvent, ICellRendererParams } from "ag-grid-enterprise"
 import { cn } from "../../lib/utils"
+import type { AgGridViewProps } from "./AgGridView"
+
+const AgGridView = React.lazy(() => import("./AgGridView")) as React.LazyExoticComponent<
+  React.ComponentType<AgGridViewProps<any>>
+>
 
 export type { ColDef, GridOptions, GridReadyEvent, RowSelectedEvent, ICellRendererParams }
-
-// Register AG Grid modules internally inside the wrapper
-try {
-  ModuleRegistry.registerModules([AllEnterpriseModule])
-} catch {
-  // Ignore duplicate registration in hot reload environments
-}
 
 export interface ZainXColumnDef<TData = any> extends ColDef<TData> {
   sensitive?: boolean
@@ -40,19 +36,6 @@ export function ZainXDataGrid<TData = any>({
   onRowSelected,
   height = "400px",
 }: ZainXDataGridProps<TData>) {
-  const rowHeightMap = {
-    compact: 32,
-    standard: 40,
-    comfortable: 48,
-  }
-
-  const defaultColDef = React.useMemo<ColDef>(() => ({
-    sortable: true,
-    filter: true,
-    resizable: true,
-    ...gridOptions?.defaultColDef,
-  }), [gridOptions?.defaultColDef])
-
   return (
     <div
       className={cn(
@@ -61,20 +44,23 @@ export function ZainXDataGrid<TData = any>({
       )}
       style={{ height }}
     >
-      <AgGridReact<TData>
-        rowData={rowData}
-        columnDefs={columnDefs}
-        defaultColDef={defaultColDef}
-        rowHeight={rowHeightMap[density]}
-        headerHeight={rowHeightMap[density] + 4}
-        loading={loading}
-        onGridReady={onGridReady}
-        onRowSelected={onRowSelected}
-        rowSelection={{ mode: "multiRow" }}
-        pagination={false}
-        animateRows={true}
-        {...gridOptions}
-      />
+      <React.Suspense
+        fallback={
+          <div className="flex h-full min-h-32 items-center justify-center bg-surface-subtle text-sm text-text-secondary">
+            Loading data grid…
+          </div>
+        }
+      >
+        <AgGridView
+          rowData={rowData}
+          columnDefs={columnDefs}
+          gridOptions={gridOptions}
+          density={density}
+          loading={loading}
+          onGridReady={onGridReady}
+          onRowSelected={onRowSelected}
+        />
+      </React.Suspense>
     </div>
   )
 }

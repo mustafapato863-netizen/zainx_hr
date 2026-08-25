@@ -1,10 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root';
-import {
-  PayrollRunsGrid,
-  PayrollRunWorkspace,
-  SettlementBatchView,
+import type {
   PayrollRun,
   PayrollPeriod,
   PayrollEmployeeResult,
@@ -13,6 +10,17 @@ import {
   SettlementBatch,
   SettlementBatchDetail,
 } from '@zainx/payroll';
+import { PageHeader } from '@zainx/design-system';
+
+const PayrollRunsGrid = lazy(() =>
+  import('@zainx/payroll').then((m) => ({ default: m.PayrollRunsGrid })),
+);
+const PayrollRunWorkspace = lazy(() =>
+  import('@zainx/payroll').then((m) => ({ default: m.PayrollRunWorkspace })),
+);
+const SettlementBatchView = lazy(() =>
+  import('@zainx/payroll').then((m) => ({ default: m.SettlementBatchView })),
+);
 
 const API_BASE = '/api/v1';
 
@@ -34,6 +42,7 @@ export function PayrollPage() {
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCalculating, setIsCalculating] = useState(false);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   // Fetch runs & periods on load
   const fetchRunsAndPeriods = async () => {
@@ -103,65 +112,9 @@ export function PayrollPage() {
   };
 
   const handleLoadInputs = async () => {
-    if (!selectedRunId) return;
-    const currentRun = runs.find((r) => r.id === selectedRunId);
-    if (!currentRun) return;
-
-    // Load standard employee inputs
-    const dummyInputs = [
-      {
-        employmentId: '11111111-1111-1111-1111-111111111111',
-        baseSalaryMonthly: 30000.0,
-        allowancesJson: JSON.stringify([
-          { code: 'HOUSING', nameEn: 'Housing Allowance', nameAr: 'بدل سكن', amount: 5000.0 },
-          { code: 'TRANSPORT', nameEn: 'Transport Allowance', nameAr: 'بدل مواصلات', amount: 2000.0 },
-        ]),
-        scheduledDays: 22,
-        verifiedWorkedMinutes: 22 * 480,
-        approvedAbsenceDays: 0,
-        approvedLeaveDays: 0,
-        unpaidLeaveDays: 0,
-      },
-      {
-        employmentId: '22222222-2222-2222-2222-222222222222',
-        baseSalaryMonthly: 20000.0,
-        allowancesJson: JSON.stringify([
-          { code: 'TRANSPORT', nameEn: 'Transport Allowance', nameAr: 'بدل مواصلات', amount: 1500.0 },
-        ]),
-        scheduledDays: 22,
-        verifiedWorkedMinutes: 21 * 480,
-        approvedAbsenceDays: 1,
-        approvedLeaveDays: 0,
-        unpaidLeaveDays: 0,
-      },
-      {
-        employmentId: '33333333-3333-3333-3333-333333333333',
-        baseSalaryMonthly: 15000.0,
-        allowancesJson: '[]',
-        scheduledDays: 22,
-        verifiedWorkedMinutes: 20 * 480,
-        approvedAbsenceDays: 0,
-        approvedLeaveDays: 2,
-        unpaidLeaveDays: 2,
-      },
-    ];
-
-    try {
-      const res = await fetch(`${API_BASE}/payroll/runs/${selectedRunId}/load-inputs`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          snapshots: dummyInputs,
-          expectedRowVersion: currentRun.rowVersion,
-        }),
-      });
-
-      if (res.ok) {
-        await fetchRunsAndPeriods();
-      }
-    } catch (err) {
-      console.error('Failed to load inputs', err);
-    }
+    setActionMessage(
+      'Authoritative payroll input snapshots are not exposed by the current frontend contract. No placeholder employee data was submitted. Connect the approved upstream input read model before loading this run.',
+    );
   };
 
   const handleCalculate = async () => {
@@ -211,7 +164,9 @@ export function PayrollPage() {
     }
   };
 
-  const handleFetchEmployeeDetail = async (empId: string): Promise<PayrollEmployeeResultDetail | null> => {
+  const handleFetchEmployeeDetail = async (
+    empId: string,
+  ): Promise<PayrollEmployeeResultDetail | null> => {
     if (!selectedRunId) return null;
     try {
       const res = await fetch(`${API_BASE}/payroll/runs/${selectedRunId}/results/${empId}`);
@@ -225,11 +180,14 @@ export function PayrollPage() {
   const handleResolveException = async (exceptionId: string, note: string) => {
     if (!selectedRunId) return;
     try {
-      const res = await fetch(`${API_BASE}/payroll/runs/${selectedRunId}/exceptions/${exceptionId}/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ note }),
-      });
+      const res = await fetch(
+        `${API_BASE}/payroll/runs/${selectedRunId}/exceptions/${exceptionId}/resolve`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note }),
+        },
+      );
       if (res.ok) await fetchRunDetail(selectedRunId);
     } catch (err) {
       console.error('Failed to resolve exception', err);
@@ -239,11 +197,14 @@ export function PayrollPage() {
   const handleWaiveException = async (exceptionId: string, justification: string) => {
     if (!selectedRunId) return;
     try {
-      const res = await fetch(`${API_BASE}/payroll/runs/${selectedRunId}/exceptions/${exceptionId}/waive`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ justification }),
-      });
+      const res = await fetch(
+        `${API_BASE}/payroll/runs/${selectedRunId}/exceptions/${exceptionId}/waive`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ justification }),
+        },
+      );
       if (res.ok) await fetchRunDetail(selectedRunId);
     } catch (err) {
       console.error('Failed to waive exception', err);
@@ -311,14 +272,26 @@ export function PayrollPage() {
 
   return (
     <div className="space-y-6">
+      <PageHeader
+        title="Payroll & settlement"
+        subtitle="Run payroll with controlled inputs, explainable results, and settlement handoff."
+      />
+      {actionMessage && (
+        <div
+          role="status"
+          className="rounded-lg border border-warning/30 bg-warning-subtle px-4 py-3 text-sm text-warning-subtle-text"
+        >
+          {actionMessage}
+        </div>
+      )}
       {/* Top Navigation Tabs */}
-      <div className="flex border-b border-neutral-200 dark:border-neutral-800 pb-3 gap-4">
+      <div className="flex border-b border-border-default pb-3 gap-4">
         <button
           id="tab-payroll-runs"
           className={`text-sm font-semibold pb-1 border-b-2 transition-colors ${
             view === 'grid' || view === 'workspace'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-neutral-500 hover:text-neutral-700'
+              ? 'border-info text-info '
+              : 'border-transparent text-text-muted hover:text-text-secondary'
           }`}
           onClick={() => setView(selectedRunId ? 'workspace' : 'grid')}
         >
@@ -328,8 +301,8 @@ export function PayrollPage() {
           id="tab-settlement-batches"
           className={`text-sm font-semibold pb-1 border-b-2 transition-colors ${
             view === 'settlement'
-              ? 'border-blue-600 text-blue-600 dark:text-blue-400'
-              : 'border-transparent text-neutral-500 hover:text-neutral-700'
+              ? 'border-info text-info '
+              : 'border-transparent text-text-muted hover:text-text-secondary'
           }`}
           onClick={() => setView('settlement')}
         >
@@ -337,44 +310,52 @@ export function PayrollPage() {
         </button>
       </div>
 
-      {view === 'grid' && (
-        <PayrollRunsGrid
-          runs={runs}
-          periods={periods}
-          onSelectRun={handleSelectRun}
-          onCreateRun={handleCreateRun}
-          isLoading={isLoading}
-        />
-      )}
+      <Suspense
+        fallback={
+          <div className="rounded-lg border border-border-default bg-surface p-8 text-sm text-text-secondary">
+            Loading payroll workspace…
+          </div>
+        }
+      >
+        {view === 'grid' && (
+          <PayrollRunsGrid
+            runs={runs}
+            periods={periods}
+            onSelectRun={handleSelectRun}
+            onCreateRun={handleCreateRun}
+            isLoading={isLoading}
+          />
+        )}
 
-      {view === 'workspace' && selectedRun && (
-        <PayrollRunWorkspace
-          run={selectedRun}
-          results={results}
-          exceptions={exceptions}
-          onLoadInputs={handleLoadInputs}
-          onCalculate={handleCalculate}
-          onFinalize={handleFinalize}
-          onNavigateSettlement={() => setView('settlement')}
-          onBack={() => setView('grid')}
-          onFetchEmployeeDetail={handleFetchEmployeeDetail}
-          onResolveException={handleResolveException}
-          onWaiveException={handleWaiveException}
-          isCalculating={isCalculating}
-        />
-      )}
+        {view === 'workspace' && selectedRun && (
+          <PayrollRunWorkspace
+            run={selectedRun}
+            results={results}
+            exceptions={exceptions}
+            onLoadInputs={handleLoadInputs}
+            onCalculate={handleCalculate}
+            onFinalize={handleFinalize}
+            onNavigateSettlement={() => setView('settlement')}
+            onBack={() => setView('grid')}
+            onFetchEmployeeDetail={handleFetchEmployeeDetail}
+            onResolveException={handleResolveException}
+            onWaiveException={handleWaiveException}
+            isCalculating={isCalculating}
+          />
+        )}
 
-      {view === 'settlement' && (
-        <SettlementBatchView
-          batches={batches}
-          onGenerateBatch={handleGenerateBatch}
-          onApproveBatch={handleApproveBatch}
-          onExportBatch={handleExportBatch}
-          onFetchBatchDetail={handleFetchBatchDetail}
-          finalizedRunId={selectedRun?.id}
-          finalizedRunCode={selectedRun?.code}
-        />
-      )}
+        {view === 'settlement' && (
+          <SettlementBatchView
+            batches={batches}
+            onGenerateBatch={handleGenerateBatch}
+            onApproveBatch={handleApproveBatch}
+            onExportBatch={handleExportBatch}
+            onFetchBatchDetail={handleFetchBatchDetail}
+            finalizedRunId={selectedRun?.id}
+            finalizedRunCode={selectedRun?.code}
+          />
+        )}
+      </Suspense>
     </div>
   );
 }

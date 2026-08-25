@@ -718,6 +718,477 @@ public class PeopleRepository
         }
     }
 
+    public async Task<Guid?> GetLinkedEmploymentIdAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid userId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            SELECT employment_id
+            FROM people.user_employment_links
+            WHERE tenant_id = @tenantId
+              AND legal_entity_id = @legalEntityId
+              AND user_id = @userId
+              AND unlinked_at_utc IS NULL
+            LIMIT 1;";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        cmd.Parameters.AddWithValue("userId", userId);
+        var result = await cmd.ExecuteScalarAsync(ct);
+        return result is Guid employmentId ? employmentId : null;
+    }
+
+    public async Task<UserEmploymentLinkResult> LinkUserToEmploymentAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid userId,
+        Guid employmentId,
+        Guid linkedByUserId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        try
+        {
+            const string employmentSql = @"
+                SELECT id
+                FROM people.employments
+                WHERE id = @employmentId
+                  AND tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                LIMIT 1;";
+            await using var employmentCmd = new NpgsqlCommand(employmentSql, conn, tx);
+            employmentCmd.Parameters.AddWithValue("employmentId", employmentId);
+            employmentCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            employmentCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            if (await employmentCmd.ExecuteScalarAsync(ct) is not Guid)
+            {
+                await tx.RollbackAsync(ct);
+                return UserEmploymentLinkResult.EmploymentNotFound;
+            }
+
+            const string userLinkSql = @"
+                SELECT employment_id
+                FROM people.user_employment_links
+                WHERE tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                  AND user_id = @userId
+                  AND unlinked_at_utc IS NULL
+                LIMIT 1;";
+            await using var userLinkCmd = new NpgsqlCommand(userLinkSql, conn, tx);
+            userLinkCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            userLinkCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            userLinkCmd.Parameters.AddWithValue("userId", userId);
+            var existingUserLink = await userLinkCmd.ExecuteScalarAsync(ct);
+            if (existingUserLink is Guid existingEmploymentId)
+            {
+                await tx.RollbackAsync(ct);
+                return existingEmploymentId == employmentId
+                    ? UserEmploymentLinkResult.AlreadyLinked
+                    : UserEmploymentLinkResult.UserAlreadyLinked;
+            }
+
+            const string employmentLinkSql = @"
+                SELECT user_id
+                FROM people.user_employment_links
+                WHERE tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                  AND employment_id = @employmentId
+                  AND unlinked_at_utc IS NULL
+                LIMIT 1;";
+            await using var employmentLinkCmd = new NpgsqlCommand(employmentLinkSql, conn, tx);
+            employmentLinkCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            employmentLinkCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            employmentLinkCmd.Parameters.AddWithValue("employmentId", employmentId);
+            if (await employmentLinkCmd.ExecuteScalarAsync(ct) is Guid)
+            {
+                await tx.RollbackAsync(ct);
+                return UserEmploymentLinkResult.EmploymentAlreadyLinked;
+            }
+
+            const string insertSql = @"
+                INSERT INTO people.user_employment_links (
+                    id, tenant_id, legal_entity_id, user_id, employment_id, linked_by_user_id
+                ) VALUES (
+                    @id, @tenantId, @legalEntityId, @userId, @employmentId, @linkedByUserId
+                );";
+            await using var insertCmd = new NpgsqlCommand(insertSql, conn, tx);
+            insertCmd.Parameters.AddWithValue("id", Guid.NewGuid());
+            insertCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            insertCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            insertCmd.Parameters.AddWithValue("userId", userId);
+            insertCmd.Parameters.AddWithValue("employmentId", employmentId);
+            insertCmd.Parameters.AddWithValue("linkedByUserId", linkedByUserId);
+            await insertCmd.ExecuteNonQueryAsync(ct);
+
+            await InsertPeopleOutboxMessageAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                "UserEmploymentLinked",
+                employmentId,
+                new { userId, employmentId, legalEntityId = legalEntityId.Value, linkedByUserId },
+                ct);
+            await InsertSelfServiceAuditAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                legalEntityId.Value,
+                linkedByUserId,
+                userId,
+                employmentId,
+                "IDENTITY_LINK_CREATED",
+                new[] { "userId", "employmentId" },
+                ct);
+
+            await tx.CommitAsync(ct);
+            return UserEmploymentLinkResult.Created;
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    public async Task<bool> UnlinkUserFromEmploymentAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid userId,
+        Guid unlinkedByUserId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        try
+        {
+            const string updateSql = @"
+                UPDATE people.user_employment_links
+                SET unlinked_at_utc = NOW(), row_version = row_version + 1
+                WHERE tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                  AND user_id = @userId
+                  AND unlinked_at_utc IS NULL
+                RETURNING employment_id;";
+            await using var updateCmd = new NpgsqlCommand(updateSql, conn, tx);
+            updateCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            updateCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            updateCmd.Parameters.AddWithValue("userId", userId);
+            var result = await updateCmd.ExecuteScalarAsync(ct);
+            if (result is not Guid employmentId)
+            {
+                await tx.RollbackAsync(ct);
+                return false;
+            }
+
+            await InsertPeopleOutboxMessageAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                "UserEmploymentUnlinked",
+                employmentId,
+                new { userId, employmentId, legalEntityId = legalEntityId.Value, unlinkedByUserId },
+                ct);
+            await InsertSelfServiceAuditAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                legalEntityId.Value,
+                unlinkedByUserId,
+                userId,
+                employmentId,
+                "IDENTITY_LINK_REMOVED",
+                new[] { "userId", "employmentId" },
+                ct);
+
+            await tx.CommitAsync(ct);
+            return true;
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    public async Task<bool> UpdateSelfServiceContactAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid employmentId,
+        uint expectedRowVersion,
+        string? primaryEmail,
+        string? phoneNumber,
+        Guid actorUserId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+        await using var tx = await conn.BeginTransactionAsync(ct);
+
+        try
+        {
+            const string employmentSql = @"
+                UPDATE people.employments
+                SET row_version = row_version + 1, updated_at = NOW()
+                WHERE id = @employmentId
+                  AND tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                  AND row_version = @expectedRowVersion
+                RETURNING person_id;";
+            await using var employmentCmd = new NpgsqlCommand(employmentSql, conn, tx);
+            employmentCmd.Parameters.AddWithValue("employmentId", employmentId);
+            employmentCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            employmentCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+            employmentCmd.Parameters.AddWithValue("expectedRowVersion", (int)expectedRowVersion);
+            var personResult = await employmentCmd.ExecuteScalarAsync(ct);
+            if (personResult is not Guid personId)
+            {
+                await tx.RollbackAsync(ct);
+                return false;
+            }
+
+            const string personSql = @"
+                UPDATE people.persons
+                SET primary_email = COALESCE(@primaryEmail, primary_email),
+                    phone_number = COALESCE(@phoneNumber, phone_number),
+                    updated_at = NOW()
+                WHERE id = @personId AND tenant_id = @tenantId;";
+            await using var personCmd = new NpgsqlCommand(personSql, conn, tx);
+            personCmd.Parameters.AddWithValue("personId", personId);
+            personCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+            personCmd.Parameters.AddWithValue("primaryEmail", (object?)primaryEmail ?? DBNull.Value);
+            personCmd.Parameters.AddWithValue("phoneNumber", (object?)phoneNumber ?? DBNull.Value);
+            await personCmd.ExecuteNonQueryAsync(ct);
+
+            await InsertPeopleOutboxMessageAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                "SelfServiceProfileUpdated",
+                employmentId,
+                new { employmentId, actorUserId, changedFields = new[] { "primaryEmail", "phoneNumber" } },
+                ct);
+            await InsertSelfServiceAuditAsync(
+                conn,
+                tx,
+                tenantId.Value,
+                legalEntityId.Value,
+                actorUserId,
+                actorUserId,
+                employmentId,
+                "PROFILE_CONTACT_UPDATED",
+                new[] { "primaryEmail", "phoneNumber" },
+                ct);
+
+            await tx.CommitAsync(ct);
+            return true;
+        }
+        catch
+        {
+            await tx.RollbackAsync(ct);
+            throw;
+        }
+    }
+
+    public async Task<PagedResult<EmployeeSummaryDto>> QueryManagerTeamAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid managerEmploymentId,
+        int pageNumber = 1,
+        int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        pageNumber = Math.Max(1, pageNumber);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+        var offset = (pageNumber - 1) * pageSize;
+
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string scope = @"
+            FROM people.employment_assignments a
+            INNER JOIN people.employments e ON e.id = a.employment_id
+            INNER JOIN people.persons p ON p.id = e.person_id
+            LEFT JOIN organization.organization_units ou ON ou.id = a.organization_unit_id
+            LEFT JOIN organization.locations loc ON loc.id = a.location_id
+            WHERE e.tenant_id = @tenantId
+              AND e.legal_entity_id = @legalEntityId
+              AND a.manager_employment_id = @managerEmploymentId
+              AND a.is_current = TRUE";
+
+        await using var countCmd = new NpgsqlCommand($"SELECT COUNT(*) {scope};", conn);
+        countCmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        countCmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        countCmd.Parameters.AddWithValue("managerEmploymentId", managerEmploymentId);
+        var totalCount = Convert.ToInt32(await countCmd.ExecuteScalarAsync(ct));
+
+        const string select = @"
+            SELECT e.id, e.tenant_id, e.legal_entity_id, e.employee_number,
+                   p.first_name_en, p.last_name_en, p.first_name_ar, p.last_name_ar,
+                   p.primary_email, p.phone_number, p.masked_national_identifier,
+                   e.status, e.hire_date, e.row_version,
+                   COALESCE(ou.name_en, 'Unassigned'), COALESCE(ou.name_ar, 'غير محدد'),
+                   COALESCE(a.job_title_en, 'N/A'), COALESCE(a.job_title_ar, 'N/A'),
+                   COALESCE(loc.name_en, 'Unassigned')
+            FROM people.employment_assignments a
+            INNER JOIN people.employments e ON e.id = a.employment_id
+            INNER JOIN people.persons p ON p.id = e.person_id
+            LEFT JOIN organization.organization_units ou ON ou.id = a.organization_unit_id
+            LEFT JOIN organization.locations loc ON loc.id = a.location_id
+            WHERE e.tenant_id = @tenantId
+              AND e.legal_entity_id = @legalEntityId
+              AND a.manager_employment_id = @managerEmploymentId
+              AND a.is_current = TRUE
+            ORDER BY e.employee_number
+            LIMIT @limit OFFSET @offset;";
+
+        await using var cmd = new NpgsqlCommand(select, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        cmd.Parameters.AddWithValue("managerEmploymentId", managerEmploymentId);
+        cmd.Parameters.AddWithValue("limit", pageSize);
+        cmd.Parameters.AddWithValue("offset", offset);
+
+        var items = new List<EmployeeSummaryDto>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            items.Add(new EmployeeSummaryDto
+            {
+                Id = reader.GetGuid(0),
+                TenantId = reader.GetGuid(1).ToString(),
+                LegalEntityId = reader.GetGuid(2).ToString(),
+                EmployeeNumber = reader.GetString(3),
+                FirstNameEn = reader.GetString(4),
+                LastNameEn = reader.GetString(5),
+                FirstNameAr = reader.GetString(6),
+                LastNameAr = reader.GetString(7),
+                FullNameEn = $"{reader.GetString(4)} {reader.GetString(5)}",
+                FullNameAr = $"{reader.GetString(6)} {reader.GetString(7)}",
+                PrimaryEmail = reader.GetString(8),
+                PhoneNumber = reader.GetString(9),
+                MaskedNationalId = reader.GetString(10),
+                Status = ((EmploymentStatus)reader.GetInt32(11)).ToString(),
+                HireDate = DateOnly.FromDateTime(reader.GetDateTime(12)).ToString("yyyy-MM-dd"),
+                RowVersion = (uint)reader.GetInt32(13),
+                DepartmentNameEn = reader.GetString(14),
+                DepartmentNameAr = reader.GetString(15),
+                JobTitleEn = reader.GetString(16),
+                JobTitleAr = reader.GetString(17),
+                LocationNameEn = reader.GetString(18)
+            });
+        }
+
+        return new PagedResult<EmployeeSummaryDto>
+        {
+            Items = items,
+            TotalCount = totalCount,
+            PageNumber = pageNumber,
+            PageSize = pageSize
+        };
+    }
+
+    /// <summary>
+    /// Resolves the active identity of the employee's current manager inside the
+    /// same tenant and legal-entity scope. A missing mapping is explicit: callers
+    /// must not silently route an approval to the requester or to an administrator.
+    /// </summary>
+    public async Task<Guid?> GetManagerUserIdAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid employmentId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = @"
+            SELECT l.user_id
+            FROM people.employment_assignments a
+            INNER JOIN people.user_employment_links l
+                ON l.employment_id = a.manager_employment_id
+               AND l.tenant_id = @tenantId
+               AND l.legal_entity_id = @legalEntityId
+               AND l.unlinked_at_utc IS NULL
+            WHERE a.employment_id = @employmentId
+              AND a.is_current = TRUE
+            LIMIT 1;";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        cmd.Parameters.AddWithValue("employmentId", employmentId);
+        var result = await cmd.ExecuteScalarAsync(ct);
+        return result is Guid userId ? userId : null;
+    }
+
+    private static async Task InsertPeopleOutboxMessageAsync(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        Guid tenantId,
+        string eventType,
+        Guid aggregateId,
+        object payload,
+        CancellationToken ct)
+    {
+        const string sql = @"
+            INSERT INTO people.outbox_messages (
+                id, tenant_id, event_type, aggregate_type, aggregate_id, payload, occurred_at
+            ) VALUES (
+                @id, @tenantId, @eventType, @aggregateType, @aggregateId, @payload::jsonb, NOW()
+            );";
+        await using var cmd = new NpgsqlCommand(sql, conn, tx);
+        cmd.Parameters.AddWithValue("id", Guid.NewGuid());
+        cmd.Parameters.AddWithValue("tenantId", tenantId);
+        cmd.Parameters.AddWithValue("eventType", eventType);
+        cmd.Parameters.AddWithValue("aggregateType", "PeopleIdentityProjection");
+        cmd.Parameters.AddWithValue("aggregateId", aggregateId);
+        cmd.Parameters.AddWithValue("payload", JsonSerializer.Serialize(payload));
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    private static async Task InsertSelfServiceAuditAsync(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        Guid tenantId,
+        Guid legalEntityId,
+        Guid actorUserId,
+        Guid? targetUserId,
+        Guid employmentId,
+        string actionCode,
+        IReadOnlyCollection<string> changedFields,
+        CancellationToken ct)
+    {
+        const string sql = @"
+            INSERT INTO people.self_service_audit_records (
+                id, tenant_id, legal_entity_id, actor_user_id, target_user_id,
+                employment_id, action_code, changed_fields_json, occurred_at_utc
+            ) VALUES (
+                @id, @tenantId, @legalEntityId, @actorUserId, @targetUserId,
+                @employmentId, @actionCode, @changedFields::jsonb, NOW()
+            );";
+        await using var cmd = new NpgsqlCommand(sql, conn, tx);
+        cmd.Parameters.AddWithValue("id", Guid.NewGuid());
+        cmd.Parameters.AddWithValue("tenantId", tenantId);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId);
+        cmd.Parameters.AddWithValue("actorUserId", actorUserId);
+        cmd.Parameters.AddWithValue("targetUserId", (object?)targetUserId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("employmentId", employmentId);
+        cmd.Parameters.AddWithValue("actionCode", actionCode);
+        cmd.Parameters.AddWithValue("changedFields", JsonSerializer.Serialize(changedFields));
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
     public async Task<string?> RevealSensitiveFieldAsync(
         Guid employmentId,
         TenantId tenantId,
@@ -809,4 +1280,13 @@ public class PeopleRepository
 
         return plaintext;
     }
+}
+
+public enum UserEmploymentLinkResult
+{
+    Created,
+    AlreadyLinked,
+    UserAlreadyLinked,
+    EmploymentAlreadyLinked,
+    EmploymentNotFound
 }

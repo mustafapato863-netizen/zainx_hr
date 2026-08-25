@@ -28,6 +28,46 @@ public class LeaveRequest
         Reason = string.Empty;
     }
 
+    internal static LeaveRequest Rehydrate(
+        Guid id,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid employmentId,
+        Guid leaveTypeId,
+        DateOnly startDate,
+        DateOnly endDate,
+        decimal durationDays,
+        string reason,
+        Guid? attachmentDocumentId,
+        LeaveRequestStatus status,
+        Guid? approvalRequestId,
+        string? rejectionReason,
+        DateTime createdAt,
+        DateTime updatedAt,
+        uint rowVersion)
+    {
+        return new LeaveRequest
+        {
+            Id = id,
+            TenantId = tenantId,
+            LegalEntityId = legalEntityId,
+            EmploymentId = employmentId,
+            LeaveTypeId = leaveTypeId,
+            StartDate = startDate,
+            EndDate = endDate,
+            DurationDays = durationDays,
+            DurationMinutes = (int)(durationDays * 480),
+            Reason = reason,
+            AttachmentDocumentId = attachmentDocumentId,
+            Status = status,
+            ApprovalRequestId = approvalRequestId,
+            RejectionReason = rejectionReason,
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt,
+            RowVersion = rowVersion
+        };
+    }
+
     public LeaveRequest(
         Guid id,
         TenantId tenantId,

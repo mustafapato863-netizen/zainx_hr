@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Workforce.Modules.Attendance.Domain;
 using Workforce.Modules.Attendance.Infrastructure;
@@ -30,6 +32,16 @@ public class AttendanceController : ControllerBase
             return Forbid();
         }
 
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Legal Entity Context Required",
+                Detail = "A legal entity context is required before recording attendance."
+            });
+        }
+
         var clockEvent = new ClockEvent(
             Guid.NewGuid(),
             _userContext.TenantId,
@@ -47,9 +59,8 @@ public class AttendanceController : ControllerBase
 
         await _repository.RecordClockEventAsync(clockEvent);
 
-        // Also evaluate the day
         var businessDate = DateOnly.FromDateTime(clockEvent.CapturedAtUtc);
-        var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
+        var legalEntityId = _userContext.LegalEntityId.Value;
         var day = await _repository.GetOrCreateAttendanceDayAsync(
             _userContext.TenantId,
             legalEntityId,
@@ -78,6 +89,16 @@ public class AttendanceController : ControllerBase
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50)
     {
+        if (!HasAnyPermission("attendance.day.read", "attendance.read"))
+        {
+            return Forbid();
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails { Status = StatusCodes.Status400BadRequest, Title = "Legal Entity Context Required", Detail = "Select an authorized legal entity before reading attendance." });
+        }
+
         DateOnly? from = !string.IsNullOrWhiteSpace(fromDate) && DateOnly.TryParse(fromDate, out var f) ? f : null;
         DateOnly? to = !string.IsNullOrWhiteSpace(toDate) && DateOnly.TryParse(toDate, out var t) ? t : null;
 
@@ -97,7 +118,17 @@ public class AttendanceController : ControllerBase
     [HttpGet("days/{id:guid}")]
     public async Task<ActionResult<AttendanceDayDto>> GetAttendanceDayById(Guid id)
     {
-        var day = await _repository.GetAttendanceDayByIdAsync(_userContext.TenantId, id);
+        if (!HasAnyPermission("attendance.day.read", "attendance.read"))
+        {
+            return Forbid();
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails { Status = StatusCodes.Status400BadRequest, Title = "Legal Entity Context Required", Detail = "Select an authorized legal entity before reading an attendance day." });
+        }
+
+        var day = await _repository.GetAttendanceDayByIdAsync(_userContext.TenantId, _userContext.LegalEntityId.Value, id);
         if (day == null) return NotFound();
         return Ok(day);
     }
@@ -110,7 +141,12 @@ public class AttendanceController : ControllerBase
             return Forbid();
         }
 
-        var day = await _repository.GetAttendanceDayEntityByIdAsync(_userContext.TenantId, id);
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails { Status = StatusCodes.Status400BadRequest, Title = "Legal Entity Context Required", Detail = "Select an authorized legal entity before adjusting attendance." });
+        }
+
+        var day = await _repository.GetAttendanceDayEntityByIdAsync(_userContext.TenantId, _userContext.LegalEntityId.Value, id);
         if (day == null) return NotFound();
 
         try
@@ -145,7 +181,12 @@ public class AttendanceController : ControllerBase
             return Forbid();
         }
 
-        var day = await _repository.GetAttendanceDayEntityByIdAsync(_userContext.TenantId, id);
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails { Status = StatusCodes.Status400BadRequest, Title = "Legal Entity Context Required", Detail = "Select an authorized legal entity before approving attendance." });
+        }
+
+        var day = await _repository.GetAttendanceDayEntityByIdAsync(_userContext.TenantId, _userContext.LegalEntityId.Value, id);
         if (day == null) return NotFound();
 
         try
@@ -168,9 +209,25 @@ public class AttendanceController : ControllerBase
     [HttpGet("schedules")]
     public async Task<ActionResult<IReadOnlyList<WorkSchedule>>> GetSchedules()
     {
-        var legalEntityId = _userContext.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
+        if (!HasAnyPermission("attendance.schedule.read", "attendance.day.read", "attendance.read"))
+        {
+            return Forbid();
+        }
+
+        if (!_userContext.LegalEntityId.HasValue)
+        {
+            return BadRequest(new ProblemDetails { Status = StatusCodes.Status400BadRequest, Title = "Legal Entity Context Required", Detail = "Select an authorized legal entity before reading schedules." });
+        }
+
+        var legalEntityId = _userContext.LegalEntityId.Value;
         var schedules = await _repository.GetWorkSchedulesAsync(_userContext.TenantId, legalEntityId);
         return Ok(schedules);
+    }
+
+    private bool HasAnyPermission(params string[] permissions)
+    {
+        if (_userContext.HasPermission("admin")) return true;
+        return permissions.Any(_userContext.HasPermission);
     }
 }
 

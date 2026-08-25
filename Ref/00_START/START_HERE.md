@@ -2,9 +2,9 @@
 
 ## Decision
 
-**We are ready to start implementation.**
+**Accepted project state (2026-08-25):** Phase 0 PASS, Phase 1A PASS, Phase 1B PASS, Phase 1C PASS. **Phase 2 — Organization + People + Documents — is approved to start.**
 
-Start **Phase 0** now.
+The repository remains in Restricted Audit Mode. HCM Core implementation is an active checkpoint, not a production release seal; downstream domain scope and production identity/deployment gates remain explicit.
 
 The architecture is sufficiently locked. Remaining unknowns are implementation spikes, licenses, environment choices and module-level contracts — not reasons to reopen the product architecture.
 
@@ -86,4 +86,9 @@ Accessibility, RTL, security, observability and error states are continuous requ
 - UX/IA: Ready
 - Design-system direction: Ready
 - Phase 0: GO
+- Phase 0: PASS
+- Phase 1A: PASS
+- Phase 1B: PASS
+- Phase 1C: PASS
+- Phase 2: APPROVED TO START
 - Feature implementation: starts after Platform Kernel + Design System P0 gates

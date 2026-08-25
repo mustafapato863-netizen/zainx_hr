@@ -63,5 +63,6 @@
         "watchDepsTargetName": "storybook:watch-deps"
       }
     }
-  ]
+  ],
+  "analytics": true
 }

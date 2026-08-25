@@ -14,22 +14,25 @@ public class OrganizationRepository
         _connectionString = connectionString;
     }
 
-    public async Task<OrganizationUnit?> GetUnitByIdAsync(Guid id, TenantId tenantId, CancellationToken ct = default)
+    public async Task<OrganizationUnit?> GetUnitByIdAsync(Guid id, TenantId tenantId, LegalEntityId? legalEntityId = null, CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        const string sql = @"
+        var sql = @"
             SELECT id, tenant_id, legal_entity_id, code, name_en, name_ar, type, 
                    parent_unit_id, manager_position_id, is_active, effective_from, effective_to, 
                    created_at, updated_at, row_version
             FROM organization.organization_units
-            WHERE id = @id AND tenant_id = @tenantId;
+            WHERE id = @id AND tenant_id = @tenantId
         ";
+        if (legalEntityId.HasValue) sql += " AND legal_entity_id = @legalEntityId";
+        sql += ";";
 
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("id", id);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
         await using var reader = await cmd.ExecuteReaderAsync(ct);
         if (!await reader.ReadAsync(ct)) return null;
@@ -37,7 +40,7 @@ public class OrganizationRepository
         var effectiveFrom = DateOnly.FromDateTime(reader.GetDateTime(10));
         DateOnly? effectiveTo = reader.IsDBNull(11) ? null : DateOnly.FromDateTime(reader.GetDateTime(11));
 
-        return new OrganizationUnit(
+        return OrganizationUnit.Rehydrate(
             reader.GetGuid(0),
             new TenantId(reader.GetGuid(1)),
             new LegalEntityId(reader.GetGuid(2)),
@@ -47,7 +50,11 @@ public class OrganizationRepository
             (OrganizationUnitType)reader.GetInt32(6),
             reader.IsDBNull(7) ? null : reader.GetGuid(7),
             new EffectivePeriod(effectiveFrom, effectiveTo),
-            reader.IsDBNull(8) ? null : reader.GetGuid(8)
+            reader.IsDBNull(8) ? null : reader.GetGuid(8),
+            reader.GetBoolean(9),
+            reader.GetDateTime(12),
+            reader.GetDateTime(13),
+            (uint)reader.GetInt32(14)
         );
     }
 
@@ -159,12 +166,13 @@ public class OrganizationRepository
                 effective_to = @effectiveTo,
                 updated_at = @updatedAt,
                 row_version = @rowVersion
-            WHERE id = @id AND tenant_id = @tenantId AND row_version = @oldRowVersion;
+            WHERE id = @id AND tenant_id = @tenantId AND legal_entity_id = @legalEntityId AND row_version = @oldRowVersion;
         ";
 
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("id", unit.Id);
         cmd.Parameters.AddWithValue("tenantId", unit.TenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", unit.LegalEntityId.Value);
         cmd.Parameters.AddWithValue("nameEn", unit.NameEn);
         cmd.Parameters.AddWithValue("nameAr", unit.NameAr);
         cmd.Parameters.AddWithValue("type", (int)unit.Type);
@@ -181,20 +189,215 @@ public class OrganizationRepository
         return rowsAffected > 0;
     }
 
-    public async Task<IReadOnlyList<LocationDto>> ListLocationsAsync(TenantId tenantId, CancellationToken ct = default)
+    public async Task<bool> WouldCreateCycleAsync(
+        Guid unitId,
+        Guid parentUnitId,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        CancellationToken ct = default)
     {
         await using var conn = new NpgsqlConnection(_connectionString);
         await conn.OpenAsync(ct);
 
-        const string sql = @"
-            SELECT id, tenant_id, legal_entity_id, code, name_en, name_ar, country, city, address, is_active
-            FROM organization.locations
-            WHERE tenant_id = @tenantId
-            ORDER BY name_en ASC;
-        ";
+        const string sql = """
+            WITH RECURSIVE ancestors AS (
+                SELECT id, parent_unit_id
+                FROM organization.organization_units
+                WHERE id = @parentUnitId
+                  AND tenant_id = @tenantId
+                  AND legal_entity_id = @legalEntityId
+                UNION ALL
+                SELECT child.id, child.parent_unit_id
+                FROM organization.organization_units child
+                INNER JOIN ancestors parent ON child.id = parent.parent_unit_id
+                WHERE child.tenant_id = @tenantId
+                  AND child.legal_entity_id = @legalEntityId
+            )
+            SELECT EXISTS (SELECT 1 FROM ancestors WHERE id = @unitId);
+            """;
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("unitId", unitId);
+        cmd.Parameters.AddWithValue("parentUnitId", parentUnitId);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        return (bool)(await cmd.ExecuteScalarAsync(ct) ?? false);
+    }
+
+    public async Task<bool> PositionExistsAsync(
+        Guid positionId,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM organization.positions
+                WHERE id = @id AND tenant_id = @tenantId AND legal_entity_id = @legalEntityId
+            );
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", positionId);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value);
+        return (bool)(await cmd.ExecuteScalarAsync(ct) ?? false);
+    }
+
+    public async Task<IReadOnlyList<PositionDto>> ListPositionsAsync(
+        TenantId tenantId,
+        LegalEntityId? legalEntityId = null,
+        Guid? organizationUnitId = null,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        var sql = """
+            SELECT p.id, p.tenant_id, p.legal_entity_id, p.organization_unit_id,
+                   p.job_code, p.title_en, p.title_ar, p.grade, p.is_active
+            FROM organization.positions p
+            WHERE p.tenant_id = @tenantId
+            """;
+        if (legalEntityId.HasValue) sql += " AND p.legal_entity_id = @legalEntityId";
+        if (organizationUnitId.HasValue) sql += " AND p.organization_unit_id = @organizationUnitId";
+        sql += " ORDER BY p.title_en ASC;";
 
         await using var cmd = new NpgsqlCommand(sql, conn);
         cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
+        if (organizationUnitId.HasValue) cmd.Parameters.AddWithValue("organizationUnitId", organizationUnitId.Value);
+
+        var list = new List<PositionDto>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            list.Add(new PositionDto
+            {
+                Id = reader.GetGuid(0),
+                TenantId = reader.GetGuid(1).ToString(),
+                LegalEntityId = reader.GetGuid(2).ToString(),
+                OrganizationUnitId = reader.GetGuid(3),
+                JobCode = reader.GetString(4),
+                TitleEn = reader.GetString(5),
+                TitleAr = reader.GetString(6),
+                Grade = reader.GetString(7),
+                IsActive = reader.GetBoolean(8)
+            });
+        }
+
+        return list;
+    }
+
+    public async Task InsertPositionAsync(Position position, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = """
+            INSERT INTO organization.positions (
+                id, tenant_id, legal_entity_id, organization_unit_id,
+                job_code, title_en, title_ar, grade, is_active, created_at
+            ) VALUES (
+                @id, @tenantId, @legalEntityId, @organizationUnitId,
+                @jobCode, @titleEn, @titleAr, @grade, @isActive, @createdAt
+            );
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", position.Id);
+        cmd.Parameters.AddWithValue("tenantId", position.TenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", position.LegalEntityId.Value);
+        cmd.Parameters.AddWithValue("organizationUnitId", position.OrganizationUnitId);
+        cmd.Parameters.AddWithValue("jobCode", position.JobCode);
+        cmd.Parameters.AddWithValue("titleEn", position.TitleEn);
+        cmd.Parameters.AddWithValue("titleAr", position.TitleAr);
+        cmd.Parameters.AddWithValue("grade", position.Grade);
+        cmd.Parameters.AddWithValue("isActive", position.IsActive);
+        cmd.Parameters.AddWithValue("createdAt", position.CreatedAt);
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<CostCenterDto>> ListCostCentersAsync(
+        TenantId tenantId,
+        LegalEntityId? legalEntityId = null,
+        CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        var sql = """
+            SELECT id, tenant_id, legal_entity_id, code, name_en, name_ar, is_active
+            FROM organization.cost_centers
+            WHERE tenant_id = @tenantId
+            """;
+        if (legalEntityId.HasValue) sql += " AND legal_entity_id = @legalEntityId";
+        sql += " ORDER BY code ASC;";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
+
+        var list = new List<CostCenterDto>();
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        while (await reader.ReadAsync(ct))
+        {
+            list.Add(new CostCenterDto
+            {
+                Id = reader.GetGuid(0),
+                TenantId = reader.GetGuid(1).ToString(),
+                LegalEntityId = reader.GetGuid(2).ToString(),
+                Code = reader.GetString(3),
+                NameEn = reader.GetString(4),
+                NameAr = reader.GetString(5),
+                IsActive = reader.GetBoolean(6)
+            });
+        }
+        return list;
+    }
+
+    public async Task InsertCostCenterAsync(CostCenter costCenter, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        const string sql = """
+            INSERT INTO organization.cost_centers (
+                id, tenant_id, legal_entity_id, code, name_en, name_ar, is_active, created_at
+            ) VALUES (
+                @id, @tenantId, @legalEntityId, @code, @nameEn, @nameAr, @isActive, @createdAt
+            );
+            """;
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("id", costCenter.Id);
+        cmd.Parameters.AddWithValue("tenantId", costCenter.TenantId.Value);
+        cmd.Parameters.AddWithValue("legalEntityId", costCenter.LegalEntityId.Value);
+        cmd.Parameters.AddWithValue("code", costCenter.Code);
+        cmd.Parameters.AddWithValue("nameEn", costCenter.NameEn);
+        cmd.Parameters.AddWithValue("nameAr", costCenter.NameAr);
+        cmd.Parameters.AddWithValue("isActive", costCenter.IsActive);
+        cmd.Parameters.AddWithValue("createdAt", costCenter.CreatedAtUtc);
+        await cmd.ExecuteNonQueryAsync(ct);
+    }
+
+    public async Task<IReadOnlyList<LocationDto>> ListLocationsAsync(TenantId tenantId, LegalEntityId? legalEntityId = null, CancellationToken ct = default)
+    {
+        await using var conn = new NpgsqlConnection(_connectionString);
+        await conn.OpenAsync(ct);
+
+        var sql = @"
+            SELECT id, tenant_id, legal_entity_id, code, name_en, name_ar, country, city, address, is_active
+            FROM organization.locations
+            WHERE tenant_id = @tenantId
+        ";
+        if (legalEntityId.HasValue) sql += " AND legal_entity_id = @legalEntityId";
+        sql += " ORDER BY name_en ASC;";
+
+        await using var cmd = new NpgsqlCommand(sql, conn);
+        cmd.Parameters.AddWithValue("tenantId", tenantId.Value);
+        if (legalEntityId.HasValue) cmd.Parameters.AddWithValue("legalEntityId", legalEntityId.Value.Value);
 
         var list = new List<LocationDto>();
         await using var reader = await cmd.ExecuteReaderAsync(ct);

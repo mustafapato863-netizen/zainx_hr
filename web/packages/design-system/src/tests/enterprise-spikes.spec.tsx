@@ -76,7 +76,7 @@ describe("ZainX Design System P0 Phase 1C Enterprise Engine Spikes", () => {
   })
 
   describe("4. ZainXRichTextEditor Tiptap Wrapper", () => {
-    it("renders editor container and cleanses malicious script injection via DOMPurify", () => {
+    it("renders editor container and cleanses malicious script injection via DOMPurify", async () => {
       const maliciousHtml = '<p>Normal text</p><script>alert("XSS")</script>'
       const handleChange = vi.fn()
 
@@ -88,7 +88,7 @@ describe("ZainX Design System P0 Phase 1C Enterprise Engine Spikes", () => {
       )
 
       expect(container.querySelector("script")).toBeNull()
-      expect(screen.getByText("Normal text")).toBeDefined()
+      expect(await screen.findByText("Normal text")).toBeDefined()
     })
   })
 

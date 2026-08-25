@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
-import {
-  Badge,
-  Button,
-  EmptyState,
-  NoResults,
-  Skeleton
-} from '@zainx/design-system';
-import {
-  AttendanceExceptionDto,
-} from '@zainx/contracts';
+import { Badge } from '@zainx/design-system/components/Badge/Badge';
+import { Button } from '@zainx/design-system/components/Button/Button';
+import { EmptyState, NoResults } from '@zainx/design-system/components/EmptyState/EmptyState';
+import { Skeleton } from '@zainx/design-system/components/Skeleton/Skeleton';
+import { AttendanceExceptionDto } from '@zainx/contracts';
 
 export const AttendanceExceptionType = {
   MissingClockIn: 1,
@@ -31,7 +26,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
   isLoading = false,
   isOpen,
   onClose,
-  onResolveException
+  onResolveException,
 }) => {
   const [selectedException, setSelectedException] = useState<AttendanceExceptionDto | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState('');
@@ -76,7 +71,7 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
       aria-modal="true"
       aria-labelledby="exceptions-drawer-title"
     >
-      <div className="w-full max-w-xl h-full bg-surface-primary shadow-2xl flex flex-col border-l border-border-primary">
+      <div className="w-full max-w-xl h-full bg-surface-primary shadow-overlay flex flex-col border-l border-border-primary">
         {/* Drawer Header */}
         <div className="flex items-center justify-between p-6 border-b border-border-primary bg-surface-secondary/40">
           <div>
@@ -102,21 +97,21 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
               onClick={() => setFilterType(val)}
               className={`text-xs px-2.5 py-1 rounded-md font-medium transition-colors ${
                 filterType === val
-                  ? 'bg-brand-primary text-white shadow-sm'
+                  ? 'bg-brand-primary text-text-inverse shadow-sm'
                   : 'bg-surface-secondary text-text-secondary hover:bg-surface-tertiary'
               }`}
             >
               {val === 'all'
                 ? 'All'
                 : val === '0'
-                ? 'Missing In'
-                : val === '1'
-                ? 'Missing Out'
-                : val === '2'
-                ? 'Late'
-                : val === '3'
-                ? 'Early'
-                : 'Absence'}
+                  ? 'Missing In'
+                  : val === '1'
+                    ? 'Missing Out'
+                    : val === '2'
+                      ? 'Late'
+                      : val === '3'
+                        ? 'Early'
+                        : 'Absence'}
             </button>
           ))}
         </div>
@@ -155,11 +150,16 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
                       </span>
                       <p className="text-xs text-text-muted mt-0.5">{item.details}</p>
                     </div>
-                    {getExceptionTypeBadge((item as any).type || (item as any).exceptionType, (item as any).typeName)}
+                    {getExceptionTypeBadge(
+                      (item as any).type || (item as any).exceptionType,
+                      (item as any).typeName,
+                    )}
                   </div>
                   <div className="mt-3 flex items-center justify-between text-xs text-text-secondary font-mono">
                     <span>{new Date(item.createdAtUtc).toLocaleDateString()}</span>
-                    <span className="capitalize">{(item as any).statusName || item.status || 'Pending'}</span>
+                    <span className="capitalize">
+                      {(item as any).statusName || item.status || 'Pending'}
+                    </span>
                   </div>
                 </div>
               );
@@ -174,7 +174,10 @@ export const AttendanceExceptionsQueue: React.FC<AttendanceExceptionsQueueProps>
               Resolve Exception: {(selectedException as any).typeName || 'Attendance Exception'}
             </h3>
             <div>
-              <label htmlFor="resolution-notes" className="block text-xs font-medium text-text-secondary mb-1">
+              <label
+                htmlFor="resolution-notes"
+                className="block text-xs font-medium text-text-secondary mb-1"
+              >
                 Resolution Notes (Required)
               </label>
               <textarea

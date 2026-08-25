@@ -13,7 +13,7 @@ export interface LeaveRequestModalProps {
     startDate: string,
     endDate: string,
     durationDays: number,
-    reason: string
+    reason: string,
   ) => Promise<void>;
 }
 
@@ -23,10 +23,10 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
   leaveTypes = [],
   balances = [],
   onClose,
-  onSubmitRequest
+  onSubmitRequest,
 }) => {
   const [selectedTypeId, setSelectedTypeId] = useState<string>(() =>
-    leaveTypes.length > 0 ? leaveTypes[0].id : ''
+    leaveTypes.length > 0 ? leaveTypes[0].id : '',
   );
   const [startDate, setStartDate] = useState<string>('');
   const [endDate, setEndDate] = useState<string>('');
@@ -67,7 +67,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
     }
     if (selectedBalance && calculatedDays > Number(selectedBalance.availableDays)) {
       setErrorMessage(
-        `Insufficient available balance (${selectedBalance.availableDays} days available, ${calculatedDays} days requested).`
+        `Insufficient available balance (${selectedBalance.availableDays} days available, ${calculatedDays} days requested).`,
       );
       return;
     }
@@ -81,7 +81,7 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
       // Handles 409 Overlap Conflict from PostgreSQL Exclusion Constraint
       setErrorMessage(
         err.message ||
-          'Overlapping leave request detected or reservation failed. Exclusion constraint rejected this date range.'
+          'Overlapping leave request detected or reservation failed. Exclusion constraint rejected this date range.',
       );
     } finally {
       setIsSubmitting(false);
@@ -96,24 +96,30 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
       aria-labelledby="leave-request-modal-title"
       data-testid="leave-request-modal"
     >
-      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-2xl border border-border-primary">
+      <div className="w-full max-w-lg rounded-xl bg-surface-primary p-6 shadow-overlay border border-border-primary">
         <div className="flex items-center justify-between border-b border-border-primary pb-4">
           <div>
             <h2 id="leave-request-modal-title" className="text-lg font-bold text-text-primary">
               Submit Leave Request
             </h2>
             <p className="text-xs text-text-muted mt-0.5">
-              Dates are validated against PostgreSQL exclusion constraints for non-overlapping integrity
+              Dates are validated against PostgreSQL exclusion constraints for non-overlapping
+              integrity
             </p>
           </div>
-          <Button variant="ghost" size="sm" onClick={onClose} aria-label="Close leave request modal">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            aria-label="Close leave request modal"
+          >
             ✕
           </Button>
         </div>
 
         {errorMessage && (
           <div
-            className="mt-4 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 font-medium"
+            className="mt-4 rounded-lg bg-danger-subtle border border-danger p-3 text-xs text-danger font-medium"
             data-testid="leave-request-error"
           >
             {errorMessage}
@@ -123,7 +129,10 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
         <form onSubmit={handleSubmit} className="mt-5 space-y-4">
           {/* Leave Type Selector */}
           <div>
-            <label htmlFor="leave-type" className="block text-xs font-medium text-text-secondary mb-1">
+            <label
+              htmlFor="leave-type"
+              className="block text-xs font-medium text-text-secondary mb-1"
+            >
               Leave Category / Type
             </label>
             <select
@@ -153,7 +162,10 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
           {/* Date Pickers */}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="leave-start-date" className="block text-xs font-medium text-text-secondary mb-1">
+              <label
+                htmlFor="leave-start-date"
+                className="block text-xs font-medium text-text-secondary mb-1"
+              >
                 Start Date
               </label>
               <input
@@ -166,7 +178,10 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
               />
             </div>
             <div>
-              <label htmlFor="leave-end-date" className="block text-xs font-medium text-text-secondary mb-1">
+              <label
+                htmlFor="leave-end-date"
+                className="block text-xs font-medium text-text-secondary mb-1"
+              >
                 End Date
               </label>
               <input
@@ -192,7 +207,10 @@ export const LeaveRequestModal: React.FC<LeaveRequestModalProps> = ({
 
           {/* Reason */}
           <div>
-            <label htmlFor="leave-reason" className="block text-xs font-medium text-text-secondary mb-1">
+            <label
+              htmlFor="leave-reason"
+              className="block text-xs font-medium text-text-secondary mb-1"
+            >
               Reason / Remarks (Optional)
             </label>
             <textarea

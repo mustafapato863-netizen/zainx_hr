@@ -9,9 +9,19 @@ namespace Workforce.Modules.Approvals.Infrastructure;
 
 public interface IApprovalsRepository
 {
-    Task<(IReadOnlyList<ApprovalInboxItemDto> Items, int TotalCount)> GetApprovalInboxAsync(TenantId tenantId, Guid? assignedUserId, int? status, int page = 1, int pageSize = 50);
-    Task<ApprovalRequestDetailDto?> GetApprovalRequestByIdAsync(TenantId tenantId, Guid id);
-    Task<ApprovalRequest?> GetApprovalRequestEntityByIdAsync(TenantId tenantId, Guid id);
+    Task<(IReadOnlyList<ApprovalInboxItemDto> Items, int TotalCount)> GetApprovalInboxAsync(TenantId tenantId, LegalEntityId? legalEntityId, Guid? assignedUserId, int? status, int page = 1, int pageSize = 50);
+    Task<ApprovalRequestDetailDto?> GetApprovalRequestByIdAsync(TenantId tenantId, Guid id, LegalEntityId? legalEntityId = null);
+    Task<ApprovalRequest?> GetApprovalRequestEntityByIdAsync(TenantId tenantId, Guid id, LegalEntityId? legalEntityId = null);
+    Task<bool> IsCurrentApproverAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid approvalRequestId, Guid actorUserId);
+    Task<ApprovalDelegationResult?> CreateDelegationAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid approvalRequestId,
+        Guid delegatedFromUserId,
+        Guid delegatedToUserId,
+        string reason,
+        DateTime? expiresAtUtc,
+        bool administratorOverride);
     Task CreateApprovalWorkflowAsync(ApprovalRequest request, IEnumerable<ApprovalStep> steps);
     Task SaveApprovalRequestAsync(ApprovalRequest request);
 }
@@ -75,6 +85,23 @@ public record ApprovalDecisionHistoryDto(
     DateTime TimestampUtc
 );
 
+public record ApprovalDelegationDto(
+    Guid Id,
+    Guid ApprovalRequestId,
+    int StepOrder,
+    Guid DelegatedFromUserId,
+    Guid DelegatedToUserId,
+    string Reason,
+    DateTime CreatedAtUtc,
+    DateTime? ExpiresAtUtc,
+    DateTime? RevokedAtUtc
+);
+
+public record ApprovalDelegationResult(
+    ApprovalDelegationDto Delegation,
+    bool AlreadyExists
+);
+
 public class ApprovalsRepository : IApprovalsRepository
 {
     private readonly NpgsqlDataSource _dataSource;
@@ -85,7 +112,7 @@ public class ApprovalsRepository : IApprovalsRepository
     }
 
     public async Task<(IReadOnlyList<ApprovalInboxItemDto> Items, int TotalCount)> GetApprovalInboxAsync(
-        TenantId tenantId, Guid? assignedUserId, int? status, int page = 1, int pageSize = 50)
+        TenantId tenantId, LegalEntityId? legalEntityId, Guid? assignedUserId, int? status, int page = 1, int pageSize = 50)
     {
         var list = new List<ApprovalInboxItemDto>();
         var offset = (Math.Max(1, page) - 1) * pageSize;
@@ -95,11 +122,17 @@ public class ApprovalsRepository : IApprovalsRepository
             SELECT COUNT(DISTINCT r.id)
             FROM approvals.approval_requests r
             LEFT JOIN approvals.approval_steps s ON r.id = s.approval_request_id AND r.current_step_order = s.step_order
+            LEFT JOIN approvals.delegations d ON d.approval_request_id = r.id
+                AND d.step_order = r.current_step_order
+                AND d.revoked_at_utc IS NULL
+                AND (d.expires_at_utc IS NULL OR d.expires_at_utc > CURRENT_TIMESTAMP)
             WHERE r.tenant_id = $1
-              AND ($2::int IS NULL OR r.status = $2)
-              AND ($3::uuid IS NULL OR s.assigned_approver_user_id = $3 OR r.requester_user_id = $3);
+              AND ($2::uuid IS NULL OR r.legal_entity_id = $2)
+              AND ($3::int IS NULL OR r.status = $3)
+              AND ($4::uuid IS NULL OR s.assigned_approver_user_id = $4 OR d.delegated_to_user_id = $4 OR r.requester_user_id = $4);
         """;
         countCmd.Parameters.AddWithValue(tenantId.Value);
+        countCmd.Parameters.AddWithValue((object?)legalEntityId?.Value ?? DBNull.Value);
         countCmd.Parameters.AddWithValue((object?)status ?? DBNull.Value);
         countCmd.Parameters.AddWithValue((object?)assignedUserId ?? DBNull.Value);
 
@@ -112,13 +145,19 @@ public class ApprovalsRepository : IApprovalsRepository
                    r.requester_user_id, r.requester_employment_id, r.created_at, r.row_version
             FROM approvals.approval_requests r
             LEFT JOIN approvals.approval_steps s ON r.id = s.approval_request_id AND r.current_step_order = s.step_order
+            LEFT JOIN approvals.delegations d ON d.approval_request_id = r.id
+                AND d.step_order = r.current_step_order
+                AND d.revoked_at_utc IS NULL
+                AND (d.expires_at_utc IS NULL OR d.expires_at_utc > CURRENT_TIMESTAMP)
             WHERE r.tenant_id = $1
-              AND ($2::int IS NULL OR r.status = $2)
-              AND ($3::uuid IS NULL OR s.assigned_approver_user_id = $3 OR r.requester_user_id = $3)
+              AND ($2::uuid IS NULL OR r.legal_entity_id = $2)
+              AND ($3::int IS NULL OR r.status = $3)
+              AND ($4::uuid IS NULL OR s.assigned_approver_user_id = $4 OR d.delegated_to_user_id = $4 OR r.requester_user_id = $4)
             ORDER BY r.created_at DESC
-            LIMIT $4 OFFSET $5;
+            LIMIT $5 OFFSET $6;
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue((object?)legalEntityId?.Value ?? DBNull.Value);
         cmd.Parameters.AddWithValue((object?)status ?? DBNull.Value);
         cmd.Parameters.AddWithValue((object?)assignedUserId ?? DBNull.Value);
         cmd.Parameters.AddWithValue(pageSize);
@@ -148,7 +187,7 @@ public class ApprovalsRepository : IApprovalsRepository
         return (list, total);
     }
 
-    public async Task<ApprovalRequestDetailDto?> GetApprovalRequestByIdAsync(TenantId tenantId, Guid id)
+    public async Task<ApprovalRequestDetailDto?> GetApprovalRequestByIdAsync(TenantId tenantId, Guid id, LegalEntityId? legalEntityId = null)
     {
         await using var cmd = _dataSource.CreateCommand();
         cmd.CommandText = """
@@ -157,10 +196,12 @@ public class ApprovalsRepository : IApprovalsRepository
                    requester_user_id, requester_employment_id, payload_snapshot_json::text,
                    created_at, row_version
             FROM approvals.approval_requests
-            WHERE tenant_id = $1 AND id = $2;
+            WHERE tenant_id = $1 AND id = $2
+              AND ($3::uuid IS NULL OR legal_entity_id = $3);
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
         cmd.Parameters.AddWithValue(id);
+        cmd.Parameters.AddWithValue((object?)legalEntityId?.Value ?? DBNull.Value);
 
         ApprovalRequestDetailDto? result = null;
         await using (var reader = await cmd.ExecuteReaderAsync())
@@ -249,7 +290,7 @@ public class ApprovalsRepository : IApprovalsRepository
         return result with { Steps = steps, History = history };
     }
 
-    public async Task<ApprovalRequest?> GetApprovalRequestEntityByIdAsync(TenantId tenantId, Guid id)
+    public async Task<ApprovalRequest?> GetApprovalRequestEntityByIdAsync(TenantId tenantId, Guid id, LegalEntityId? legalEntityId = null)
     {
         await using var cmd = _dataSource.CreateCommand();
         cmd.CommandText = """
@@ -257,10 +298,12 @@ public class ApprovalsRepository : IApprovalsRepository
                    workflow_type, title, requester_user_id, requester_employment_id,
                    payload_snapshot_json::text, total_steps
             FROM approvals.approval_requests
-            WHERE tenant_id = $1 AND id = $2;
+            WHERE tenant_id = $1 AND id = $2
+              AND ($3::uuid IS NULL OR legal_entity_id = $3);
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
         cmd.Parameters.AddWithValue(id);
+        cmd.Parameters.AddWithValue((object?)legalEntityId?.Value ?? DBNull.Value);
 
         await using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
@@ -281,6 +324,179 @@ public class ApprovalsRepository : IApprovalsRepository
         }
 
         return null;
+    }
+
+    public async Task<bool> IsCurrentApproverAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid approvalRequestId,
+        Guid actorUserId)
+    {
+        await using var cmd = _dataSource.CreateCommand();
+        cmd.CommandText = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM approvals.approval_requests r
+                INNER JOIN approvals.approval_steps s
+                    ON s.approval_request_id = r.id
+                   AND s.step_order = r.current_step_order
+                   AND s.status = 1
+                WHERE r.tenant_id = $1
+                  AND r.legal_entity_id = $2
+                  AND r.id = $3
+                  AND (
+                      s.assigned_approver_user_id = $4
+                      OR EXISTS (
+                          SELECT 1
+                          FROM approvals.delegations d
+                          WHERE d.approval_request_id = r.id
+                            AND d.step_order = r.current_step_order
+                            AND d.delegated_to_user_id = $4
+                            AND d.revoked_at_utc IS NULL
+                            AND (d.expires_at_utc IS NULL OR d.expires_at_utc > CURRENT_TIMESTAMP)
+                      )
+                  )
+            );
+        """;
+        cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
+        cmd.Parameters.AddWithValue(approvalRequestId);
+        cmd.Parameters.AddWithValue(actorUserId);
+        return (bool)(await cmd.ExecuteScalarAsync() ?? false);
+    }
+
+    public async Task<ApprovalDelegationResult?> CreateDelegationAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid approvalRequestId,
+        Guid delegatedFromUserId,
+        Guid delegatedToUserId,
+        string reason,
+        DateTime? expiresAtUtc,
+        bool administratorOverride)
+    {
+        await using var conn = await _dataSource.OpenConnectionAsync();
+        await using var tx = await conn.BeginTransactionAsync();
+
+        await using var verify = conn.CreateCommand();
+        verify.Transaction = tx;
+        verify.CommandText = """
+            SELECT r.current_step_order, s.assigned_approver_user_id
+            FROM approvals.approval_requests r
+            INNER JOIN approvals.approval_steps s
+                ON s.approval_request_id = r.id
+               AND s.step_order = r.current_step_order
+               AND s.status = 1
+            WHERE r.tenant_id = $1 AND r.legal_entity_id = $2 AND r.id = $3
+            FOR UPDATE OF r;
+        """;
+        verify.Parameters.AddWithValue(tenantId.Value);
+        verify.Parameters.AddWithValue(legalEntityId.Value);
+        verify.Parameters.AddWithValue(approvalRequestId);
+
+        await using var reader = await verify.ExecuteReaderAsync();
+        if (!await reader.ReadAsync())
+        {
+            await tx.RollbackAsync();
+            return null;
+        }
+
+        var stepOrder = reader.GetInt32(0);
+        var assignedApprover = reader.IsDBNull(1) ? (Guid?)null : reader.GetGuid(1);
+        await reader.DisposeAsync();
+
+        if (!administratorOverride && assignedApprover != delegatedFromUserId)
+        {
+            await tx.RollbackAsync();
+            return null;
+        }
+
+        await using var existing = conn.CreateCommand();
+        existing.Transaction = tx;
+        existing.CommandText = """
+            SELECT id, created_at_utc, revoked_at_utc
+            FROM approvals.delegations
+            WHERE approval_request_id = $1
+              AND step_order = $2
+              AND delegated_from_user_id = $3
+              AND delegated_to_user_id = $4
+            LIMIT 1;
+        """;
+        existing.Parameters.AddWithValue(approvalRequestId);
+        existing.Parameters.AddWithValue(stepOrder);
+        existing.Parameters.AddWithValue(delegatedFromUserId);
+        existing.Parameters.AddWithValue(delegatedToUserId);
+        await using var existingReader = await existing.ExecuteReaderAsync();
+        if (await existingReader.ReadAsync())
+        {
+            var existingId = existingReader.GetGuid(0);
+            var createdAt = existingReader.GetDateTime(1);
+            var revokedAt = existingReader.IsDBNull(2) ? (DateTime?)null : existingReader.GetDateTime(2);
+            await existingReader.DisposeAsync();
+            await tx.CommitAsync();
+            return new ApprovalDelegationResult(
+                new ApprovalDelegationDto(
+                    existingId,
+                    approvalRequestId,
+                    stepOrder,
+                    delegatedFromUserId,
+                    delegatedToUserId,
+                    reason,
+                    createdAt,
+                    expiresAtUtc,
+                    revokedAt),
+                true);
+        }
+        await existingReader.DisposeAsync();
+
+        var delegationId = Guid.NewGuid();
+        const string insertSql = """
+            INSERT INTO approvals.delegations (
+                id, tenant_id, legal_entity_id, approval_request_id, step_order,
+                delegated_from_user_id, delegated_to_user_id, reason, expires_at_utc
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9);
+        """;
+        await using var insert = conn.CreateCommand();
+        insert.Transaction = tx;
+        insert.CommandText = insertSql;
+        insert.Parameters.AddWithValue(delegationId);
+        insert.Parameters.AddWithValue(tenantId.Value);
+        insert.Parameters.AddWithValue(legalEntityId.Value);
+        insert.Parameters.AddWithValue(approvalRequestId);
+        insert.Parameters.AddWithValue(stepOrder);
+        insert.Parameters.AddWithValue(delegatedFromUserId);
+        insert.Parameters.AddWithValue(delegatedToUserId);
+        insert.Parameters.AddWithValue(reason.Trim());
+        insert.Parameters.AddWithValue((object?)expiresAtUtc ?? DBNull.Value);
+        await insert.ExecuteNonQueryAsync();
+
+        await using var history = conn.CreateCommand();
+        history.Transaction = tx;
+        history.CommandText = """
+            INSERT INTO approvals.decision_histories
+                (id, approval_request_id, step_order, actor_user_id, action, reason)
+            VALUES ($1, $2, $3, $4, 'Delegated', $5);
+        """;
+        history.Parameters.AddWithValue(Guid.NewGuid());
+        history.Parameters.AddWithValue(approvalRequestId);
+        history.Parameters.AddWithValue(stepOrder);
+        history.Parameters.AddWithValue(delegatedFromUserId);
+        history.Parameters.AddWithValue(reason.Trim());
+        await history.ExecuteNonQueryAsync();
+
+        await tx.CommitAsync();
+        return new ApprovalDelegationResult(
+            new ApprovalDelegationDto(
+                delegationId,
+                approvalRequestId,
+                stepOrder,
+                delegatedFromUserId,
+                delegatedToUserId,
+                reason.Trim(),
+                DateTime.UtcNow,
+                expiresAtUtc,
+                null),
+            false);
     }
 
     public async Task CreateApprovalWorkflowAsync(ApprovalRequest request, IEnumerable<ApprovalStep> steps)
@@ -381,6 +597,29 @@ public class ApprovalsRepository : IApprovalsRepository
             histCmd.Parameters.AddWithValue((object?)hist.Reason ?? DBNull.Value);
             histCmd.Parameters.AddWithValue(hist.TimestampUtc);
             await histCmd.ExecuteNonQueryAsync();
+        }
+
+        foreach (var step in request.Steps)
+        {
+            await using var stepCmd = conn.CreateCommand();
+            stepCmd.Transaction = tx;
+            stepCmd.CommandText = """
+                UPDATE approvals.approval_steps SET
+                    status = $1,
+                    decided_at_utc = $2,
+                    decided_by_user_id = $3,
+                    decision_reason = $4,
+                    row_version = $5
+                WHERE approval_request_id = $6 AND id = $7;
+            """;
+            stepCmd.Parameters.AddWithValue((int)step.Status);
+            stepCmd.Parameters.AddWithValue((object?)step.DecidedAtUtc ?? DBNull.Value);
+            stepCmd.Parameters.AddWithValue((object?)step.DecidedByUserId ?? DBNull.Value);
+            stepCmd.Parameters.AddWithValue((object?)step.DecisionReason ?? DBNull.Value);
+            stepCmd.Parameters.AddWithValue((long)step.RowVersion);
+            stepCmd.Parameters.AddWithValue(step.ApprovalRequestId);
+            stepCmd.Parameters.AddWithValue(step.Id);
+            await stepCmd.ExecuteNonQueryAsync();
         }
 
         await tx.CommitAsync();

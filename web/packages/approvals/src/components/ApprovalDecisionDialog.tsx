@@ -71,7 +71,7 @@ export const ApprovalDecisionDialog: React.FC<ApprovalDecisionDialogProps> = ({
         </div>
 
         {errorMessage && (
-          <div className="mt-3 rounded-lg bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 font-medium">
+          <div className="mt-3 rounded-lg bg-danger-subtle border border-danger p-3 text-xs text-danger font-medium">
             {errorMessage}
           </div>
         )}
@@ -87,7 +87,7 @@ export const ApprovalDecisionDialog: React.FC<ApprovalDecisionDialogProps> = ({
         <form onSubmit={handleSubmit} className="mt-4 space-y-4">
           <div>
             <label htmlFor="decision-comments" className="block text-xs font-medium text-text-secondary mb-1">
-              Comments / Decision Notes {!isApprove && <span className="text-rose-500">*</span>}
+              Comments / Decision Notes {!isApprove && <span className="text-danger">*</span>}
             </label>
             <textarea
               id="decision-comments"

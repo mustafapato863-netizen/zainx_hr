@@ -20,6 +20,35 @@ public class LeaveBalance
 
     private LeaveBalance() { }
 
+    internal static LeaveBalance Rehydrate(
+        Guid id,
+        TenantId tenantId,
+        Guid employmentId,
+        Guid leaveTypeId,
+        int year,
+        decimal entitledDays,
+        decimal accruedDays,
+        decimal usedDays,
+        decimal pendingDays,
+        DateTime updatedAt,
+        uint rowVersion)
+    {
+        return new LeaveBalance
+        {
+            Id = id,
+            TenantId = tenantId,
+            EmploymentId = employmentId,
+            LeaveTypeId = leaveTypeId,
+            Year = year,
+            EntitledDays = entitledDays,
+            AccruedDays = accruedDays,
+            UsedDays = usedDays,
+            PendingDays = pendingDays,
+            UpdatedAt = updatedAt,
+            RowVersion = rowVersion
+        };
+    }
+
     public LeaveBalance(
         Guid id,
         TenantId tenantId,
@@ -75,6 +104,20 @@ public class LeaveBalance
         VerifyRowVersion(expectedRowVersion);
         PendingDays = Math.Max(0, PendingDays - days);
         UsedDays += days;
+        UpdatedAt = DateTime.UtcNow;
+        RowVersion++;
+    }
+
+    public void CancelApprovedDays(decimal days, uint expectedRowVersion)
+    {
+        VerifyRowVersion(expectedRowVersion);
+        if (days <= 0) throw new ArgumentException("Days to cancel must be greater than zero.", nameof(days));
+        if (UsedDays < days)
+        {
+            throw new InvalidOperationException($"Cannot cancel more approved leave than has been used. Requested: {days}, Used: {UsedDays}.");
+        }
+
+        UsedDays -= days;
         UpdatedAt = DateTime.UtcNow;
         RowVersion++;
     }

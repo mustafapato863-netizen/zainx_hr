@@ -14,15 +14,17 @@ import {
   SensitiveValue,
   Skeleton
 } from '@zainx/design-system';
-import { EmployeeProfileDto, DocumentSummaryDto } from '@zainx/contracts';
+import { EmployeeProfileDto, DocumentSummaryDto, DocumentTypeDto } from '@zainx/contracts';
+import { DocumentsTab, DocumentUploadData } from '../DocumentsTab/DocumentsTab';
 
 export interface EmployeeWorkspaceProps {
   profile?: EmployeeProfileDto;
   documents?: DocumentSummaryDto[];
+  documentTypes?: DocumentTypeDto[];
   isLoading?: boolean;
   onBack?: () => void;
   onChangeAssignment?: () => void;
-  onUploadDocument?: () => void;
+  onUploadDocument?: (data: DocumentUploadData) => Promise<void>;
   onDownloadDocument?: (docId: string) => void;
   onRevealSensitive?: (fieldName: string) => Promise<string | null>;
 }
@@ -30,6 +32,7 @@ export interface EmployeeWorkspaceProps {
 export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
   profile,
   documents = [],
+  documentTypes = [],
   isLoading = false,
   onBack,
   onChangeAssignment,
@@ -89,7 +92,7 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
             <Button size="xs" variant="secondary" onClick={onChangeAssignment}>
               Change Assignment / تغيير التكليف
             </Button>
-            <Button size="xs" variant="primary" onClick={onUploadDocument}>
+            <Button size="xs" variant="primary" onClick={() => setSelectedTabKey('documents')} disabled={!onUploadDocument}>
               Upload Document / رفع مستند
             </Button>
           </div>
@@ -171,13 +174,13 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
               <CardContent>
                 <dl style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem 1rem', fontSize: '0.875rem' }}>
                   <dt style={{ color: 'var(--zainx-color-text-muted, #94a3b8)' }}>Work Email / البريد:</dt>
-                  <dd style={{ fontWeight: 500 }}>{profile.primaryEmail || 'N/A'}</dd>
+                  <dd style={{ fontWeight: 500 }}>{profile.primaryEmail || 'Not provided / غير متوفر'}</dd>
 
                   <dt style={{ color: 'var(--zainx-color-text-muted, #94a3b8)' }}>Phone / الجوال:</dt>
-                  <dd>{profile.phoneNumber || 'N/A'}</dd>
+                  <dd>{profile.phoneNumber || 'Not provided / غير متوفر'}</dd>
 
                   <dt style={{ color: 'var(--zainx-color-text-muted, #94a3b8)' }}>Work Location / المقر:</dt>
-                  <dd>{profile.currentAssignment?.locationNameEn || 'HQ - Riyadh'}</dd>
+                  <dd>{profile.currentAssignment?.locationNameEn || 'Not assigned / غير محدد'}</dd>
                 </dl>
               </CardContent>
             </Card>
@@ -199,7 +202,7 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
                   </div>
                   <div>
                     <span style={{ color: 'var(--zainx-color-text-muted, #94a3b8)', display: 'block' }}>Probation End / نهاية التجربة</span>
-                    <strong>{profile.probationEndDate || 'N/A'}</strong>
+                    <strong>{profile.probationEndDate || 'Not provided / غير متوفر'}</strong>
                   </div>
                   <div>
                     <span style={{ color: 'var(--zainx-color-text-muted, #94a3b8)', display: 'block' }}>Status / الحالة</span>
@@ -267,11 +270,11 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
               <div style={{ padding: '1rem', background: 'var(--zainx-color-surface-subtle, #f8fafc)', borderRadius: '8px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ padding: '0.75rem 1.25rem', background: 'var(--zainx-color-primary, #6366f1)', color: '#ffffff', borderRadius: '6px', fontWeight: 600 }}>
-                    {profile.currentAssignment?.departmentNameEn || 'Department'}
+                    {profile.currentAssignment?.departmentNameEn || 'Not assigned / غير محدد'}
                   </div>
                   <span>→</span>
                   <div style={{ padding: '0.75rem 1.25rem', background: '#ffffff', border: '1px solid var(--zainx-color-border, #cbd5e1)', borderRadius: '6px', fontWeight: 600 }}>
-                    {profile.currentAssignment?.jobTitleEn || 'Job Role'}
+                    {profile.currentAssignment?.jobTitleEn || 'Not assigned / غير محدد'}
                   </div>
                 </div>
               </div>
@@ -281,62 +284,12 @@ export const EmployeeWorkspace: React.FC<EmployeeWorkspaceProps> = ({
 
         {/* Tab: Documents */}
         <TabPanel id="documents">
-          <Card>
-            <CardHeader>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <CardTitle>Attached Workforce Documents / المستندات المرفقة</CardTitle>
-                <Button size="xs" variant="primary" onClick={onUploadDocument}>
-                  + Upload / رفع مستند
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {documents.length === 0 ? (
-                <p style={{ color: 'var(--zainx-color-text-muted, #94a3b8)', fontSize: '0.875rem' }}>
-                  No documents attached yet / لا توجد مستندات مرفقة حتى الآن.
-                </p>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                  {documents.map((doc) => {
-                    const docStatus = (doc.status || 'Active').toLowerCase();
-                    const docSizeKb = doc.latestFileSize ? (Number(doc.latestFileSize) / 1024).toFixed(1) : '0';
-                    return (
-                      <div
-                        key={doc.id}
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center',
-                          padding: '0.75rem 1rem',
-                          border: '1px solid var(--zainx-color-border, #e2e8f0)',
-                          borderRadius: '6px'
-                        }}
-                      >
-                        <div>
-                          <strong>{doc.title}</strong> ({doc.documentTypeNameEn})
-                          <div style={{ fontSize: '0.75rem', color: 'var(--zainx-color-text-muted, #94a3b8)' }}>
-                            File: {doc.latestFileName} ({docSizeKb} KB) • Expiry: {doc.expiryDate || 'N/A'}
-                          </div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                          <Badge variant={docStatus === 'active' ? 'success' : 'neutral'}>
-                            {doc.status}
-                          </Badge>
-                          <Button
-                            size="xs"
-                            variant="secondary"
-                            onClick={() => onDownloadDocument && doc.id && onDownloadDocument(doc.id)}
-                          >
-                            Download / تحميل
-                          </Button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <DocumentsTab
+            documents={documents}
+            documentTypes={documentTypes}
+            onUpload={onUploadDocument}
+            onDownload={onDownloadDocument}
+          />
         </TabPanel>
 
         {/* Tab: Audit History */}

@@ -16,22 +16,22 @@ import type { CreateEmployeeRequestManagerEmploymentId } from './createEmployeeR
 
 export interface CreateEmployeeRequest {
   legalEntityId?: CreateEmployeeRequestLegalEntityId;
-  employeeNumber?: CreateEmployeeRequestEmployeeNumber;
-  firstNameEn?: string;
-  lastNameEn?: string;
-  firstNameAr?: string;
-  lastNameAr?: string;
-  dateOfBirth?: string;
+  employeeNumber: CreateEmployeeRequestEmployeeNumber;
+  firstNameEn: string;
+  lastNameEn: string;
+  firstNameAr: string;
+  lastNameAr: string;
+  dateOfBirth: string;
   gender?: CreateEmployeeRequestGender;
   nationality?: CreateEmployeeRequestNationality;
-  nationalIdentifier?: string;
+  nationalIdentifier: string;
   primaryEmail?: CreateEmployeeRequestPrimaryEmail;
   phoneNumber?: CreateEmployeeRequestPhoneNumber;
-  hireDate?: string;
-  organizationUnitId?: string;
+  hireDate: string;
+  organizationUnitId: string;
   positionId?: CreateEmployeeRequestPositionId;
   locationId?: CreateEmployeeRequestLocationId;
   managerEmploymentId?: CreateEmployeeRequestManagerEmploymentId;
-  jobTitleEn?: string;
-  jobTitleAr?: string;
+  jobTitleEn: string;
+  jobTitleAr: string;
 }

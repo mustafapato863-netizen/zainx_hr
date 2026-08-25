@@ -1,7 +1,10 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { createRoute } from '@tanstack/react-router';
 import { Route as rootRoute } from './__root';
-import { AdministrationWorkspace } from '@zainx/administration';
+
+const AdministrationWorkspace = lazy(() =>
+  import('@zainx/administration').then((m) => ({ default: m.AdministrationWorkspace }))
+);
 
 export const administrationRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -10,5 +13,15 @@ export const administrationRoute = createRoute({
 });
 
 function AdministrationPage() {
-  return <AdministrationWorkspace />;
+  return (
+    <Suspense
+      fallback={
+        <div className="mx-auto w-full max-w-[1440px] rounded-lg border border-border-default bg-surface p-8 text-sm text-text-secondary">
+          Loading administration & governance…
+        </div>
+      }
+    >
+      <AdministrationWorkspace />
+    </Suspense>
+  );
 }

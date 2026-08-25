@@ -50,4 +50,9 @@ public class Position
         IsActive = true;
         CreatedAt = DateTime.UtcNow;
     }
+
+    public void Deactivate()
+    {
+        IsActive = false;
+    }
 }

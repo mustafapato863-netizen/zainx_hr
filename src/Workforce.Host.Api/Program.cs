@@ -1,8 +1,10 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Npgsql;
 using OpenTelemetry.Trace;
 using Workforce.BuildingBlocks.Database;
+using Workforce.Host.Api.Health;
 using Workforce.Host.Api.Middleware;
 using Workforce.Modules.Attendance.Infrastructure;
 using Workforce.Modules.Approvals.Infrastructure;
@@ -23,7 +25,9 @@ using Workforce.Modules.Reporting.Application;
 using Workforce.Modules.Reporting.Infrastructure;
 using Workforce.Modules.Settlement.Domain.ExportAdapters;
 using Workforce.Modules.Settlement.Infrastructure;
+using Workforce.Modules.Tenancy.Infrastructure;
 using Workforce.Modules.Recruitment.Domain;
+using Workforce.Host.Api.Application;
 using Workforce.Modules.Recruitment.Infrastructure;
 using Workforce.SharedKernel.Primitives;
 using Workforce.SharedKernel.Security;
@@ -46,63 +50,27 @@ builder.Services.AddOpenTelemetry()
         .AddHttpClientInstrumentation()
         .AddConsoleExporter());
 
-builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddHealthChecks();
+builder.Services.AddSingleton<MigrationReadinessState>();
+builder.Services.AddHealthChecks()
+    .AddCheck<MigrationReadinessHealthCheck>("database_migrations", tags: new[] { "ready" })
+    .AddCheck<DatabaseConnectivityHealthCheck>("database_connectivity", tags: new[] { "ready" });
 
-// Environment-based Database Connection
-var dbHost = Environment.GetEnvironmentVariable("ZAINX_DB_HOST") ?? "127.0.0.1";
-var dbPort = Environment.GetEnvironmentVariable("ZAINX_DB_PORT") ?? "55432";
-var dbUser = Environment.GetEnvironmentVariable("ZAINX_DB_USER") ?? "zainx";
-var dbPass = Environment.GetEnvironmentVariable("ZAINX_DB_PASSWORD") ?? "123456";
-var dbName = Environment.GetEnvironmentVariable("ZAINX_DB_NAME") ?? "zainx_workforce";
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass}";
+// Database credentials must come from configuration or the deployment environment.
+var connectionString = DatabaseConnectionResolver.Resolve(
+    builder.Configuration.GetConnectionString("DefaultConnection"));
 
 // Register NpgsqlDataSource
 var dataSource = NpgsqlDataSource.Create(connectionString);
 builder.Services.AddSingleton(dataSource);
 
 // Security & User Context Resolution
-builder.Services.AddScoped<IUserContextProvider, DefaultUserContextProvider>();
+builder.Services.AddScoped<IUserContextProvider, RequestUserContextProvider>();
 builder.Services.AddScoped<IUserContext>(sp =>
 {
     var provider = sp.GetRequiredService<IUserContextProvider>();
-    if (provider.Current != null) return provider.Current;
-
-    // Fallback default context for development / testing
-    return new UserContext(
-        new UserId(Guid.Parse("11111111-1111-1111-1111-111111111111")),
-        new TenantId(Guid.Parse("22222222-2222-2222-2222-222222222222")),
-        new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333")),
-        "en-US",
-        "UTC",
-        new HashSet<string> 
-        { 
-            "*",
-            "people.employee.read", "people.employee.create", "people.employee.update", "people.employee.reveal_pii",
-            "organization.unit.read", "organization.unit.create", "organization.unit.update",
-            "documents.read", "documents.upload", "documents.download",
-            "attendance.clock.create", "attendance.adjustment.submit", "attendance.day.approve", "attendance.exception.resolve",
-            "leave.request.create", "leave.request.approve", "leave.request.reject",
-            "approvals.decision.approve", "approvals.decision.reject",
-            "payroll.run.read", "payroll.run.create", "payroll.run.calculate", "payroll.run.finalize", "payroll.exceptions.resolve",
-            "settlement.batch.read", "settlement.batch.generate", "settlement.batch.approve", "settlement.batch.export",
-            "compliance.rules.read",
-            "recruitment.requisition.read", "recruitment.requisition.create", "recruitment.requisition.approve",
-            "recruitment.candidate.read", "recruitment.candidate.manage",
-            "recruitment.application.read", "recruitment.application.move", "recruitment.application.reject",
-            "recruitment.interview.manage", "recruitment.scorecard.submit", "recruitment.scorecard.read_all",
-            "recruitment.offer.read", "recruitment.offer.read_sensitive", "recruitment.offer.create", "recruitment.offer.approve", "recruitment.offer.issue",
-            "recruitment.hire",
-            "reports.read", "reports.export",
-            "admin.roles.manage", "admin.settings.manage", "admin.retention.manage",
-            "integrations.manage",
-            "audit.read",
-            "admin" 
-        },
-        new HashSet<string> { "core.platform", "people", "organization", "documents", "attendance", "leave", "approvals", "payroll", "compliance", "settlement", "recruitment", "reports", "admin", "integrations", "notifications", "audit" }
-    );
+    return provider.Current ?? throw new InvalidOperationException(
+        "No authenticated user context is available for this request.");
 });
 
 // PII Encryption Service (AES-256-GCM + Blind Indexing)
@@ -120,6 +88,16 @@ builder.Services.AddScoped<Workforce.Modules.Documents.Application.Contracts.IDo
 builder.Services.AddScoped<IAttendanceRepository, AttendanceRepository>();
 builder.Services.AddScoped<ILeaveRepository, LeaveRepository>();
 builder.Services.AddScoped<IApprovalsRepository, ApprovalsRepository>();
+builder.Services.AddScoped<Workforce.Modules.Attendance.Application.Contracts.IAttendanceSelfServiceContract,
+    Workforce.Modules.Attendance.Application.Services.AttendanceSelfServiceService>();
+builder.Services.AddScoped<Workforce.Modules.Leave.Application.Contracts.ILeaveSelfServiceQueryContract,
+    Workforce.Modules.Leave.Application.Services.LeaveSelfServiceQueryService>();
+builder.Services.AddScoped<Workforce.Modules.Leave.Application.Contracts.ILeaveRequestApplicationContract,
+    Workforce.Modules.Leave.Application.Services.LeaveRequestApplicationService>();
+builder.Services.AddScoped<Workforce.Modules.Leave.Application.Contracts.ILeaveApprovalWorkflowStarter,
+    LeaveApprovalWorkflowStarter>();
+builder.Services.AddScoped<Workforce.Modules.Approvals.Application.Contracts.IApprovalDecisionSideEffect,
+    LeaveApprovalDecisionSideEffect>();
 
 // Phase 4 Services
 builder.Services.AddScoped<IComplianceRepository, ComplianceRepository>();
@@ -140,6 +118,91 @@ builder.Services.AddScoped<IOutboundIntegrationAdapter, GenericWebhookAdapter>()
 builder.Services.AddScoped<IAdministrationRepository>(sp => new AdministrationRepository(connectionString, sp.GetRequiredService<IAuditRepository>()));
 builder.Services.AddScoped<IReportingRepository>(_ => new ReportingRepository(connectionString));
 builder.Services.AddScoped<IReportingExportEngine, ReportingExportEngine>();
+builder.Services.AddScoped<TenancyRepository>(_ => new TenancyRepository(connectionString));
+
+// Phase 7A Services: AI Read / Analyze / Explain
+builder.Services.AddScoped<Workforce.Modules.Ai.Infrastructure.IAiRepository>(_ => new Workforce.Modules.Ai.Infrastructure.AiRepository(connectionString));
+builder.Services.AddSingleton<Workforce.Modules.Ai.Application.Contracts.IAiModelProvider, Workforce.Modules.Ai.Application.Services.DeterministicTestAiProvider>();
+
+// Closeout Gate 8: per-user/tenant AI request rate limit (configurable).
+var aiRateLimit = int.TryParse(Environment.GetEnvironmentVariable("ZAINX_AI_RATE_LIMIT_PER_MINUTE"), out var rl) && rl > 0 ? rl : 30;
+builder.Services.AddSingleton(new Workforce.Modules.Ai.Application.Services.AiRateLimiter(aiRateLimit));
+
+builder.Services.AddScoped<Workforce.Modules.Ai.Application.Contracts.AiToolRegistry>(sp =>
+{
+    var registry = new Workforce.Modules.Ai.Application.Contracts.AiToolRegistry();
+    var peopleRepo = new PeopleRepository(connectionString, sp.GetRequiredService<IPiiEncryptionService>());
+    var attendanceRepo = sp.GetRequiredService<IAttendanceRepository>();
+    var leaveRepo = sp.GetRequiredService<ILeaveRepository>();
+    var payrollRepo = sp.GetRequiredService<IPayrollRepository>();
+    var recruitmentRepo = new RecruitmentRepository(connectionString);
+    var reportingRepo = new ReportingRepository(connectionString);
+    var auditRepo = new AuditRepository(connectionString);
+    var aiRepo = new Workforce.Modules.Ai.Infrastructure.AiRepository(connectionString);
+
+    // 16 Allowlisted Read-Only Tools
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PeopleSearchToolHandler(peopleRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PeopleGetSummaryToolHandler(peopleRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.AttendanceGetRecordsToolHandler(attendanceRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.AttendanceGetExceptionsToolHandler(attendanceRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.LeaveGetBalanceSummaryToolHandler(leaveRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.LeaveGetRequestSummaryToolHandler(leaveRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PayrollGetRunSummaryToolHandler(payrollRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PayrollGetEmployeeTraceToolHandler(payrollRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PayrollExplainExceptionToolHandler(payrollRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.RecruitmentGetRequisitionSummaryToolHandler(recruitmentRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.RecruitmentGetCandidateSummaryToolHandler(recruitmentRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.RecruitmentGetApplicationTimelineToolHandler(recruitmentRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.ReportingRunGovernedReportToolHandler(reportingRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.AuditSearchScopedToolHandler(auditRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.PolicySearchToolHandler(aiRepo));
+    registry.RegisterTool(new Workforce.Modules.Ai.Application.Tools.ProductKnowledgeSearchToolHandler(aiRepo));
+
+    return registry;
+});
+
+// Phase 7B: Action Contracts & Registry
+builder.Services.AddScoped<Workforce.Modules.People.Application.Contracts.IPeopleAssignmentApplicationContract>(sp =>
+{
+    var peopleRepo = new PeopleRepository(connectionString, sp.GetRequiredService<IPiiEncryptionService>());
+    return new Workforce.Modules.People.Application.Services.PeopleAssignmentApplicationService(peopleRepo);
+});
+
+builder.Services.AddScoped<Workforce.Modules.Recruitment.Contracts.IRecruitmentActionContract>(sp =>
+{
+    var recruitmentRepo = new RecruitmentRepository(connectionString);
+    var approvalsRepo = sp.GetService<IApprovalsRepository>();
+    return new Workforce.Modules.Recruitment.Services.RecruitmentActionService(recruitmentRepo, approvalsRepo);
+});
+
+builder.Services.AddScoped<Workforce.Modules.Leave.Application.Contracts.ILeaveActionContract>(sp =>
+{
+    var leaveRepo = sp.GetRequiredService<ILeaveRepository>();
+    return new Workforce.Modules.Leave.Application.Services.LeaveActionService(leaveRepo);
+});
+
+builder.Services.AddScoped<Workforce.Modules.Ai.Application.Contracts.AiActionRegistry>(sp =>
+{
+    var actionRegistry = new Workforce.Modules.Ai.Application.Contracts.AiActionRegistry();
+    var peopleContract = sp.GetRequiredService<Workforce.Modules.People.Application.Contracts.IPeopleAssignmentApplicationContract>();
+    var recruitmentContract = sp.GetRequiredService<Workforce.Modules.Recruitment.Contracts.IRecruitmentActionContract>();
+    var leaveContract = sp.GetRequiredService<Workforce.Modules.Leave.Application.Contracts.ILeaveActionContract>();
+
+    actionRegistry.RegisterAction(new Workforce.Modules.Ai.Application.Actions.PeopleChangeLocationActionHandler(peopleContract));
+    actionRegistry.RegisterAction(new Workforce.Modules.Ai.Application.Actions.PeopleChangeManagerActionHandler(peopleContract));
+    actionRegistry.RegisterAction(new Workforce.Modules.Ai.Application.Actions.RecruitmentMoveStageActionHandler(recruitmentContract));
+    actionRegistry.RegisterAction(new Workforce.Modules.Ai.Application.Actions.RecruitmentSubmitRequisitionActionHandler(recruitmentContract));
+    actionRegistry.RegisterAction(new Workforce.Modules.Ai.Application.Actions.LeaveCancelRequestActionHandler(leaveContract));
+
+    return actionRegistry;
+});
+
+builder.Services.AddScoped<Workforce.Modules.Ai.Application.Contracts.IAiProposalService, Workforce.Modules.Ai.Application.Services.AiProposalService>();
+builder.Services.AddScoped<Workforce.Modules.Ai.Application.Contracts.IAiConversationService, Workforce.Modules.Ai.Application.Services.AiConversationService>();
+
+// Closeout Gate 10: configurable conversation retention (days; 0 disables purging).
+// This is an operational privacy setting - no statutory retention period is implied.
+var aiRetentionDays = int.TryParse(Environment.GetEnvironmentVariable("ZAINX_AI_CONVERSATION_RETENTION_DAYS"), out var rd) && rd >= 0 ? rd : 90;
 
 // Controllers
 builder.Services.AddControllers()
@@ -161,16 +224,52 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(Workforce.Modules.Notifications.Api.NotificationsController).Assembly)
     .AddApplicationPart(typeof(Workforce.Modules.Integrations.Api.IntegrationsController).Assembly)
     .AddApplicationPart(typeof(Workforce.Modules.Identity.Api.AdministrationRolesController).Assembly)
-    .AddApplicationPart(typeof(Workforce.Modules.Reporting.Api.ReportsController).Assembly);
+    .AddApplicationPart(typeof(Workforce.Modules.Reporting.Api.ReportsController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Ai.Api.AiController).Assembly)
+    .AddApplicationPart(typeof(Workforce.Modules.Tenancy.Api.TenancyController).Assembly);
 
-// CORS for local web dev
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddOpenApi();
+
+// CORS uses explicit configured origins. Development has an explicit localhost default only.
+var configuredCorsOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins")
+    .GetChildren()
+    .Select(section => section.Value)
+    .OfType<string>()
+    .Concat((builder.Configuration["Cors:AllowedOrigins"] ?? string.Empty)
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    .Concat((Environment.GetEnvironmentVariable("ZAINX_CORS_ALLOWED_ORIGINS") ?? string.Empty)
+        .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+    .Where(origin => !string.IsNullOrWhiteSpace(origin))
+    .Distinct(StringComparer.OrdinalIgnoreCase)
+    .ToArray();
+
+if (configuredCorsOrigins.Length == 0 && (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Test")))
+{
+    configuredCorsOrigins = new[] { "http://localhost:4200", "http://127.0.0.1:4200" };
+}
+
+if (configuredCorsOrigins.Length == 0)
+{
+    throw new InvalidOperationException(
+        "CORS is not configured. Set Cors:AllowedOrigins or ZAINX_CORS_ALLOWED_ORIGINS before starting the API.");
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(configuredCorsOrigins)
+              .WithHeaders(
+                  "Accept",
+                  "Accept-Language",
+                  "Authorization",
+                  "Content-Type",
+                  "X-Correlation-ID",
+                  "X-Legal-Entity-ID",
+                  "X-Tenant-ID",
+                  "X-Trace-ID")
+              .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS");
     });
 });
 
@@ -180,6 +279,7 @@ var app = builder.Build();
 try
 {
     await MigrationRunner.EnsureMigrationHistoryTableAsync(connectionString);
+    await TenancyMigrations.ApplyAsync(connectionString, app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"));
     await OrganizationMigrations.ApplyMigrationsAsync(connectionString);
     await PeopleMigrations.ApplyMigrationsAsync(connectionString);
     await DocumentsMigrations.ApplyMigrationsAsync(connectionString);
@@ -195,6 +295,19 @@ try
     await IntegrationsMigrations.ApplyMigrationsAsync(connectionString);
     await AdministrationMigrations.ApplyMigrationsAsync(connectionString);
     await ReportingMigrations.ApplyMigrationsAsync(connectionString);
+    await Workforce.Modules.Ai.Infrastructure.AiMigrations.ApplyMigrationsAsync(connectionString);
+
+    // Closeout Gate 10: apply conversation retention on startup.
+    if (aiRetentionDays > 0)
+    {
+        var aiRepoForRetention = new Workforce.Modules.Ai.Infrastructure.AiRepository(connectionString);
+        var purged = await aiRepoForRetention.PurgeConversationsOlderThanAsync(aiRetentionDays);
+        Console.WriteLine($"[AI RETENTION] Purged {purged} conversation(s) older than {aiRetentionDays} day(s).");
+    }
+    else
+    {
+        Console.WriteLine("[AI RETENTION] Conversation retention purge disabled (ZAINX_AI_CONVERSATION_RETENTION_DAYS=0).");
+    }
 
     // Seed compliance rules
     using (var scope = app.Services.CreateScope())
@@ -203,13 +316,16 @@ try
         await complianceRepo.SeedDefaultEgyptRulesAsync();
     }
 
-    Console.WriteLine("[MIGRATIONS] All 16 Phase 1 - 6 Database schemas initialized successfully.");
+    Console.WriteLine("[MIGRATIONS] All 17 Phase 1 - 7A Database schemas initialized successfully.");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"[MIGRATIONS] Migration notice/warning: {ex.Message}");
+    app.Services.GetRequiredService<MigrationReadinessState>().MarkFailed(ex);
+    Console.Error.WriteLine($"[MIGRATIONS] Startup failed; API will not serve requests: {ex.Message}");
+    throw;
 }
 
+app.Services.GetRequiredService<MigrationReadinessState>().MarkReady();
 app.UseCors();
 
 // Correlation ID & Trace ID Middleware
@@ -231,7 +347,10 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 
 // Health Checks
 app.MapHealthChecks("/health");
-app.MapHealthChecks("/health/ready");
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready")
+});
 
 // OpenAPI Specification Endpoint
 app.MapOpenApi();
@@ -244,30 +363,45 @@ if (args.Contains("--run-db-benchmark"))
     Environment.Exit(code);
 }
 
-// Seed initial test data for Phase 4 if needed
-app.MapGet("/api/v1/seed/phase4", async (
-    IPayrollRepository payrollRepo,
-    IUserContext uCtx) =>
+// Development/test-only seed route. It is never mapped in production and still
+// requires the explicit payroll write permission in the local sandbox.
+if (app.Environment.IsDevelopment() || app.Environment.IsEnvironment("Test"))
 {
-    var tid = uCtx.TenantId;
-    var lid = uCtx.LegalEntityId ?? new LegalEntityId(Guid.Parse("33333333-3333-3333-3333-333333333333"));
+    app.MapGet("/api/v1/seed/phase4", async (
+        IPayrollRepository payrollRepo,
+        IUserContext uCtx) =>
+    {
+        if (!uCtx.HasPermission("payroll.run.create") && !uCtx.HasPermission("admin"))
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status403Forbidden,
+                title: "Seed Permission Required",
+                detail: "The development seed route requires payroll.run.create.");
+        }
 
-    var period = new Workforce.Modules.Payroll.Domain.PayrollPeriod(
-        Guid.Parse("44444444-1111-2222-3333-444444444444"),
-        tid, lid, "2026-08-MONTHLY",
-        new DateOnly(2026, 8, 1),
-        new DateOnly(2026, 8, 31),
-        new DateOnly(2026, 8, 31)
-    );
-    await payrollRepo.CreatePeriodAsync(period);
+        var tid = uCtx.TenantId;
+        if (!uCtx.LegalEntityId.HasValue)
+        {
+            return Results.Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Legal Entity Context Required",
+                detail: "A legal entity context is required before seeding payroll data.");
+        }
 
-    var run = new Workforce.Modules.Payroll.Domain.PayrollRun(
-        Guid.Parse("55555555-1111-2222-3333-444444444444"),
-        tid, lid, period.Id, "RUN-2026-08-STD", "EGP"
-    );
-    await payrollRepo.CreateRunAsync(run);
+        var lid = uCtx.LegalEntityId.Value;
+        var period = new Workforce.Modules.Payroll.Domain.PayrollPeriod(
+            Guid.Parse("44444444-1111-2222-3333-444444444444"),
+            tid, lid, "2026-08-MONTHLY",
+            new DateOnly(2026, 8, 1), new DateOnly(2026, 8, 31), new DateOnly(2026, 8, 31));
+        await payrollRepo.CreatePeriodAsync(period);
 
-    return Results.Ok(new { status = "Seeded Phase 4 baseline period and run", periodId = period.Id, runId = run.Id });
-});
+        var run = new Workforce.Modules.Payroll.Domain.PayrollRun(
+            Guid.Parse("55555555-1111-2222-3333-444444444444"),
+            tid, lid, period.Id, "RUN-2026-08-STD", "EGP");
+        await payrollRepo.CreateRunAsync(run);
+
+        return Results.Ok(new { status = "Seeded Phase 4 baseline period and run", periodId = period.Id, runId = run.Id });
+    });
+}
 
 app.Run();

@@ -31,31 +31,55 @@ import type {
 } from 'axios';
 
 import type {
+  AiActionDefinition,
+  AiActionProposalDto,
+  AiMessageResponseDto,
+  AiProposalExecutionResponseDto,
+  AiToolDefinition,
   Application,
   ApplicationDetailDto,
   ApprovalCancellationInput,
   ApprovalDecisionInput,
+  ApprovalDelegationDto,
+  ApprovalDelegationInput,
   ApprovalRejectionInput,
   ApprovalRequestDetailDto,
   ApproveBatchRequest,
+  AssignRoleRequest,
   AttendanceDayDto,
+  AuditRecord,
   BackgroundJobDto,
   CalculateRunRequest,
+  CancelProposalRequest,
   Candidate,
   ChangeAssignmentRequest,
   ChangeContextRequest,
   CheckDuplicateCandidatesRequest,
+  CompanyPolicy,
   ConcurrencyActionRequest,
+  ConfirmProposalRequest,
+  ConversationDetailDto,
+  ConversationSummaryDto,
+  CostCenterDto,
   CreateApplicationRequest,
   CreateCandidateRequest,
+  CreateConnectorRequest,
+  CreateConversationRequest,
+  CreateCostCenterRequest,
   CreateEmployeeRequest,
   CreateLeaveRequestInput,
+  CreateLegalEntityRequest,
   CreateLocationRequest,
   CreateOfferRequest,
   CreateOrganizationUnitRequest,
   CreatePayrollPeriodRequest,
   CreatePayrollRunRequest,
+  CreatePositionRequest,
+  CreateProposalRequest,
   CreateRequisitionRequest,
+  CreateRoleRequest,
+  CreateSavedViewRequest,
+  DeactivateOrganizationUnitRequest,
   DocumentDetailDto,
   DocumentSummaryDto,
   DocumentTypeDto,
@@ -63,14 +87,23 @@ import type {
   EmployeeProfileDto,
   FinalizeRunRequest,
   GenerateSettlementBatchRequest,
+  GetApiV1AdminRoleAssignmentsParams,
+  GetApiV1AiPoliciesParams,
+  GetApiV1AiProposalsParams,
   GetApiV1ApprovalsInboxParams,
   GetApiV1AttendanceDaysParams,
   GetApiV1AttendanceExceptionsParams,
+  GetApiV1AuditParams,
   GetApiV1ComplianceRulesParams,
+  GetApiV1DocumentsExpiringParams,
   GetApiV1DocumentsIdDownloadParams,
   GetApiV1DocumentsParams,
+  GetApiV1IntegrationsDeliveriesParams,
   GetApiV1LeaveBalancesParams,
   GetApiV1LeaveRequestsParams,
+  GetApiV1NotificationsParams,
+  GetApiV1OrganizationCostCentersParams,
+  GetApiV1OrganizationPositionsParams,
   GetApiV1OrganizationUnitsParams,
   GetApiV1PeopleEmployeesParams,
   GetApiV1RecruitmentApplicationsParams,
@@ -78,55 +111,96 @@ import type {
   GetApiV1RecruitmentInterviewsParams,
   GetApiV1RecruitmentOffersParams,
   GetApiV1RecruitmentRequisitionsParams,
+  GetApiV1SelfServiceAttendanceTodayParams,
+  GetApiV1SelfServiceDocumentsIdDownloadParams,
+  GetApiV1SelfServiceLeaveBalancesParams,
+  GetApiV1SelfServiceLeaveRequestsParams,
+  GetApiV1SelfServiceTeamParams,
   HireCandidateRequest,
+  IntegrationConnector,
   Interview,
   JobRequisition,
   LeaveBalanceDto,
+  LeaveCancellationRequest,
   LeaveDecisionRequest,
   LeaveRejectionRequest,
   LeaveRequestDto,
   LeaveTypeDto,
+  LegalEntityDto,
   LoadInputsRequest,
   LocationDto,
   MoveApplicationStageRequest,
+  NotificationPreference,
+  NotificationTemplate,
   OfferDetailDto,
   OrganizationUnitDto,
   PagedApprovalInboxResponse,
   PagedAttendanceDaysResponse,
+  PagedAuditResult,
+  PagedDeliveriesResult,
   PagedExceptionsResponse,
   PagedLeaveRequestsResponse,
+  PagedNotificationsResult,
   PagedRecruitmentResultOfApplication,
   PagedRecruitmentResultOfCandidate,
   PagedRecruitmentResultOfJobRequisition,
   PagedResultOfEmployeeSummaryDto,
+  PagedSelfServiceLeaveRequestsResponse,
   PayrollEmployeeResultDetailDto,
   PayrollEmployeeResultSummaryDto,
   PayrollExceptionDto,
   PayrollPeriodDto,
   PayrollRunDto,
   PipelineBoardDto,
+  PlatformSetting,
+  PositionDto,
   PostApiV1DocumentsIdVersionsBody,
   PostApiV1DocumentsUploadBody,
   ProblemDetails,
+  QueueExportRequest,
   RecordClockRequest,
   RecruitmentPipeline,
   RecruitmentPipelineVersion,
   RejectApplicationRequest,
+  ReportDefinition,
+  ReportExecutionData,
+  ReportExecutionJob,
   RescheduleInterviewRequest,
   ResolveExceptionRequest,
+  RetentionPolicy,
   RevealSensitiveFieldRequest,
+  Role,
+  RoleAssignment,
+  RunReportRequest,
+  SaveRetentionPolicyRequest,
+  SaveSettingRequest,
+  SavedReportView,
   ScheduleInterviewRequest,
   ScorecardSubmission,
+  SelfServiceClockRequest,
+  SelfServiceClockResponse,
+  SelfServiceLeaveRequestInput,
+  SelfServiceLeaveRequestResponse,
+  SelfServiceProfileUpdateRequest,
+  SendMessageRequest,
   SensitiveRevealResponse,
   SettlementBatchDetailDto,
   SettlementBatchDto,
   StatutoryRuleDto,
   SubmitAdjustmentRequest,
   SubmitScorecardRequest,
+  TenantContextDto,
   UpdateCandidateRequest,
+  UpdateConnectorRequest,
+  UpdateLegalEntityRequest,
   UpdateOfferTermsRequest,
   UpdateOrganizationUnitRequest,
+  UpdatePreferenceRequest,
   UpdateRequisitionRequest,
+  UpdateRoleRequest,
+  UpdateTemplateRequest,
+  UserEmploymentLinkDto,
+  UserEmploymentLinkRequest,
   WaiveExceptionRequest,
   WithdrawApplicationRequest,
   WorkSchedule
@@ -439,6 +513,890 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiSessionContextMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1AiConversations = (
+    createConversationRequest: CreateConversationRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConversationSummaryDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/ai/conversations`,
+      createConversationRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AiConversationsMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversations>>, TError,{data: CreateConversationRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversations>>, TError,{data: CreateConversationRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AiConversations'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AiConversations>>, {data: CreateConversationRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1AiConversations(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AiConversationsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AiConversations>>>
+    export type PostApiV1AiConversationsMutationBody = CreateConversationRequest
+    export type PostApiV1AiConversationsMutationError = AxiosError<unknown>
+
+    export const usePostApiV1AiConversations = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversations>>, TError,{data: CreateConversationRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AiConversations>>,
+        TError,
+        {data: CreateConversationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AiConversationsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AiConversations = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConversationSummaryDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/conversations`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AiConversationsQueryKey = () => {
+    return [
+    `/api/v1/ai/conversations`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiConversationsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiConversations>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiConversationsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiConversations>>> = ({ signal }) => getApiV1AiConversations({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiConversationsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiConversations>>>
+export type GetApiV1AiConversationsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiConversations<TData = Awaited<ReturnType<typeof getApiV1AiConversations>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiConversations>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiConversations>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiConversations<TData = Awaited<ReturnType<typeof getApiV1AiConversations>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiConversations>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiConversations>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiConversations<TData = Awaited<ReturnType<typeof getApiV1AiConversations>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiConversations<TData = Awaited<ReturnType<typeof getApiV1AiConversations>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversations>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiConversationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AiConversationsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ConversationDetailDto>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/conversations/${id}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AiConversationsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/ai/conversations/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiConversationsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError = AxiosError<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiConversationsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiConversationsId>>> = ({ signal }) => getApiV1AiConversationsId(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiConversationsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiConversationsId>>>
+export type GetApiV1AiConversationsIdQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiConversationsId<TData = Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError = AxiosError<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiConversationsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiConversationsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiConversationsId<TData = Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiConversationsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiConversationsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiConversationsId<TData = Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiConversationsId<TData = Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiConversationsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiConversationsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AiConversationsIdMessages = (
+    id: string,
+    sendMessageRequest: SendMessageRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiMessageResponseDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/ai/conversations/${id}/messages`,
+      sendMessageRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AiConversationsIdMessagesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>, TError,{id: string;data: SendMessageRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>, TError,{id: string;data: SendMessageRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AiConversationsIdMessages'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>, {id: string;data: SendMessageRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AiConversationsIdMessages(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AiConversationsIdMessagesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>>
+    export type PostApiV1AiConversationsIdMessagesMutationBody = SendMessageRequest
+    export type PostApiV1AiConversationsIdMessagesMutationError = AxiosError<unknown>
+
+    export const usePostApiV1AiConversationsIdMessages = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>, TError,{id: string;data: SendMessageRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AiConversationsIdMessages>>,
+        TError,
+        {id: string;data: SendMessageRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AiConversationsIdMessagesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AiTools = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiToolDefinition[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/tools`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AiToolsQueryKey = () => {
+    return [
+    `/api/v1/ai/tools`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiToolsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiTools>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiToolsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiTools>>> = ({ signal }) => getApiV1AiTools({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiToolsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiTools>>>
+export type GetApiV1AiToolsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiTools<TData = Awaited<ReturnType<typeof getApiV1AiTools>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiTools>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiTools>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiTools<TData = Awaited<ReturnType<typeof getApiV1AiTools>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiTools>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiTools>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiTools<TData = Awaited<ReturnType<typeof getApiV1AiTools>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiTools<TData = Awaited<ReturnType<typeof getApiV1AiTools>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiTools>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiToolsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AiPolicies = (
+    params?: GetApiV1AiPoliciesParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CompanyPolicy[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/policies`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1AiPoliciesQueryKey = (params?: GetApiV1AiPoliciesParams,) => {
+    return [
+    `/api/v1/ai/policies`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiPoliciesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError = AxiosError<unknown>>(params?: GetApiV1AiPoliciesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiPoliciesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiPolicies>>> = ({ signal }) => getApiV1AiPolicies(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiPoliciesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiPolicies>>>
+export type GetApiV1AiPoliciesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiPolicies<TData = Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1AiPoliciesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiPolicies>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiPolicies>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiPolicies<TData = Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiPoliciesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiPolicies>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiPolicies>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiPolicies<TData = Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiPoliciesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiPolicies<TData = Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiPoliciesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiPoliciesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AiActions = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiActionDefinition[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/actions`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AiActionsQueryKey = () => {
+    return [
+    `/api/v1/ai/actions`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiActionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiActions>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiActionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiActions>>> = ({ signal }) => getApiV1AiActions({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiActionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiActions>>>
+export type GetApiV1AiActionsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiActions<TData = Awaited<ReturnType<typeof getApiV1AiActions>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiActions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiActions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiActions<TData = Awaited<ReturnType<typeof getApiV1AiActions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiActions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiActions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiActions<TData = Awaited<ReturnType<typeof getApiV1AiActions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiActions<TData = Awaited<ReturnType<typeof getApiV1AiActions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiActions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiActionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AiProposals = (
+    createProposalRequest: CreateProposalRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiActionProposalDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/ai/proposals`,
+      createProposalRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AiProposalsMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposals>>, TError,{data: CreateProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposals>>, TError,{data: CreateProposalRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AiProposals'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AiProposals>>, {data: CreateProposalRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1AiProposals(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AiProposalsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AiProposals>>>
+    export type PostApiV1AiProposalsMutationBody = CreateProposalRequest
+    export type PostApiV1AiProposalsMutationError = AxiosError<unknown>
+
+    export const usePostApiV1AiProposals = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposals>>, TError,{data: CreateProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AiProposals>>,
+        TError,
+        {data: CreateProposalRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AiProposalsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AiProposals = (
+    params?: GetApiV1AiProposalsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiActionProposalDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/proposals`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1AiProposalsQueryKey = (params?: GetApiV1AiProposalsParams,) => {
+    return [
+    `/api/v1/ai/proposals`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiProposalsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiProposals>>, TError = AxiosError<unknown>>(params?: GetApiV1AiProposalsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiProposalsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiProposals>>> = ({ signal }) => getApiV1AiProposals(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiProposalsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiProposals>>>
+export type GetApiV1AiProposalsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiProposals<TData = Awaited<ReturnType<typeof getApiV1AiProposals>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1AiProposalsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiProposals>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiProposals>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiProposals<TData = Awaited<ReturnType<typeof getApiV1AiProposals>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiProposalsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiProposals>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiProposals>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiProposals<TData = Awaited<ReturnType<typeof getApiV1AiProposals>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiProposalsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiProposals<TData = Awaited<ReturnType<typeof getApiV1AiProposals>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AiProposalsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposals>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiProposalsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AiProposalsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiActionProposalDto>> => {
+    
+    
+    return axios.get(
+      `/api/v1/ai/proposals/${id}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AiProposalsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/ai/proposals/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AiProposalsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError = AxiosError<unknown>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AiProposalsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AiProposalsId>>> = ({ signal }) => getApiV1AiProposalsId(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AiProposalsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AiProposalsId>>>
+export type GetApiV1AiProposalsIdQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AiProposalsId<TData = Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError = AxiosError<unknown>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiProposalsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiProposalsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiProposalsId<TData = Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AiProposalsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AiProposalsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AiProposalsId<TData = Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AiProposalsId<TData = Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError = AxiosError<unknown>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AiProposalsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AiProposalsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AiProposalsIdConfirm = (
+    id: string,
+    confirmProposalRequest: ConfirmProposalRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiProposalExecutionResponseDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/ai/proposals/${id}/confirm`,
+      confirmProposalRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AiProposalsIdConfirmMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>, TError,{id: string;data: ConfirmProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>, TError,{id: string;data: ConfirmProposalRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AiProposalsIdConfirm'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>, {id: string;data: ConfirmProposalRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AiProposalsIdConfirm(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AiProposalsIdConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>>
+    export type PostApiV1AiProposalsIdConfirmMutationBody = ConfirmProposalRequest
+    export type PostApiV1AiProposalsIdConfirmMutationError = AxiosError<unknown>
+
+    export const usePostApiV1AiProposalsIdConfirm = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>, TError,{id: string;data: ConfirmProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AiProposalsIdConfirm>>,
+        TError,
+        {id: string;data: ConfirmProposalRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AiProposalsIdConfirmMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1AiProposalsIdCancel = (
+    id: string,
+    cancelProposalRequest: CancelProposalRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AiActionProposalDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/ai/proposals/${id}/cancel`,
+      cancelProposalRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AiProposalsIdCancelMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>, TError,{id: string;data: CancelProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>, TError,{id: string;data: CancelProposalRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AiProposalsIdCancel'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>, {id: string;data: CancelProposalRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1AiProposalsIdCancel(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AiProposalsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>>
+    export type PostApiV1AiProposalsIdCancelMutationBody = CancelProposalRequest
+    export type PostApiV1AiProposalsIdCancelMutationError = AxiosError<unknown>
+
+    export const usePostApiV1AiProposalsIdCancel = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>, TError,{id: string;data: CancelProposalRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AiProposalsIdCancel>>,
+        TError,
+        {id: string;data: CancelProposalRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AiProposalsIdCancelMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -783,6 +1741,63 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1ApprovalsRequestsIdCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1ApprovalsRequestsIdDelegate = (
+    id: string,
+    approvalDelegationInput: ApprovalDelegationInput, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ApprovalDelegationDto | ApprovalDelegationDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/approvals/requests/${id}/delegate`,
+      approvalDelegationInput,options
+    );
+  }
+
+
+
+export const getPostApiV1ApprovalsRequestsIdDelegateMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>, TError,{id: string;data: ApprovalDelegationInput}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>, TError,{id: string;data: ApprovalDelegationInput}, TContext> => {
+
+const mutationKey = ['postApiV1ApprovalsRequestsIdDelegate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>, {id: string;data: ApprovalDelegationInput}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1ApprovalsRequestsIdDelegate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ApprovalsRequestsIdDelegateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>>
+    export type PostApiV1ApprovalsRequestsIdDelegateMutationBody = ApprovalDelegationInput
+    export type PostApiV1ApprovalsRequestsIdDelegateMutationError = AxiosError<unknown>
+
+    export const usePostApiV1ApprovalsRequestsIdDelegate = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>, TError,{id: string;data: ApprovalDelegationInput}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ApprovalsRequestsIdDelegate>>,
+        TError,
+        {id: string;data: ApprovalDelegationInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ApprovalsRequestsIdDelegateMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -1360,6 +2375,179 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const getApiV1Audit = (
+    params?: GetApiV1AuditParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PagedAuditResult>> => {
+    
+    
+    return axios.get(
+      `/api/v1/audit`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1AuditQueryKey = (params?: GetApiV1AuditParams,) => {
+    return [
+    `/api/v1/audit`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AuditQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Audit>>, TError = AxiosError<unknown>>(params?: GetApiV1AuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AuditQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Audit>>> = ({ signal }) => getApiV1Audit(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AuditQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Audit>>>
+export type GetApiV1AuditQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1Audit<TData = Awaited<ReturnType<typeof getApiV1Audit>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1AuditParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Audit>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Audit>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Audit<TData = Awaited<ReturnType<typeof getApiV1Audit>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Audit>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Audit>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Audit<TData = Awaited<ReturnType<typeof getApiV1Audit>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1Audit<TData = Awaited<ReturnType<typeof getApiV1Audit>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Audit>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AuditQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AuditId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AuditRecord>> => {
+    
+    
+    return axios.get(
+      `/api/v1/audit/${id}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AuditIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/audit/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AuditIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AuditId>>, TError = AxiosError<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AuditIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AuditId>>> = ({ signal }) => getApiV1AuditId(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AuditIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AuditId>>>
+export type GetApiV1AuditIdQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1AuditId<TData = Awaited<ReturnType<typeof getApiV1AuditId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuditId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuditId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AuditId<TData = Awaited<ReturnType<typeof getApiV1AuditId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AuditId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AuditId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AuditId<TData = Awaited<ReturnType<typeof getApiV1AuditId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AuditId<TData = Awaited<ReturnType<typeof getApiV1AuditId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AuditId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AuditIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
 export const getApiV1ComplianceRules = (
     params?: GetApiV1ComplianceRulesParams, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<StatutoryRuleDto[]>> => {
@@ -1521,6 +2709,93 @@ export function useGetApiV1DocumentsTypes<TData = Awaited<ReturnType<typeof getA
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetApiV1DocumentsTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1DocumentsExpiring = (
+    params?: GetApiV1DocumentsExpiringParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DocumentSummaryDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/documents/expiring`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1DocumentsExpiringQueryKey = (params?: GetApiV1DocumentsExpiringParams,) => {
+    return [
+    `/api/v1/documents/expiring`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1DocumentsExpiringQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError = AxiosError<unknown>>(params?: GetApiV1DocumentsExpiringParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1DocumentsExpiringQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>> = ({ signal }) => getApiV1DocumentsExpiring(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1DocumentsExpiringQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>>
+export type GetApiV1DocumentsExpiringQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1DocumentsExpiring<TData = Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1DocumentsExpiringParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1DocumentsExpiring<TData = Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1DocumentsExpiringParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1DocumentsExpiring<TData = Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1DocumentsExpiringParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1DocumentsExpiring<TData = Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1DocumentsExpiringParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1DocumentsExpiring>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1DocumentsExpiringQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -1709,11 +2984,12 @@ export function useGetApiV1DocumentsId<TData = Awaited<ReturnType<typeof getApiV
 export const getApiV1DocumentsIdDownload = (
     id: string,
     params?: GetApiV1DocumentsIdDownloadParams, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+ ): Promise<AxiosResponse<Blob>> => {
     
     
     return axios.get(
       `/api/v1/documents/${id}/download`,{
+        responseType: 'blob',
     ...options,
         params: {...params, ...options?.params},}
     );
@@ -1804,29 +3080,29 @@ export const postApiV1DocumentsUpload = (
     postApiV1DocumentsUploadBody: PostApiV1DocumentsUploadBody, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<DocumentDetailDto>> => {
     
-    const formUrlEncoded = new URLSearchParams();
+    const formData = new FormData();
 if(postApiV1DocumentsUploadBody.OwnerType !== undefined) {
- formUrlEncoded.append(`OwnerType`, postApiV1DocumentsUploadBody.OwnerType)
+ formData.append(`OwnerType`, postApiV1DocumentsUploadBody.OwnerType)
  }
 if(postApiV1DocumentsUploadBody.OwnerId !== undefined) {
- formUrlEncoded.append(`OwnerId`, postApiV1DocumentsUploadBody.OwnerId)
+ formData.append(`OwnerId`, postApiV1DocumentsUploadBody.OwnerId)
  }
 if(postApiV1DocumentsUploadBody.DocumentTypeId !== undefined) {
- formUrlEncoded.append(`DocumentTypeId`, postApiV1DocumentsUploadBody.DocumentTypeId)
+ formData.append(`DocumentTypeId`, postApiV1DocumentsUploadBody.DocumentTypeId)
  }
 if(postApiV1DocumentsUploadBody.Title !== undefined) {
- formUrlEncoded.append(`Title`, postApiV1DocumentsUploadBody.Title)
+ formData.append(`Title`, postApiV1DocumentsUploadBody.Title)
  }
 if(postApiV1DocumentsUploadBody.ExpiryDate !== undefined) {
- formUrlEncoded.append(`ExpiryDate`, postApiV1DocumentsUploadBody.ExpiryDate)
+ formData.append(`ExpiryDate`, postApiV1DocumentsUploadBody.ExpiryDate)
  }
 if(postApiV1DocumentsUploadBody.File !== undefined) {
- formUrlEncoded.append(`File`, postApiV1DocumentsUploadBody.File)
+ formData.append(`File`, postApiV1DocumentsUploadBody.File)
  }
 
     return axios.post(
       `/api/v1/documents/upload`,
-      formUrlEncoded,options
+      formData,options
     );
   }
 
@@ -1880,14 +3156,14 @@ export const postApiV1DocumentsIdVersions = (
     postApiV1DocumentsIdVersionsBody: PostApiV1DocumentsIdVersionsBody, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<DocumentDetailDto>> => {
     
-    const formUrlEncoded = new URLSearchParams();
+    const formData = new FormData();
 if(postApiV1DocumentsIdVersionsBody.File !== undefined) {
- formUrlEncoded.append(`File`, postApiV1DocumentsIdVersionsBody.File)
+ formData.append(`File`, postApiV1DocumentsIdVersionsBody.File)
  }
 
     return axios.post(
       `/api/v1/documents/${id}/versions`,
-      formUrlEncoded,options
+      formData,options
     );
   }
 
@@ -1932,6 +3208,1391 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1DocumentsIdVersionsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1DocumentsIdArchive = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/documents/${id}/archive`,undefined,options
+    );
+  }
+
+
+
+export const getPostApiV1DocumentsIdArchiveMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postApiV1DocumentsIdArchive'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1DocumentsIdArchive(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1DocumentsIdArchiveMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>>
+    
+    export type PostApiV1DocumentsIdArchiveMutationError = AxiosError<unknown>
+
+    export const usePostApiV1DocumentsIdArchive = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1DocumentsIdArchive>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1DocumentsIdArchiveMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AdminRoles = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Role[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/roles`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminRolesQueryKey = () => {
+    return [
+    `/api/v1/admin/roles`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminRolesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminRolesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminRoles>>> = ({ signal }) => getApiV1AdminRoles({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminRolesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminRoles>>>
+export type GetApiV1AdminRolesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AdminRoles<TData = Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRoles>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRoles>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRoles<TData = Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRoles>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRoles>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRoles<TData = Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminRoles<TData = Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoles>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminRolesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AdminRoles = (
+    createRoleRequest: CreateRoleRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Role>> => {
+    
+    
+    return axios.post(
+      `/api/v1/admin/roles`,
+      createRoleRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AdminRolesMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoles>>, TError,{data: CreateRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoles>>, TError,{data: CreateRoleRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AdminRoles'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AdminRoles>>, {data: CreateRoleRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1AdminRoles(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AdminRolesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AdminRoles>>>
+    export type PostApiV1AdminRolesMutationBody = CreateRoleRequest
+    export type PostApiV1AdminRolesMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1AdminRoles = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoles>>, TError,{data: CreateRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AdminRoles>>,
+        TError,
+        {data: CreateRoleRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AdminRolesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AdminRolesId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Role>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/roles/${id}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminRolesIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/admin/roles/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminRolesIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError = AxiosError<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminRolesIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminRolesId>>> = ({ signal }) => getApiV1AdminRolesId(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminRolesIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminRolesId>>>
+export type GetApiV1AdminRolesIdQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1AdminRolesId<TData = Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRolesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRolesId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRolesId<TData = Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRolesId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRolesId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRolesId<TData = Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminRolesId<TData = Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRolesId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminRolesIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1AdminRolesId = (
+    id: string,
+    updateRoleRequest: UpdateRoleRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Role>> => {
+    
+    
+    return axios.put(
+      `/api/v1/admin/roles/${id}`,
+      updateRoleRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1AdminRolesIdMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRolesId>>, TError,{id: string;data: UpdateRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRolesId>>, TError,{id: string;data: UpdateRoleRequest}, TContext> => {
+
+const mutationKey = ['putApiV1AdminRolesId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1AdminRolesId>>, {id: string;data: UpdateRoleRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1AdminRolesId(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1AdminRolesIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1AdminRolesId>>>
+    export type PutApiV1AdminRolesIdMutationBody = UpdateRoleRequest
+    export type PutApiV1AdminRolesIdMutationError = AxiosError<ProblemDetails>
+
+    export const usePutApiV1AdminRolesId = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRolesId>>, TError,{id: string;data: UpdateRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1AdminRolesId>>,
+        TError,
+        {id: string;data: UpdateRoleRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1AdminRolesIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AdminRoleAssignments = (
+    params?: GetApiV1AdminRoleAssignmentsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<RoleAssignment[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/role-assignments`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminRoleAssignmentsQueryKey = (params?: GetApiV1AdminRoleAssignmentsParams,) => {
+    return [
+    `/api/v1/admin/role-assignments`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminRoleAssignmentsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError = AxiosError<unknown>>(params?: GetApiV1AdminRoleAssignmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminRoleAssignmentsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>> = ({ signal }) => getApiV1AdminRoleAssignments(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminRoleAssignmentsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>>
+export type GetApiV1AdminRoleAssignmentsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AdminRoleAssignments<TData = Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1AdminRoleAssignmentsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRoleAssignments<TData = Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AdminRoleAssignmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRoleAssignments<TData = Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AdminRoleAssignmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminRoleAssignments<TData = Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1AdminRoleAssignmentsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRoleAssignments>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminRoleAssignmentsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1AdminRoleAssignments = (
+    assignRoleRequest: AssignRoleRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/admin/role-assignments`,
+      assignRoleRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1AdminRoleAssignmentsMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>, TError,{data: AssignRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>, TError,{data: AssignRoleRequest}, TContext> => {
+
+const mutationKey = ['postApiV1AdminRoleAssignments'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>, {data: AssignRoleRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1AdminRoleAssignments(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1AdminRoleAssignmentsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>>
+    export type PostApiV1AdminRoleAssignmentsMutationBody = AssignRoleRequest
+    export type PostApiV1AdminRoleAssignmentsMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1AdminRoleAssignments = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>, TError,{data: AssignRoleRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1AdminRoleAssignments>>,
+        TError,
+        {data: AssignRoleRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1AdminRoleAssignmentsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const deleteApiV1AdminRoleAssignmentsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.delete(
+      `/api/v1/admin/role-assignments/${id}`,options
+    );
+  }
+
+
+
+export const getDeleteApiV1AdminRoleAssignmentsIdMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiV1AdminRoleAssignmentsId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiV1AdminRoleAssignmentsId(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiV1AdminRoleAssignmentsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>>
+    
+    export type DeleteApiV1AdminRoleAssignmentsIdMutationError = AxiosError<unknown>
+
+    export const useDeleteApiV1AdminRoleAssignmentsId = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiV1AdminRoleAssignmentsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteApiV1AdminRoleAssignmentsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AdminPermissions = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<string[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/permissions`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminPermissionsQueryKey = () => {
+    return [
+    `/api/v1/admin/permissions`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminPermissionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminPermissionsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminPermissions>>> = ({ signal }) => getApiV1AdminPermissions({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminPermissionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminPermissions>>>
+export type GetApiV1AdminPermissionsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AdminPermissions<TData = Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminPermissions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminPermissions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminPermissions<TData = Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminPermissions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminPermissions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminPermissions<TData = Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminPermissions<TData = Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminPermissions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminPermissionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1AdminSettings = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PlatformSetting[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/settings`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminSettingsQueryKey = () => {
+    return [
+    `/api/v1/admin/settings`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminSettingsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminSettingsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminSettings>>> = ({ signal }) => getApiV1AdminSettings({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminSettingsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminSettings>>>
+export type GetApiV1AdminSettingsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AdminSettings<TData = Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminSettings>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminSettings>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminSettings<TData = Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminSettings>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminSettings>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminSettings<TData = Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminSettings<TData = Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminSettings>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminSettingsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1AdminSettings = (
+    saveSettingRequest: SaveSettingRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PlatformSetting>> => {
+    
+    
+    return axios.put(
+      `/api/v1/admin/settings`,
+      saveSettingRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1AdminSettingsMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminSettings>>, TError,{data: SaveSettingRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminSettings>>, TError,{data: SaveSettingRequest}, TContext> => {
+
+const mutationKey = ['putApiV1AdminSettings'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1AdminSettings>>, {data: SaveSettingRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiV1AdminSettings(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1AdminSettingsMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1AdminSettings>>>
+    export type PutApiV1AdminSettingsMutationBody = SaveSettingRequest
+    export type PutApiV1AdminSettingsMutationError = AxiosError<unknown>
+
+    export const usePutApiV1AdminSettings = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminSettings>>, TError,{data: SaveSettingRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1AdminSettings>>,
+        TError,
+        {data: SaveSettingRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1AdminSettingsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1AdminRetentionPolicies = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<RetentionPolicy[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/admin/retention-policies`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1AdminRetentionPoliciesQueryKey = () => {
+    return [
+    `/api/v1/admin/retention-policies`
+    ] as const;
+    }
+
+    
+export const getGetApiV1AdminRetentionPoliciesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1AdminRetentionPoliciesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>> = ({ signal }) => getApiV1AdminRetentionPolicies({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1AdminRetentionPoliciesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>>
+export type GetApiV1AdminRetentionPoliciesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1AdminRetentionPolicies<TData = Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRetentionPolicies<TData = Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1AdminRetentionPolicies<TData = Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1AdminRetentionPolicies<TData = Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1AdminRetentionPolicies>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1AdminRetentionPoliciesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1AdminRetentionPolicies = (
+    saveRetentionPolicyRequest: SaveRetentionPolicyRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<RetentionPolicy>> => {
+    
+    
+    return axios.put(
+      `/api/v1/admin/retention-policies`,
+      saveRetentionPolicyRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1AdminRetentionPoliciesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>, TError,{data: SaveRetentionPolicyRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>, TError,{data: SaveRetentionPolicyRequest}, TContext> => {
+
+const mutationKey = ['putApiV1AdminRetentionPolicies'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>, {data: SaveRetentionPolicyRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiV1AdminRetentionPolicies(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1AdminRetentionPoliciesMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>>
+    export type PutApiV1AdminRetentionPoliciesMutationBody = SaveRetentionPolicyRequest
+    export type PutApiV1AdminRetentionPoliciesMutationError = AxiosError<unknown>
+
+    export const usePutApiV1AdminRetentionPolicies = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>, TError,{data: SaveRetentionPolicyRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1AdminRetentionPolicies>>,
+        TError,
+        {data: SaveRetentionPolicyRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1AdminRetentionPoliciesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1IntegrationsConnectors = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<IntegrationConnector[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/integrations/connectors`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1IntegrationsConnectorsQueryKey = () => {
+    return [
+    `/api/v1/integrations/connectors`
+    ] as const;
+    }
+
+    
+export const getGetApiV1IntegrationsConnectorsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1IntegrationsConnectorsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>> = ({ signal }) => getApiV1IntegrationsConnectors({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1IntegrationsConnectorsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>>
+export type GetApiV1IntegrationsConnectorsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1IntegrationsConnectors<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsConnectors<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsConnectors<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1IntegrationsConnectors<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectors>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1IntegrationsConnectorsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1IntegrationsConnectors = (
+    createConnectorRequest: CreateConnectorRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<IntegrationConnector>> => {
+    
+    
+    return axios.post(
+      `/api/v1/integrations/connectors`,
+      createConnectorRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1IntegrationsConnectorsMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>, TError,{data: CreateConnectorRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>, TError,{data: CreateConnectorRequest}, TContext> => {
+
+const mutationKey = ['postApiV1IntegrationsConnectors'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>, {data: CreateConnectorRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1IntegrationsConnectors(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1IntegrationsConnectorsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>>
+    export type PostApiV1IntegrationsConnectorsMutationBody = CreateConnectorRequest
+    export type PostApiV1IntegrationsConnectorsMutationError = AxiosError<unknown>
+
+    export const usePostApiV1IntegrationsConnectors = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>, TError,{data: CreateConnectorRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1IntegrationsConnectors>>,
+        TError,
+        {data: CreateConnectorRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1IntegrationsConnectorsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1IntegrationsConnectorsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<IntegrationConnector>> => {
+    
+    
+    return axios.get(
+      `/api/v1/integrations/connectors/${id}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1IntegrationsConnectorsIdQueryKey = (id?: string,) => {
+    return [
+    `/api/v1/integrations/connectors/${id}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1IntegrationsConnectorsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError = AxiosError<ProblemDetails>>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1IntegrationsConnectorsIdQueryKey(id);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>> = ({ signal }) => getApiV1IntegrationsConnectorsId(id, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1IntegrationsConnectorsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>>
+export type GetApiV1IntegrationsConnectorsIdQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1IntegrationsConnectorsId<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsConnectorsId<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsConnectorsId<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1IntegrationsConnectorsId<TData = Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError = AxiosError<ProblemDetails>>(
+ id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsConnectorsId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1IntegrationsConnectorsIdQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1IntegrationsConnectorsId = (
+    id: string,
+    updateConnectorRequest: UpdateConnectorRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<IntegrationConnector>> => {
+    
+    
+    return axios.put(
+      `/api/v1/integrations/connectors/${id}`,
+      updateConnectorRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1IntegrationsConnectorsIdMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>, TError,{id: string;data: UpdateConnectorRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>, TError,{id: string;data: UpdateConnectorRequest}, TContext> => {
+
+const mutationKey = ['putApiV1IntegrationsConnectorsId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>, {id: string;data: UpdateConnectorRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1IntegrationsConnectorsId(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1IntegrationsConnectorsIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>>
+    export type PutApiV1IntegrationsConnectorsIdMutationBody = UpdateConnectorRequest
+    export type PutApiV1IntegrationsConnectorsIdMutationError = AxiosError<ProblemDetails>
+
+    export const usePutApiV1IntegrationsConnectorsId = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>, TError,{id: string;data: UpdateConnectorRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1IntegrationsConnectorsId>>,
+        TError,
+        {id: string;data: UpdateConnectorRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1IntegrationsConnectorsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1IntegrationsDeliveries = (
+    params?: GetApiV1IntegrationsDeliveriesParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PagedDeliveriesResult>> => {
+    
+    
+    return axios.get(
+      `/api/v1/integrations/deliveries`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1IntegrationsDeliveriesQueryKey = (params?: GetApiV1IntegrationsDeliveriesParams,) => {
+    return [
+    `/api/v1/integrations/deliveries`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1IntegrationsDeliveriesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError = AxiosError<unknown>>(params?: GetApiV1IntegrationsDeliveriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1IntegrationsDeliveriesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>> = ({ signal }) => getApiV1IntegrationsDeliveries(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1IntegrationsDeliveriesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>>
+export type GetApiV1IntegrationsDeliveriesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1IntegrationsDeliveries<TData = Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1IntegrationsDeliveriesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsDeliveries<TData = Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1IntegrationsDeliveriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1IntegrationsDeliveries<TData = Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1IntegrationsDeliveriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1IntegrationsDeliveries<TData = Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1IntegrationsDeliveriesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1IntegrationsDeliveries>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1IntegrationsDeliveriesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1IntegrationsDeliveriesIdRetry = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/integrations/deliveries/${id}/retry`,undefined,options
+    );
+  }
+
+
+
+export const getPostApiV1IntegrationsDeliveriesIdRetryMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postApiV1IntegrationsDeliveriesIdRetry'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1IntegrationsDeliveriesIdRetry(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1IntegrationsDeliveriesIdRetryMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>>
+    
+    export type PostApiV1IntegrationsDeliveriesIdRetryMutationError = AxiosError<unknown>
+
+    export const usePostApiV1IntegrationsDeliveriesIdRetry = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1IntegrationsDeliveriesIdRetry>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1IntegrationsDeliveriesIdRetryMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1IntegrationsInboundWebhookConnectorCode = (
+    connectorCode: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/integrations/inbound/webhook/${connectorCode}`,undefined,options
+    );
+  }
+
+
+
+export const getPostApiV1IntegrationsInboundWebhookConnectorCodeMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>, TError,{connectorCode: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>, TError,{connectorCode: string}, TContext> => {
+
+const mutationKey = ['postApiV1IntegrationsInboundWebhookConnectorCode'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>, {connectorCode: string}> = (props) => {
+          const {connectorCode} = props ?? {};
+
+          return  postApiV1IntegrationsInboundWebhookConnectorCode(connectorCode,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1IntegrationsInboundWebhookConnectorCodeMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>>
+    
+    export type PostApiV1IntegrationsInboundWebhookConnectorCodeMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1IntegrationsInboundWebhookConnectorCode = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>, TError,{connectorCode: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1IntegrationsInboundWebhookConnectorCode>>,
+        TError,
+        {connectorCode: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1IntegrationsInboundWebhookConnectorCodeMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -2452,6 +5113,684 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const postApiV1LeaveRequestsIdCancel = (
+    id: string,
+    leaveCancellationRequest: LeaveCancellationRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/leave/requests/${id}/cancel`,
+      leaveCancellationRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1LeaveRequestsIdCancelMutationOptions = <TError = AxiosError<void | ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext> => {
+
+const mutationKey = ['postApiV1LeaveRequestsIdCancel'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, {id: string;data: LeaveCancellationRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1LeaveRequestsIdCancel(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1LeaveRequestsIdCancelMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>>
+    export type PostApiV1LeaveRequestsIdCancelMutationBody = LeaveCancellationRequest
+    export type PostApiV1LeaveRequestsIdCancelMutationError = AxiosError<void | ProblemDetails>
+
+    export const usePostApiV1LeaveRequestsIdCancel = <TError = AxiosError<void | ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>, TError,{id: string;data: LeaveCancellationRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1LeaveRequestsIdCancel>>,
+        TError,
+        {id: string;data: LeaveCancellationRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1LeaveRequestsIdCancelMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1Notifications = (
+    params?: GetApiV1NotificationsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PagedNotificationsResult>> => {
+    
+    
+    return axios.get(
+      `/api/v1/notifications`,{
+        responseType: 'text',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1NotificationsQueryKey = (params?: GetApiV1NotificationsParams,) => {
+    return [
+    `/api/v1/notifications`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1NotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Notifications>>, TError = AxiosError<unknown>>(params?: GetApiV1NotificationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1NotificationsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Notifications>>> = ({ signal }) => getApiV1Notifications(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1NotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Notifications>>>
+export type GetApiV1NotificationsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1Notifications<TData = Awaited<ReturnType<typeof getApiV1Notifications>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1NotificationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Notifications>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Notifications>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Notifications<TData = Awaited<ReturnType<typeof getApiV1Notifications>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1NotificationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Notifications>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Notifications>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Notifications<TData = Awaited<ReturnType<typeof getApiV1Notifications>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1NotificationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1Notifications<TData = Awaited<ReturnType<typeof getApiV1Notifications>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1NotificationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Notifications>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1NotificationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1NotificationsUnreadCount = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<unknown>> => {
+    
+    
+    return axios.get(
+      `/api/v1/notifications/unread-count`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1NotificationsUnreadCountQueryKey = () => {
+    return [
+    `/api/v1/notifications/unread-count`
+    ] as const;
+    }
+
+    
+export const getGetApiV1NotificationsUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1NotificationsUnreadCountQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>> = ({ signal }) => getApiV1NotificationsUnreadCount({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1NotificationsUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>>
+export type GetApiV1NotificationsUnreadCountQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1NotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1NotificationsUnreadCount<TData = Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsUnreadCount>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1NotificationsUnreadCountQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1NotificationsIdRead = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/notifications/${id}/read`,undefined,options
+    );
+  }
+
+
+
+export const getPostApiV1NotificationsIdReadMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['postApiV1NotificationsIdRead'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1NotificationsIdRead(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1NotificationsIdReadMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>>
+    
+    export type PostApiV1NotificationsIdReadMutationError = AxiosError<unknown>
+
+    export const usePostApiV1NotificationsIdRead = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1NotificationsIdRead>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1NotificationsIdReadMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1NotificationsReadAll = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/notifications/read-all`,undefined,options
+    );
+  }
+
+
+
+export const getPostApiV1NotificationsReadAllMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>, TError,void, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>, TError,void, TContext> => {
+
+const mutationKey = ['postApiV1NotificationsReadAll'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>, void> = () => {
+          
+
+          return  postApiV1NotificationsReadAll(axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1NotificationsReadAllMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>>
+    
+    export type PostApiV1NotificationsReadAllMutationError = AxiosError<unknown>
+
+    export const usePostApiV1NotificationsReadAll = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>, TError,void, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1NotificationsReadAll>>,
+        TError,
+        void,
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1NotificationsReadAllMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const deleteApiV1NotificationsId = (
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.delete(
+      `/api/v1/notifications/${id}`,options
+    );
+  }
+
+
+
+export const getDeleteApiV1NotificationsIdMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1NotificationsId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1NotificationsId>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['deleteApiV1NotificationsId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiV1NotificationsId>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteApiV1NotificationsId(id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiV1NotificationsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiV1NotificationsId>>>
+    
+    export type DeleteApiV1NotificationsIdMutationError = AxiosError<unknown>
+
+    export const useDeleteApiV1NotificationsId = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1NotificationsId>>, TError,{id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiV1NotificationsId>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteApiV1NotificationsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1NotificationsPreferences = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<NotificationPreference[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/notifications/preferences`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1NotificationsPreferencesQueryKey = () => {
+    return [
+    `/api/v1/notifications/preferences`
+    ] as const;
+    }
+
+    
+export const getGetApiV1NotificationsPreferencesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1NotificationsPreferencesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>> = ({ signal }) => getApiV1NotificationsPreferences({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1NotificationsPreferencesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>>
+export type GetApiV1NotificationsPreferencesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1NotificationsPreferences<TData = Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsPreferences<TData = Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsPreferences<TData = Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1NotificationsPreferences<TData = Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsPreferences>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1NotificationsPreferencesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1NotificationsPreferences = (
+    updatePreferenceRequest: UpdatePreferenceRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.put(
+      `/api/v1/notifications/preferences`,
+      updatePreferenceRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1NotificationsPreferencesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>, TError,{data: UpdatePreferenceRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>, TError,{data: UpdatePreferenceRequest}, TContext> => {
+
+const mutationKey = ['putApiV1NotificationsPreferences'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>, {data: UpdatePreferenceRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiV1NotificationsPreferences(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1NotificationsPreferencesMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>>
+    export type PutApiV1NotificationsPreferencesMutationBody = UpdatePreferenceRequest
+    export type PutApiV1NotificationsPreferencesMutationError = AxiosError<unknown>
+
+    export const usePutApiV1NotificationsPreferences = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>, TError,{data: UpdatePreferenceRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1NotificationsPreferences>>,
+        TError,
+        {data: UpdatePreferenceRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1NotificationsPreferencesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1NotificationsTemplates = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<NotificationTemplate[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/notifications/templates`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1NotificationsTemplatesQueryKey = () => {
+    return [
+    `/api/v1/notifications/templates`
+    ] as const;
+    }
+
+    
+export const getGetApiV1NotificationsTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1NotificationsTemplatesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>> = ({ signal }) => getApiV1NotificationsTemplates({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1NotificationsTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>>
+export type GetApiV1NotificationsTemplatesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1NotificationsTemplates<TData = Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsTemplates<TData = Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1NotificationsTemplates<TData = Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1NotificationsTemplates<TData = Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1NotificationsTemplates>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1NotificationsTemplatesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1NotificationsTemplatesId = (
+    id: string,
+    updateTemplateRequest: UpdateTemplateRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.put(
+      `/api/v1/notifications/templates/${id}`,
+      updateTemplateRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1NotificationsTemplatesIdMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>, TError,{id: string;data: UpdateTemplateRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>, TError,{id: string;data: UpdateTemplateRequest}, TContext> => {
+
+const mutationKey = ['putApiV1NotificationsTemplatesId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>, {id: string;data: UpdateTemplateRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1NotificationsTemplatesId(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1NotificationsTemplatesIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>>
+    export type PutApiV1NotificationsTemplatesIdMutationBody = UpdateTemplateRequest
+    export type PutApiV1NotificationsTemplatesIdMutationError = AxiosError<ProblemDetails>
+
+    export const usePutApiV1NotificationsTemplatesId = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>, TError,{id: string;data: UpdateTemplateRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1NotificationsTemplatesId>>,
+        TError,
+        {id: string;data: UpdateTemplateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1NotificationsTemplatesIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
 export const getApiV1OrganizationUnits = (
     params?: GetApiV1OrganizationUnitsParams, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<OrganizationUnitDto[]>> => {
@@ -2734,6 +6073,206 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPutApiV1OrganizationUnitsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1OrganizationUnitsIdDeactivate = (
+    id: string,
+    deactivateOrganizationUnitRequest: DeactivateOrganizationUnitRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.post(
+      `/api/v1/organization/units/${id}/deactivate`,
+      deactivateOrganizationUnitRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1OrganizationUnitsIdDeactivateMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>, TError,{id: string;data: DeactivateOrganizationUnitRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>, TError,{id: string;data: DeactivateOrganizationUnitRequest}, TContext> => {
+
+const mutationKey = ['postApiV1OrganizationUnitsIdDeactivate'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>, {id: string;data: DeactivateOrganizationUnitRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  postApiV1OrganizationUnitsIdDeactivate(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1OrganizationUnitsIdDeactivateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>>
+    export type PostApiV1OrganizationUnitsIdDeactivateMutationBody = DeactivateOrganizationUnitRequest
+    export type PostApiV1OrganizationUnitsIdDeactivateMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1OrganizationUnitsIdDeactivate = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>, TError,{id: string;data: DeactivateOrganizationUnitRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1OrganizationUnitsIdDeactivate>>,
+        TError,
+        {id: string;data: DeactivateOrganizationUnitRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1OrganizationUnitsIdDeactivateMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1OrganizationPositions = (
+    params?: GetApiV1OrganizationPositionsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PositionDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/organization/positions`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1OrganizationPositionsQueryKey = (params?: GetApiV1OrganizationPositionsParams,) => {
+    return [
+    `/api/v1/organization/positions`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1OrganizationPositionsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError = AxiosError<ProblemDetails>>(params?: GetApiV1OrganizationPositionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1OrganizationPositionsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>> = ({ signal }) => getApiV1OrganizationPositions(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1OrganizationPositionsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>>
+export type GetApiV1OrganizationPositionsQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1OrganizationPositions<TData = Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError = AxiosError<ProblemDetails>>(
+ params: undefined |  GetApiV1OrganizationPositionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1OrganizationPositions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1OrganizationPositions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1OrganizationPositions<TData = Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1OrganizationPositionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1OrganizationPositions>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1OrganizationPositions>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1OrganizationPositions<TData = Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1OrganizationPositionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1OrganizationPositions<TData = Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1OrganizationPositionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationPositions>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1OrganizationPositionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1OrganizationPositions = (
+    createPositionRequest: CreatePositionRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PositionDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/organization/positions`,
+      createPositionRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1OrganizationPositionsMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationPositions>>, TError,{data: CreatePositionRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationPositions>>, TError,{data: CreatePositionRequest}, TContext> => {
+
+const mutationKey = ['postApiV1OrganizationPositions'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1OrganizationPositions>>, {data: CreatePositionRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1OrganizationPositions(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1OrganizationPositionsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1OrganizationPositions>>>
+    export type PostApiV1OrganizationPositionsMutationBody = CreatePositionRequest
+    export type PostApiV1OrganizationPositionsMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1OrganizationPositions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationPositions>>, TError,{data: CreatePositionRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1OrganizationPositions>>,
+        TError,
+        {data: CreatePositionRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1OrganizationPositionsMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -3876,6 +7415,983 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1PayrollRunsIdFinalizeMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1SelfServiceProfile = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<EmployeeProfileDto>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/profile`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceProfileQueryKey = () => {
+    return [
+    `/api/v1/self-service/profile`
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceProfileQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError = AxiosError<ProblemDetails>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceProfileQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>> = ({ signal }) => getApiV1SelfServiceProfile({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>>
+export type GetApiV1SelfServiceProfileQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceProfile<TData = Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError = AxiosError<ProblemDetails>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceProfile<TData = Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceProfile<TData = Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceProfile<TData = Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceProfile>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceProfileQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const putApiV1SelfServiceProfile = (
+    selfServiceProfileUpdateRequest: SelfServiceProfileUpdateRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<EmployeeProfileDto>> => {
+    
+    
+    return axios.put(
+      `/api/v1/self-service/profile`,
+      selfServiceProfileUpdateRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1SelfServiceProfileMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>, TError,{data: SelfServiceProfileUpdateRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>, TError,{data: SelfServiceProfileUpdateRequest}, TContext> => {
+
+const mutationKey = ['putApiV1SelfServiceProfile'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>, {data: SelfServiceProfileUpdateRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  putApiV1SelfServiceProfile(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1SelfServiceProfileMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>>
+    export type PutApiV1SelfServiceProfileMutationBody = SelfServiceProfileUpdateRequest
+    export type PutApiV1SelfServiceProfileMutationError = AxiosError<ProblemDetails>
+
+    export const usePutApiV1SelfServiceProfile = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>, TError,{data: SelfServiceProfileUpdateRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1SelfServiceProfile>>,
+        TError,
+        {data: SelfServiceProfileUpdateRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1SelfServiceProfileMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1SelfServiceTeam = (
+    params?: GetApiV1SelfServiceTeamParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PagedResultOfEmployeeSummaryDto>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/team`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceTeamQueryKey = (params?: GetApiV1SelfServiceTeamParams,) => {
+    return [
+    `/api/v1/self-service/team`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceTeamQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError = AxiosError<ProblemDetails>>(params?: GetApiV1SelfServiceTeamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceTeamQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>> = ({ signal }) => getApiV1SelfServiceTeam(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceTeamQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>>
+export type GetApiV1SelfServiceTeamQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceTeam<TData = Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError = AxiosError<ProblemDetails>>(
+ params: undefined |  GetApiV1SelfServiceTeamParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceTeam<TData = Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceTeamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceTeam<TData = Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceTeamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceTeam<TData = Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceTeamParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceTeam>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceTeamQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1SelfServiceLeaveBalances = (
+    params?: GetApiV1SelfServiceLeaveBalancesParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LeaveBalanceDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/leave/balances`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceLeaveBalancesQueryKey = (params?: GetApiV1SelfServiceLeaveBalancesParams,) => {
+    return [
+    `/api/v1/self-service/leave/balances`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceLeaveBalancesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError = AxiosError<ProblemDetails>>(params?: GetApiV1SelfServiceLeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceLeaveBalancesQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>> = ({ signal }) => getApiV1SelfServiceLeaveBalances(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceLeaveBalancesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>>
+export type GetApiV1SelfServiceLeaveBalancesQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceLeaveBalances<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError = AxiosError<ProblemDetails>>(
+ params: undefined |  GetApiV1SelfServiceLeaveBalancesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveBalances<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveBalances<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceLeaveBalances<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveBalancesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveBalances>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceLeaveBalancesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1SelfServiceLeaveTypes = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LeaveTypeDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/leave/types`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceLeaveTypesQueryKey = () => {
+    return [
+    `/api/v1/self-service/leave/types`
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceLeaveTypesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError = AxiosError<ProblemDetails>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceLeaveTypesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>> = ({ signal }) => getApiV1SelfServiceLeaveTypes({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceLeaveTypesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>>
+export type GetApiV1SelfServiceLeaveTypesQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceLeaveTypes<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError = AxiosError<ProblemDetails>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveTypes<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveTypes<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceLeaveTypes<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveTypes>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceLeaveTypesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1SelfServiceLeaveRequests = (
+    params?: GetApiV1SelfServiceLeaveRequestsParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<PagedSelfServiceLeaveRequestsResponse>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/leave/requests`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceLeaveRequestsQueryKey = (params?: GetApiV1SelfServiceLeaveRequestsParams,) => {
+    return [
+    `/api/v1/self-service/leave/requests`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceLeaveRequestsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError = AxiosError<ProblemDetails>>(params?: GetApiV1SelfServiceLeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceLeaveRequestsQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>> = ({ signal }) => getApiV1SelfServiceLeaveRequests(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceLeaveRequestsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>>
+export type GetApiV1SelfServiceLeaveRequestsQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceLeaveRequests<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError = AxiosError<ProblemDetails>>(
+ params: undefined |  GetApiV1SelfServiceLeaveRequestsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveRequests<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceLeaveRequests<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceLeaveRequests<TData = Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceLeaveRequestsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceLeaveRequests>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceLeaveRequestsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1SelfServiceLeaveRequests = (
+    selfServiceLeaveRequestInput: SelfServiceLeaveRequestInput, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SelfServiceLeaveRequestResponse>> => {
+    
+    
+    return axios.post(
+      `/api/v1/self-service/leave/requests`,
+      selfServiceLeaveRequestInput,options
+    );
+  }
+
+
+
+export const getPostApiV1SelfServiceLeaveRequestsMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>, TError,{data: SelfServiceLeaveRequestInput}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>, TError,{data: SelfServiceLeaveRequestInput}, TContext> => {
+
+const mutationKey = ['postApiV1SelfServiceLeaveRequests'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>, {data: SelfServiceLeaveRequestInput}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1SelfServiceLeaveRequests(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1SelfServiceLeaveRequestsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>>
+    export type PostApiV1SelfServiceLeaveRequestsMutationBody = SelfServiceLeaveRequestInput
+    export type PostApiV1SelfServiceLeaveRequestsMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1SelfServiceLeaveRequests = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>, TError,{data: SelfServiceLeaveRequestInput}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1SelfServiceLeaveRequests>>,
+        TError,
+        {data: SelfServiceLeaveRequestInput},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1SelfServiceLeaveRequestsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1SelfServiceAttendanceToday = (
+    params?: GetApiV1SelfServiceAttendanceTodayParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<AttendanceDayDto | void>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/attendance/today`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceAttendanceTodayQueryKey = (params?: GetApiV1SelfServiceAttendanceTodayParams,) => {
+    return [
+    `/api/v1/self-service/attendance/today`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceAttendanceTodayQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError = AxiosError<ProblemDetails>>(params?: GetApiV1SelfServiceAttendanceTodayParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceAttendanceTodayQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>> = ({ signal }) => getApiV1SelfServiceAttendanceToday(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceAttendanceTodayQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>>
+export type GetApiV1SelfServiceAttendanceTodayQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceAttendanceToday<TData = Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError = AxiosError<ProblemDetails>>(
+ params: undefined |  GetApiV1SelfServiceAttendanceTodayParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceAttendanceToday<TData = Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceAttendanceTodayParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceAttendanceToday<TData = Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceAttendanceTodayParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceAttendanceToday<TData = Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError = AxiosError<ProblemDetails>>(
+ params?: GetApiV1SelfServiceAttendanceTodayParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceAttendanceToday>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceAttendanceTodayQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1SelfServiceAttendanceClock = (
+    selfServiceClockRequest: SelfServiceClockRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SelfServiceClockResponse>> => {
+    
+    
+    return axios.post(
+      `/api/v1/self-service/attendance/clock`,
+      selfServiceClockRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1SelfServiceAttendanceClockMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>, TError,{data: SelfServiceClockRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>, TError,{data: SelfServiceClockRequest}, TContext> => {
+
+const mutationKey = ['postApiV1SelfServiceAttendanceClock'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>, {data: SelfServiceClockRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1SelfServiceAttendanceClock(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1SelfServiceAttendanceClockMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>>
+    export type PostApiV1SelfServiceAttendanceClockMutationBody = SelfServiceClockRequest
+    export type PostApiV1SelfServiceAttendanceClockMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1SelfServiceAttendanceClock = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>, TError,{data: SelfServiceClockRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1SelfServiceAttendanceClock>>,
+        TError,
+        {data: SelfServiceClockRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1SelfServiceAttendanceClockMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1SelfServiceDocuments = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DocumentSummaryDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/documents`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceDocumentsQueryKey = () => {
+    return [
+    `/api/v1/self-service/documents`
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceDocumentsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError = AxiosError<ProblemDetails>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceDocumentsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>> = ({ signal }) => getApiV1SelfServiceDocuments({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceDocumentsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>>
+export type GetApiV1SelfServiceDocumentsQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceDocuments<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError = AxiosError<ProblemDetails>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceDocuments<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceDocuments<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceDocuments<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError = AxiosError<ProblemDetails>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocuments>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceDocumentsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1SelfServiceDocumentsIdDownload = (
+    id: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<Blob>> => {
+    
+    
+    return axios.get(
+      `/api/v1/self-service/documents/${id}/download`,{
+        responseType: 'blob',
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1SelfServiceDocumentsIdDownloadQueryKey = (id?: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams,) => {
+    return [
+    `/api/v1/self-service/documents/${id}/download`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1SelfServiceDocumentsIdDownloadQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError = AxiosError<ProblemDetails>>(id: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1SelfServiceDocumentsIdDownloadQueryKey(id,params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>> = ({ signal }) => getApiV1SelfServiceDocumentsIdDownload(id,params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1SelfServiceDocumentsIdDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>>
+export type GetApiV1SelfServiceDocumentsIdDownloadQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1SelfServiceDocumentsIdDownload<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ id: string,
+    params: undefined |  GetApiV1SelfServiceDocumentsIdDownloadParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceDocumentsIdDownload<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ id: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1SelfServiceDocumentsIdDownload<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ id: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1SelfServiceDocumentsIdDownload<TData = Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ id: string,
+    params?: GetApiV1SelfServiceDocumentsIdDownloadParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1SelfServiceDocumentsIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1SelfServiceDocumentsIdDownloadQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1PeopleIdentityLinks = (
+    userEmploymentLinkRequest: UserEmploymentLinkRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<UserEmploymentLinkDto | UserEmploymentLinkDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/people/identity-links`,
+      userEmploymentLinkRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1PeopleIdentityLinksMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>, TError,{data: UserEmploymentLinkRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>, TError,{data: UserEmploymentLinkRequest}, TContext> => {
+
+const mutationKey = ['postApiV1PeopleIdentityLinks'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>, {data: UserEmploymentLinkRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1PeopleIdentityLinks(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1PeopleIdentityLinksMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>>
+    export type PostApiV1PeopleIdentityLinksMutationBody = UserEmploymentLinkRequest
+    export type PostApiV1PeopleIdentityLinksMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1PeopleIdentityLinks = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>, TError,{data: UserEmploymentLinkRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1PeopleIdentityLinks>>,
+        TError,
+        {data: UserEmploymentLinkRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1PeopleIdentityLinksMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const deleteApiV1PeopleIdentityLinksUserId = (
+    userId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.delete(
+      `/api/v1/people/identity-links/${userId}`,options
+    );
+  }
+
+
+
+export const getDeleteApiV1PeopleIdentityLinksUserIdMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>, TError,{userId: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>, TError,{userId: string}, TContext> => {
+
+const mutationKey = ['deleteApiV1PeopleIdentityLinksUserId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>, {userId: string}> = (props) => {
+          const {userId} = props ?? {};
+
+          return  deleteApiV1PeopleIdentityLinksUserId(userId,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiV1PeopleIdentityLinksUserIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>>
+    
+    export type DeleteApiV1PeopleIdentityLinksUserIdMutationError = AxiosError<ProblemDetails>
+
+    export const useDeleteApiV1PeopleIdentityLinksUserId = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>, TError,{userId: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiV1PeopleIdentityLinksUserId>>,
+        TError,
+        {userId: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteApiV1PeopleIdentityLinksUserIdMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }
@@ -7160,6 +11676,658 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       return useMutation(mutationOptions, queryClient);
     }
     
+export const getApiV1Reports = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReportDefinition[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/reports`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1ReportsQueryKey = () => {
+    return [
+    `/api/v1/reports`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ReportsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1Reports>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ReportsQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1Reports>>> = ({ signal }) => getApiV1Reports({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1Reports>>>
+export type GetApiV1ReportsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1Reports<TData = Awaited<ReturnType<typeof getApiV1Reports>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Reports>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Reports>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Reports<TData = Awaited<ReturnType<typeof getApiV1Reports>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1Reports>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1Reports>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1Reports<TData = Awaited<ReturnType<typeof getApiV1Reports>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1Reports<TData = Awaited<ReturnType<typeof getApiV1Reports>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1Reports>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ReportsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1ReportsReportCode = (
+    reportCode: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReportDefinition>> => {
+    
+    
+    return axios.get(
+      `/api/v1/reports/${reportCode}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1ReportsReportCodeQueryKey = (reportCode?: string,) => {
+    return [
+    `/api/v1/reports/${reportCode}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ReportsReportCodeQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError = AxiosError<ProblemDetails>>(reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ReportsReportCodeQueryKey(reportCode);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>> = ({ signal }) => getApiV1ReportsReportCode(reportCode, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(reportCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ReportsReportCodeQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>>
+export type GetApiV1ReportsReportCodeQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1ReportsReportCode<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError = AxiosError<ProblemDetails>>(
+ reportCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsReportCode>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsReportCode>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsReportCode<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError = AxiosError<ProblemDetails>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsReportCode>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsReportCode>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsReportCode<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError = AxiosError<ProblemDetails>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ReportsReportCode<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError = AxiosError<ProblemDetails>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCode>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ReportsReportCodeQueryOptions(reportCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1ReportsReportCodeRun = (
+    reportCode: string,
+    runReportRequest: RunReportRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReportExecutionData>> => {
+    
+    
+    return axios.post(
+      `/api/v1/reports/${reportCode}/run`,
+      runReportRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1ReportsReportCodeRunMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>, TError,{reportCode: string;data: RunReportRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>, TError,{reportCode: string;data: RunReportRequest}, TContext> => {
+
+const mutationKey = ['postApiV1ReportsReportCodeRun'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>, {reportCode: string;data: RunReportRequest}> = (props) => {
+          const {reportCode,data} = props ?? {};
+
+          return  postApiV1ReportsReportCodeRun(reportCode,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ReportsReportCodeRunMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>>
+    export type PostApiV1ReportsReportCodeRunMutationBody = RunReportRequest
+    export type PostApiV1ReportsReportCodeRunMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1ReportsReportCodeRun = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>, TError,{reportCode: string;data: RunReportRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ReportsReportCodeRun>>,
+        TError,
+        {reportCode: string;data: RunReportRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ReportsReportCodeRunMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const postApiV1ReportsReportCodeExport = (
+    reportCode: string,
+    queueExportRequest: QueueExportRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReportExecutionJob>> => {
+    
+    
+    return axios.post(
+      `/api/v1/reports/${reportCode}/export`,
+      queueExportRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1ReportsReportCodeExportMutationOptions = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>, TError,{reportCode: string;data: QueueExportRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>, TError,{reportCode: string;data: QueueExportRequest}, TContext> => {
+
+const mutationKey = ['postApiV1ReportsReportCodeExport'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>, {reportCode: string;data: QueueExportRequest}> = (props) => {
+          const {reportCode,data} = props ?? {};
+
+          return  postApiV1ReportsReportCodeExport(reportCode,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ReportsReportCodeExportMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>>
+    export type PostApiV1ReportsReportCodeExportMutationBody = QueueExportRequest
+    export type PostApiV1ReportsReportCodeExportMutationError = AxiosError<ProblemDetails>
+
+    export const usePostApiV1ReportsReportCodeExport = <TError = AxiosError<ProblemDetails>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>, TError,{reportCode: string;data: QueueExportRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ReportsReportCodeExport>>,
+        TError,
+        {reportCode: string;data: QueueExportRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ReportsReportCodeExportMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1ReportsJobsJobId = (
+    jobId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ReportExecutionJob>> => {
+    
+    
+    return axios.get(
+      `/api/v1/reports/jobs/${jobId}`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1ReportsJobsJobIdQueryKey = (jobId?: string,) => {
+    return [
+    `/api/v1/reports/jobs/${jobId}`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ReportsJobsJobIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError = AxiosError<ProblemDetails>>(jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ReportsJobsJobIdQueryKey(jobId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>> = ({ signal }) => getApiV1ReportsJobsJobId(jobId, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(jobId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ReportsJobsJobIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>>
+export type GetApiV1ReportsJobsJobIdQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1ReportsJobsJobId<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsJobsJobId<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsJobsJobId<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ReportsJobsJobId<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobId>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ReportsJobsJobIdQueryOptions(jobId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1ReportsJobsJobIdDownload = (
+    jobId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.get(
+      `/api/v1/reports/jobs/${jobId}/download`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1ReportsJobsJobIdDownloadQueryKey = (jobId?: string,) => {
+    return [
+    `/api/v1/reports/jobs/${jobId}/download`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ReportsJobsJobIdDownloadQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError = AxiosError<ProblemDetails>>(jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ReportsJobsJobIdDownloadQueryKey(jobId);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>> = ({ signal }) => getApiV1ReportsJobsJobIdDownload(jobId, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(jobId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ReportsJobsJobIdDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>>
+export type GetApiV1ReportsJobsJobIdDownloadQueryError = AxiosError<ProblemDetails>
+
+
+export function useGetApiV1ReportsJobsJobIdDownload<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsJobsJobIdDownload<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsJobsJobIdDownload<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ReportsJobsJobIdDownload<TData = Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError = AxiosError<ProblemDetails>>(
+ jobId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsJobsJobIdDownload>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ReportsJobsJobIdDownloadQueryOptions(jobId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1ReportsReportCodeSavedViews = (
+    reportCode: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SavedReportView[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/reports/${reportCode}/saved-views`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1ReportsReportCodeSavedViewsQueryKey = (reportCode?: string,) => {
+    return [
+    `/api/v1/reports/${reportCode}/saved-views`
+    ] as const;
+    }
+
+    
+export const getGetApiV1ReportsReportCodeSavedViewsQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError = AxiosError<unknown>>(reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1ReportsReportCodeSavedViewsQueryKey(reportCode);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>> = ({ signal }) => getApiV1ReportsReportCodeSavedViews(reportCode, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, enabled: !!(reportCode), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1ReportsReportCodeSavedViewsQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>>
+export type GetApiV1ReportsReportCodeSavedViewsQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1ReportsReportCodeSavedViews<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError = AxiosError<unknown>>(
+ reportCode: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsReportCodeSavedViews<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError = AxiosError<unknown>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1ReportsReportCodeSavedViews<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError = AxiosError<unknown>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1ReportsReportCodeSavedViews<TData = Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError = AxiosError<unknown>>(
+ reportCode: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ReportsReportCodeSavedViews>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1ReportsReportCodeSavedViewsQueryOptions(reportCode,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1ReportsReportCodeSavedViews = (
+    reportCode: string,
+    createSavedViewRequest: CreateSavedViewRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<SavedReportView>> => {
+    
+    
+    return axios.post(
+      `/api/v1/reports/${reportCode}/saved-views`,
+      createSavedViewRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1ReportsReportCodeSavedViewsMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>, TError,{reportCode: string;data: CreateSavedViewRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>, TError,{reportCode: string;data: CreateSavedViewRequest}, TContext> => {
+
+const mutationKey = ['postApiV1ReportsReportCodeSavedViews'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>, {reportCode: string;data: CreateSavedViewRequest}> = (props) => {
+          const {reportCode,data} = props ?? {};
+
+          return  postApiV1ReportsReportCodeSavedViews(reportCode,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ReportsReportCodeSavedViewsMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>>
+    export type PostApiV1ReportsReportCodeSavedViewsMutationBody = CreateSavedViewRequest
+    export type PostApiV1ReportsReportCodeSavedViewsMutationError = AxiosError<unknown>
+
+    export const usePostApiV1ReportsReportCodeSavedViews = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>, TError,{reportCode: string;data: CreateSavedViewRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ReportsReportCodeSavedViews>>,
+        TError,
+        {reportCode: string;data: CreateSavedViewRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1ReportsReportCodeSavedViewsMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const deleteApiV1ReportsReportCodeSavedViewsId = (
+    reportCode: string,
+    id: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+    
+    
+    return axios.delete(
+      `/api/v1/reports/${reportCode}/saved-views/${id}`,options
+    );
+  }
+
+
+
+export const getDeleteApiV1ReportsReportCodeSavedViewsIdMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>, TError,{reportCode: string;id: string}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>, TError,{reportCode: string;id: string}, TContext> => {
+
+const mutationKey = ['deleteApiV1ReportsReportCodeSavedViewsId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>, {reportCode: string;id: string}> = (props) => {
+          const {reportCode,id} = props ?? {};
+
+          return  deleteApiV1ReportsReportCodeSavedViewsId(reportCode,id,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteApiV1ReportsReportCodeSavedViewsIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>>
+    
+    export type DeleteApiV1ReportsReportCodeSavedViewsIdMutationError = AxiosError<unknown>
+
+    export const useDeleteApiV1ReportsReportCodeSavedViewsId = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>, TError,{reportCode: string;id: string}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteApiV1ReportsReportCodeSavedViewsId>>,
+        TError,
+        {reportCode: string;id: string},
+        TContext
+      > => {
+
+      const mutationOptions = getDeleteApiV1ReportsReportCodeSavedViewsIdMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
 export const postApiV1SettlementBatchesGenerate = (
     generateSettlementBatchRequest: GenerateSettlementBatchRequest, options?: AxiosRequestConfig
  ): Promise<AxiosResponse<SettlementBatchDto>> => {
@@ -7494,6 +12662,432 @@ const {mutation: mutationOptions, axios: axiosOptions} = options ?
       > => {
 
       const mutationOptions = getPostApiV1SettlementBatchesIdExportMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1TenancyContext = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<TenantContextDto>> => {
+    
+    
+    return axios.get(
+      `/api/v1/tenancy/context`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1TenancyContextQueryKey = () => {
+    return [
+    `/api/v1/tenancy/context`
+    ] as const;
+    }
+
+    
+export const getGetApiV1TenancyContextQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1TenancyContextQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1TenancyContext>>> = ({ signal }) => getApiV1TenancyContext({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1TenancyContextQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1TenancyContext>>>
+export type GetApiV1TenancyContextQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1TenancyContext<TData = Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1TenancyContext>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1TenancyContext>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1TenancyContext<TData = Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1TenancyContext>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1TenancyContext>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1TenancyContext<TData = Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1TenancyContext<TData = Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyContext>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1TenancyContextQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const getApiV1OrganizationCostCenters = (
+    params?: GetApiV1OrganizationCostCentersParams, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CostCenterDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/organization/cost-centers`,{
+    ...options,
+        params: {...params, ...options?.params},}
+    );
+  }
+
+
+
+
+export const getGetApiV1OrganizationCostCentersQueryKey = (params?: GetApiV1OrganizationCostCentersParams,) => {
+    return [
+    `/api/v1/organization/cost-centers`, ...(params ? [params]: [])
+    ] as const;
+    }
+
+    
+export const getGetApiV1OrganizationCostCentersQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError = AxiosError<unknown>>(params?: GetApiV1OrganizationCostCentersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1OrganizationCostCentersQueryKey(params);
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>> = ({ signal }) => getApiV1OrganizationCostCenters(params, { signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1OrganizationCostCentersQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>>
+export type GetApiV1OrganizationCostCentersQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1OrganizationCostCenters<TData = Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError = AxiosError<unknown>>(
+ params: undefined |  GetApiV1OrganizationCostCentersParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1OrganizationCostCenters<TData = Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1OrganizationCostCentersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1OrganizationCostCenters<TData = Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1OrganizationCostCentersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1OrganizationCostCenters<TData = Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError = AxiosError<unknown>>(
+ params?: GetApiV1OrganizationCostCentersParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1OrganizationCostCenters>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1OrganizationCostCentersQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1OrganizationCostCenters = (
+    createCostCenterRequest: CreateCostCenterRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CostCenterDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/organization/cost-centers`,
+      createCostCenterRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1OrganizationCostCentersMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>, TError,{data: CreateCostCenterRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>, TError,{data: CreateCostCenterRequest}, TContext> => {
+
+const mutationKey = ['postApiV1OrganizationCostCenters'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>, {data: CreateCostCenterRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1OrganizationCostCenters(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1OrganizationCostCentersMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>>
+    export type PostApiV1OrganizationCostCentersMutationBody = CreateCostCenterRequest
+    export type PostApiV1OrganizationCostCentersMutationError = AxiosError<unknown>
+
+    export const usePostApiV1OrganizationCostCenters = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>, TError,{data: CreateCostCenterRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1OrganizationCostCenters>>,
+        TError,
+        {data: CreateCostCenterRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1OrganizationCostCentersMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const getApiV1TenancyLegalEntities = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LegalEntityDto[]>> => {
+    
+    
+    return axios.get(
+      `/api/v1/tenancy/legal-entities`,options
+    );
+  }
+
+
+
+
+export const getGetApiV1TenancyLegalEntitiesQueryKey = () => {
+    return [
+    `/api/v1/tenancy/legal-entities`
+    ] as const;
+    }
+
+    
+export const getGetApiV1TenancyLegalEntitiesQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError = AxiosError<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData>>, axios?: AxiosRequestConfig}
+) => {
+
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetApiV1TenancyLegalEntitiesQueryKey();
+
+  
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>> = ({ signal }) => getApiV1TenancyLegalEntities({ signal, ...axiosOptions });
+
+      
+
+      
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetApiV1TenancyLegalEntitiesQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>>
+export type GetApiV1TenancyLegalEntitiesQueryError = AxiosError<unknown>
+
+
+export function useGetApiV1TenancyLegalEntities<TData = Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError = AxiosError<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1TenancyLegalEntities<TData = Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>,
+          TError,
+          Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>
+        > , 'initialData'
+      >, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetApiV1TenancyLegalEntities<TData = Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetApiV1TenancyLegalEntities<TData = Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError = AxiosError<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1TenancyLegalEntities>>, TError, TData>>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient 
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetApiV1TenancyLegalEntitiesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  query.queryKey = queryOptions.queryKey ;
+
+  return query;
+}
+
+
+
+
+
+export const postApiV1TenancyLegalEntities = (
+    createLegalEntityRequest: CreateLegalEntityRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LegalEntityDto>> => {
+    
+    
+    return axios.post(
+      `/api/v1/tenancy/legal-entities`,
+      createLegalEntityRequest,options
+    );
+  }
+
+
+
+export const getPostApiV1TenancyLegalEntitiesMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>, TError,{data: CreateLegalEntityRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>, TError,{data: CreateLegalEntityRequest}, TContext> => {
+
+const mutationKey = ['postApiV1TenancyLegalEntities'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>, {data: CreateLegalEntityRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  postApiV1TenancyLegalEntities(data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1TenancyLegalEntitiesMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>>
+    export type PostApiV1TenancyLegalEntitiesMutationBody = CreateLegalEntityRequest
+    export type PostApiV1TenancyLegalEntitiesMutationError = AxiosError<unknown>
+
+    export const usePostApiV1TenancyLegalEntities = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>, TError,{data: CreateLegalEntityRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1TenancyLegalEntities>>,
+        TError,
+        {data: CreateLegalEntityRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPostApiV1TenancyLegalEntitiesMutationOptions(options);
+
+      return useMutation(mutationOptions, queryClient);
+    }
+    
+export const putApiV1TenancyLegalEntitiesId = (
+    id: string,
+    updateLegalEntityRequest: UpdateLegalEntityRequest, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LegalEntityDto>> => {
+    
+    
+    return axios.put(
+      `/api/v1/tenancy/legal-entities/${id}`,
+      updateLegalEntityRequest,options
+    );
+  }
+
+
+
+export const getPutApiV1TenancyLegalEntitiesIdMutationOptions = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>, TError,{id: string;data: UpdateLegalEntityRequest}, TContext>, axios?: AxiosRequestConfig}
+): UseMutationOptions<Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>, TError,{id: string;data: UpdateLegalEntityRequest}, TContext> => {
+
+const mutationKey = ['putApiV1TenancyLegalEntitiesId'];
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, axios: undefined};
+
+      
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>, {id: string;data: UpdateLegalEntityRequest}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  putApiV1TenancyLegalEntitiesId(id,data,axiosOptions)
+        }
+
+        
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PutApiV1TenancyLegalEntitiesIdMutationResult = NonNullable<Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>>
+    export type PutApiV1TenancyLegalEntitiesIdMutationBody = UpdateLegalEntityRequest
+    export type PutApiV1TenancyLegalEntitiesIdMutationError = AxiosError<unknown>
+
+    export const usePutApiV1TenancyLegalEntitiesId = <TError = AxiosError<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>, TError,{id: string;data: UpdateLegalEntityRequest}, TContext>, axios?: AxiosRequestConfig}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof putApiV1TenancyLegalEntitiesId>>,
+        TError,
+        {id: string;data: UpdateLegalEntityRequest},
+        TContext
+      > => {
+
+      const mutationOptions = getPutApiV1TenancyLegalEntitiesIdMutationOptions(options);
 
       return useMutation(mutationOptions, queryClient);
     }

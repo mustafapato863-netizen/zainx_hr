@@ -26,7 +26,7 @@ export const ChangeAssignmentModal: React.FC<ChangeAssignmentModalProps> = ({
 }) => {
   const [formData, setFormData] = useState<ChangeAssignmentRequest>({
     organizationUnitId: departments[0]?.id || '',
-    locationId: locations[0]?.id || '',
+    locationId: locations[0]?.id,
     jobTitleEn: '',
     jobTitleAr: '',
     effectiveFrom: new Date().toISOString().split('T')[0],
@@ -113,7 +113,7 @@ export const ChangeAssignmentModal: React.FC<ChangeAssignmentModalProps> = ({
         <Field label="Location / الموقع">
           <select
             value={formData.locationId || ''}
-            onChange={(e) => handleChange('locationId', e.target.value)}
+              onChange={(e) => handleChange('locationId', e.target.value || undefined)}
             style={{
               width: '100%',
               padding: '0.5rem',

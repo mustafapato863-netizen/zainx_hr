@@ -12,8 +12,9 @@ public interface IAttendanceRepository
     Task RecordClockEventAsync(ClockEvent clockEvent);
     Task<IReadOnlyList<ClockEvent>> GetClockEventsAsync(TenantId tenantId, Guid employmentId, DateTime fromUtc, DateTime toUtc);
     Task<(IReadOnlyList<AttendanceDayDto> Items, int TotalCount)> GetAttendanceDaysAsync(TenantId tenantId, LegalEntityId? legalEntityId, DateOnly? fromDate, DateOnly? toDate, int? status, int page = 1, int pageSize = 50);
-    Task<AttendanceDayDto?> GetAttendanceDayByIdAsync(TenantId tenantId, Guid id);
-    Task<AttendanceDay?> GetAttendanceDayEntityByIdAsync(TenantId tenantId, Guid id);
+    Task<AttendanceDayDto?> GetAttendanceDayByIdAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid id);
+    Task<AttendanceDayDto?> GetAttendanceDayForEmploymentAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid employmentId, DateOnly businessDate);
+    Task<AttendanceDay?> GetAttendanceDayEntityByIdAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid id);
     Task<AttendanceDay?> GetOrCreateAttendanceDayAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid employmentId, DateOnly businessDate, string timeZoneId);
     Task SaveAttendanceDayAsync(AttendanceDay day);
     Task<(IReadOnlyList<AttendanceExceptionDto> Items, int TotalCount)> GetExceptionsQueueAsync(TenantId tenantId, int? status, int page = 1, int pageSize = 50);
@@ -198,7 +199,7 @@ public class AttendanceRepository : IAttendanceRepository
         return (list, total);
     }
 
-    public async Task<AttendanceDayDto?> GetAttendanceDayByIdAsync(TenantId tenantId, Guid id)
+    public async Task<AttendanceDayDto?> GetAttendanceDayByIdAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid id)
     {
         await using var cmd = _dataSource.CreateCommand();
         cmd.CommandText = """
@@ -206,9 +207,10 @@ public class AttendanceRepository : IAttendanceRepository
                    first_clock_in_utc, last_clock_out_utc, scheduled_minutes, total_worked_minutes,
                    late_minutes, early_departure_minutes, is_absent, row_version
             FROM attendance.attendance_days
-            WHERE tenant_id = $1 AND id = $2;
+            WHERE tenant_id = $1 AND legal_entity_id = $2 AND id = $3;
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
         cmd.Parameters.AddWithValue(id);
 
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -236,15 +238,61 @@ public class AttendanceRepository : IAttendanceRepository
         return null;
     }
 
-    public async Task<AttendanceDay?> GetAttendanceDayEntityByIdAsync(TenantId tenantId, Guid id)
+    public async Task<AttendanceDayDto?> GetAttendanceDayForEmploymentAsync(
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid employmentId,
+        DateOnly businessDate)
+    {
+        await using var cmd = _dataSource.CreateCommand();
+        cmd.CommandText = """
+            SELECT id, tenant_id, legal_entity_id, employment_id, business_date, timezone_id, status,
+                   first_clock_in_utc, last_clock_out_utc, scheduled_minutes, total_worked_minutes,
+                   late_minutes, early_departure_minutes, is_absent, row_version
+            FROM attendance.attendance_days
+            WHERE tenant_id = $1 AND legal_entity_id = $2
+              AND employment_id = $3 AND business_date = $4;
+        """;
+        cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
+        cmd.Parameters.AddWithValue(employmentId);
+        cmd.Parameters.AddWithValue(businessDate);
+
+        await using var reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            return new AttendanceDayDto(
+                reader.GetGuid(0),
+                reader.GetGuid(1),
+                reader.GetGuid(2),
+                reader.GetGuid(3),
+                reader.GetFieldValue<DateOnly>(4).ToString("yyyy-MM-dd"),
+                reader.GetString(5),
+                ((AttendanceStatus)reader.GetInt32(6)).ToString(),
+                reader.IsDBNull(7) ? null : reader.GetDateTime(7),
+                reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                reader.GetInt32(9),
+                reader.GetInt32(10),
+                reader.GetInt32(11),
+                reader.GetInt32(12),
+                reader.GetBoolean(13),
+                (uint)reader.GetInt64(14)
+            );
+        }
+
+        return null;
+    }
+
+    public async Task<AttendanceDay?> GetAttendanceDayEntityByIdAsync(TenantId tenantId, LegalEntityId legalEntityId, Guid id)
     {
         await using var cmd = _dataSource.CreateCommand();
         cmd.CommandText = """
             SELECT id, tenant_id, legal_entity_id, employment_id, business_date, timezone_id, scheduled_minutes
             FROM attendance.attendance_days
-            WHERE tenant_id = $1 AND id = $2;
+            WHERE tenant_id = $1 AND legal_entity_id = $2 AND id = $3;
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
         cmd.Parameters.AddWithValue(id);
 
         await using var reader = await cmd.ExecuteReaderAsync();
@@ -271,9 +319,10 @@ public class AttendanceRepository : IAttendanceRepository
         cmd.CommandText = """
             SELECT id, tenant_id, legal_entity_id, employment_id, business_date, timezone_id, scheduled_minutes
             FROM attendance.attendance_days
-            WHERE tenant_id = $1 AND employment_id = $2 AND business_date = $3;
+            WHERE tenant_id = $1 AND legal_entity_id = $2 AND employment_id = $3 AND business_date = $4;
         """;
         cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
         cmd.Parameters.AddWithValue(employmentId);
         cmd.Parameters.AddWithValue(businessDate);
 

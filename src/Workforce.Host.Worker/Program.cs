@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Npgsql;
+using Workforce.BuildingBlocks.Database;
 using Workforce.Modules.Documents.Infrastructure;
 using Workforce.Host.Worker;
 using Workforce.Modules.Audit.Infrastructure;
@@ -17,14 +18,10 @@ using Workforce.SharedKernel.Security;
 
 var builder = Host.CreateApplicationBuilder(args);
 
-var dbHost = Environment.GetEnvironmentVariable("ZAINX_DB_HOST") ?? "127.0.0.1";
-var dbPort = Environment.GetEnvironmentVariable("ZAINX_DB_PORT") ?? "55432";
-var dbUser = Environment.GetEnvironmentVariable("ZAINX_DB_USER") ?? "zainx";
-var dbPass = Environment.GetEnvironmentVariable("ZAINX_DB_PASSWORD") ?? "123456";
-var dbName = Environment.GetEnvironmentVariable("ZAINX_DB_NAME") ?? "zainx_workforce";
-var connectionString = builder.Configuration.GetSection("Database:ConnectionString").Value
+var connectionString = DatabaseConnectionResolver.Resolve(
+    builder.Configuration.GetSection("Database:ConnectionString").Value
     ?? builder.Configuration.GetConnectionString("Default")
-    ?? $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass}";
+    ?? builder.Configuration.GetConnectionString("DefaultConnection"));
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
 var dataSource = dataSourceBuilder.Build();

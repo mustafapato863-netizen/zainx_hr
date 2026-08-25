@@ -1,16 +1,18 @@
 /// <reference types='vitest' />
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import path from 'path';
 
 export default defineConfig({
   root: import.meta.dirname,
   cacheDir: '../../node_modules/.vite/apps/workforce-web',
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   resolve: {
     alias: [
       { find: /^@zainx\/platform\/(.*)$/, replacement: path.resolve(import.meta.dirname, '../../packages/platform/src/$1') },
       { find: '@zainx/platform', replacement: path.resolve(import.meta.dirname, '../../packages/platform/src/index.ts') },
+      { find: '@zainx/design-system/enterprise', replacement: path.resolve(import.meta.dirname, '../../packages/design-system/src/enterprise.ts') },
       { find: /^@zainx\/design-system\/(.*)$/, replacement: path.resolve(import.meta.dirname, '../../packages/design-system/src/$1') },
       { find: '@zainx/design-system', replacement: path.resolve(import.meta.dirname, '../../packages/design-system/src/index.ts') },
       { find: /^@zainx\/contracts\/(.*)$/, replacement: path.resolve(import.meta.dirname, '../../packages/contracts/src/$1') },
@@ -58,43 +60,88 @@ export default defineConfig({
     outDir: '../../dist/apps/workforce-web',
     emptyOutDir: true,
     reportCompressedSize: true,
+    // Route widgets are loaded by the active route. Avoid emitting preload
+    // hints for every known route into the initial Home document.
+    modulePreload: false,
     commonjsOptions: {
       transformMixedEsModules: true,
     },
-    rollupOptions: {
+    rolldownOptions: {
       output: {
         manualChunks(id) {
+          const norm = id.replace(/\\/g, '/');
+
+          // 1. Heavy Enterprise Engine Vendor Chunks (Strictly isolated from initial shell)
           if (
-            id.includes('ag-grid-community') ||
-            id.includes('ag-grid-enterprise') ||
-            id.includes('ag-grid-react') ||
-            id.includes('ZainXDataGrid')
+            norm.includes('ag-grid') ||
+            norm.includes('ZainXDataGrid')
           ) {
             return 'vendor-aggrid';
           }
-          if (id.includes('packages/people/src/components/EmployeeDirectory')) {
+          if (
+            norm.includes('echarts') ||
+            norm.includes('zrender') ||
+            norm.includes('ZainXChart')
+          ) {
+            return 'vendor-echarts';
+          }
+          if (
+            norm.includes('fullcalendar') ||
+            norm.includes('ZainXScheduler')
+          ) {
+            return 'vendor-fullcalendar';
+          }
+          if (
+            norm.includes('tiptap') ||
+            norm.includes('dompurify') ||
+            norm.includes('prosemirror') ||
+            norm.includes('ZainXRichTextEditor')
+          ) {
+            return 'vendor-tiptap';
+          }
+          if (
+            norm.includes('dnd-kit') ||
+            norm.includes('ZainXDnD')
+          ) {
+            return 'vendor-dndkit';
+          }
+
+          // 2. Feature Package Modular Chunks
+          if (norm.includes('packages/people/src/components/EmployeeDirectory')) {
             return 'people-directory';
           }
           if (
-            id.includes('packages/people/src/components/EmployeeProfile') ||
-            id.includes('packages/people/src/components/ChangeAssignmentModal')
+            norm.includes('packages/people/src/components/EmployeeProfile') ||
+            norm.includes('packages/people/src/components/ChangeAssignmentModal')
           ) {
             return 'people-workspace';
           }
-          if (id.includes('packages/attendance')) {
+          if (norm.includes('packages/people')) {
+            return 'module-people';
+          }
+          if (norm.includes('packages/attendance')) {
             return 'module-attendance';
           }
-          if (id.includes('packages/leave')) {
+          if (norm.includes('packages/leave')) {
             return 'module-leave';
           }
-          if (id.includes('packages/approvals')) {
+          if (norm.includes('packages/approvals')) {
             return 'module-approvals';
           }
-          if (id.includes('packages/payroll')) {
+          if (norm.includes('packages/payroll')) {
             return 'module-payroll';
           }
-          if (id.includes('packages/recruitment')) {
+          if (norm.includes('packages/recruitment')) {
             return 'module-recruitment';
+          }
+          if (norm.includes('packages/reports')) {
+            return 'module-reports';
+          }
+          if (norm.includes('packages/administration')) {
+            return 'module-administration';
+          }
+          if (norm.includes('packages/ai')) {
+            return 'module-ai';
           }
         },
       },
