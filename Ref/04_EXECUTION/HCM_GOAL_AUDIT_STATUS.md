@@ -26,6 +26,7 @@ This review improved the first HCM Core slice without starting downstream Phase 
 - A full browser rerun exposed and then resolved a People create-path defect: an omitted nationality was being mapped to `"Unspecified"`, which exceeded the persisted `VARCHAR(10)` field. The corrected path preserves the value as unavailable and no longer invents master data.
 - Attendance and Leave no longer silently substitute a development legal entity or employee identifier when required context is missing.
 - Approval inbox, details, decisions, and cancellation now have explicit permission and legal-entity boundaries; cancellation is limited to the requester or administrator.
+- Leave cancellation now has two explicit paths: pending requests cancel through the linked Universal Approval workflow and release reserved days; approved requests cancel through the Leave application contract and reverse used days. Both paths write auditable balance transactions and preserve stale-row-version `409` behavior.
 - Session context switching now validates membership and reports `501 Not Implemented` until a secure identity-provider token/session refresh mechanism is configured; it no longer claims a context change succeeded.
 
 This is a verified recovery checkpoint, not a release seal for the whole HCM platform.
@@ -39,7 +40,7 @@ This is a verified recovery checkpoint, not a release seal for the whole HCM pla
 | People | Canonical person/employment/assignment model, directory/profile UI, document summary, sensitive reveal audit path, truthful create validation | Core improved | Full employee lifecycle and cross-legal-entity acceptance remain open; ESS/MSS now has a first explicit identity-link slice |
 | ESS/MSS | Explicit `people.user_employment_links`, self profile/contact update, manager team projection, link/unlink audit events, contract-first Leave submit/decision workflow with balance reservation, Attendance today/clock operations, employment-scoped document list/download, and `/me` route | Operational HCM slice | Production IdP claim provisioning, self-service upload, escalation policy, and manager approval action depth remain open |
 | Documents | Secure storage/type policy validation, expiry query, version-aware multipart upload/blob download, archive, access logs, and real self-service list/download projection | Lifecycle checkpoint | Owner policy matrix by module, malware scanning, retention execution, and production storage lifecycle remain open |
-| Attendance, Leave, Approvals | Existing modules plus context/permission hardening, legal-entity filtering, self-service Attendance today/clock operations, contract-first Leave submission with balance reservation, Universal Approval decisions, current-approver authorization, delegation idempotency/audit, and frontend test coverage | Leave request → manager approval/rejection path verified | Escalation policy, schedule/overtime/holiday calculation, and a DB-backed no-MSW integration seal remain open |
+| Attendance, Leave, Approvals | Existing modules plus context/permission hardening, legal-entity filtering, self-service Attendance today/clock operations, contract-first Leave submission with per-year balance reservation, pending/approved cancellation with auditable balance transactions, Universal Approval decisions, current-approver authorization, delegation idempotency/audit, and frontend test coverage | Leave request → manager approval/rejection/cross-year/cancellation paths verified | Escalation policy, schedule/overtime/holiday calculation, accrual/adjustment/year-close workflows, and a DB-backed no-MSW integration seal remain open |
 | Payroll, Settlement, Compliance | Existing Egypt-first modules, permission boundaries, calculation/finalization controls, and test coverage are present | Existing implementation | Production payroll closeout, statutory evidence, bank/export operations, and UAT remain open |
 | Recruitment and onboarding transition | Existing requisition/candidate/interview/offer/hire paths and frontend surfaces are present; fake interview data removed | Existing implementation | Full hire-conversion and employee-master handoff must be proven with PostgreSQL and worker services |
 | Talent | No evidence that Performance, Learning, Compensation, or Succession are complete business modules | Roadmap debt | Do not represent these as live HCM capabilities until contracts and workflows exist |
@@ -73,6 +74,21 @@ The worktree was already materially dirty before this audit. The list below is t
 - `src/Modules/Leave/Application/Contracts/ILeaveSelfServiceQueryContract.cs`
 - `src/Modules/Leave/Application/Services/LeaveSelfServiceQueryService.cs`
 - `src/Modules/Leave/Application/Services/LeaveActionService.cs`
+- `src/Modules/Leave/Application/Contracts/ILeaveActionContract.cs`
+- `src/Modules/Leave/Application/Contracts/ILeaveRequestApplicationContract.cs`
+- `src/Modules/Leave/Application/Contracts/ILeaveSelfServiceQueryContract.cs`
+- `src/Modules/Leave/Domain/LeaveBalance.cs`
+- `src/Modules/Leave/Infrastructure/LeaveMigrations.cs`
+- `src/Modules/Approvals/Api/ApprovalsController.cs`
+- `src/Modules/Approvals/Application/Contracts/IApprovalDecisionSideEffect.cs`
+- `src/Workforce.Host.Api/Application/LeaveApprovalDecisionSideEffect.cs`
+- `src/Workforce.Host.Api/Controllers/SelfServiceOperationsController.cs`
+- `src/Workforce.Host.Api/Middleware/TenantResolutionMiddleware.cs`
+- `src/Modules/Identity/Infrastructure/AdministrationMigrations.cs`
+- `web/tooling/openapi/workforce.openapi.json`
+- `web/packages/contracts/workforce.openapi.json`
+- `web/packages/contracts/src/api/generated.ts`
+- `web/packages/contracts/src/api/generated.schemas.ts`
 - `src/Modules/Approvals/Api/ApprovalsController.cs`
 - `src/Modules/Approvals/Infrastructure/ApprovalsRepository.cs`
 - `src/Workforce.Host.Api/Controllers/SessionController.cs`
@@ -144,7 +160,7 @@ The source of these artwork files is the approved reference directory:
 | --- | --- |
 | `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore` using an isolated temporary output directory | PASS, 0 warnings, 0 errors after current HCM changes |
 | `dotnet test tests/Architecture.Tests/Architecture.Tests.csproj --no-restore --filter FullyQualifiedName~HcmCoreAuthorizationTests` | PASS, 4 passed, 0 failed |
-| `dotnet test tests/Architecture.Tests/Architecture.Tests.csproj --no-restore` with the active PostgreSQL 18 runtime connection | PASS after the People nationality correction, 196 passed, 0 failed, 196 total |
+| `dotnet test tests/Architecture.Tests/Architecture.Tests.csproj --no-restore` with the active PostgreSQL 18 runtime connection | PASS after the cross-year Leave correction, 197 passed, 0 failed, 197 total |
 | `pnpm --dir web exec eslint .` | PASS |
 | `pnpm --dir web exec tsc --noEmit -p apps/workforce-web/tsconfig.app.json` | PASS |
 | `pnpm --dir web exec vitest run` | PASS, 19 files, 121 tests |
@@ -153,6 +169,8 @@ The source of these artwork files is the approved reference directory:
 | `pnpm --dir web exec nx build design-system-docs` | PASS |
 | `pnpm --dir web exec storybook build --config-dir apps/design-system-docs/.storybook` | PASS; known iframe chunk warning remains |
 | `pnpm --dir web exec orval --config ./tooling/openapi/orval.config.ts` | PASS |
+| `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore -p:OutDir=artifacts\validation-hcm-leave-cancel-1` | PASS, 0 warnings, 0 errors |
+| `pnpm --dir web exec orval --config ./tooling/openapi/orval.config.ts` after Leave cancellation contract synchronization | PASS; generated approved Leave cancellation hook and optional approval-cancellation reason |
 | `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore -p:OutDir=artifacts\\validation-ess-mss\\` | PASS, 0 warnings, 0 errors |
 | `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore -p:OutDir=artifacts\\validation-ess-ops\\` | PASS, 0 warnings, 0 errors |
 | `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore -p:OutDir=artifacts\\validation-self-documents\\` | PASS, 0 warnings, 0 errors |
@@ -164,6 +182,9 @@ The source of these artwork files is the approved reference directory:
 | Real ESS/MSS runtime check against PostgreSQL 18 | PASS: unlinked profile 404; link 201; profile/team 200; profile update 200; stale update 409; unlink 204; post-cleanup profile 404; active links 0; 9 actor-scoped self-service audit rows retained by design |
 | Real ESS operational runtime check against PostgreSQL 18 | PASS: unlinked balances 404; unlinked attendance 404; link 201; balances 200 with real count 0; requests 200 with real total 0; attendance before clock 204; clock 200; attendance after clock 200; exact clock/day cleanup completed; active links 0 |
 | Real ESS Leave submit/approval runtime check against PostgreSQL 18 | PASS: linked self-service types 200; submit 201 with `PendingApproval`; pending balance `0 → 1`; Universal Approval approve produced Leave `Approved`, used `2`, pending `0`; rejection released pending `1 → 0`; direct Leave approve returned 409; exact requests/approvals/outbox/fixtures cleaned and manager assignment restored |
+| Real PostgreSQL 18 Leave cancellation runtime check | PASS: pending approval cancellation returned 200 and moved pending `2 → 0` with `CancelPending`; approved Leave cancellation returned 200 and moved used `2 → 0` with `CancelApproved`; stale direct cancellation returned 409; exact transactions, requests, approvals, outbox, balance, policy, type, links, and manager assignment cleanup verified |
+| Real PostgreSQL 18 cross-year Leave runtime check | PASS: `2026-12-31` → `2027-01-02` reserved `1`/`2`, approved to used `1`/`2`, approved cancellation returned used to `0`/`0`; pending `4`/`1` cancellation returned pending to `0`/`0`; per-year transaction rows verified; exact cleanup returned `0|0|0|0` |
+| `dotnet build src/Workforce.Host.Api/Workforce.Host.Api.csproj --no-restore` after cross-year Leave implementation | PASS, 0 warnings, 0 errors |
 | Native Chromium `/me` browser check at 375x812 | PASS: page 200; Daily Operations visible; attendance query 200; no horizontal overflow; no console errors; exact clock/day test records cleaned up |
 | `git diff --check` on the review-scope files | PASS; Git reported normal LF/CRLF normalization warnings only |
 
@@ -183,7 +204,7 @@ The source of these artwork files is the approved reference directory:
 12. The current context-switch endpoint intentionally returns `501` after authorization validation until the approved production identity provider can issue a refreshed secure token/session. This is a truthful capability boundary, not a failed authorization check.
 13. ESS/MSS link/unlink and profile concurrency were verified against the real database and the active link was removed afterward. Nine actor-scoped self-service audit rows from the repeated runtime verification remain by design. The temporary contact values used during verification were removed from the exact test employee; the original pre-test contact values were not available in the database history and must be supplied by data-owner review if that fixture is considered authoritative.
 14. The first post-ESS full browser rerun found 9 failures caused by the omitted-nationality SQL overflow described above. The controller now stores an empty unavailable value instead of `"Unspecified"`; the focused regression run passed 2/2 and the subsequent full browser run passed 39/39.
-15. ESS Leave submission now uses linked employment identity, manager-identity resolution, a persisted Universal Approval workflow, and atomic balance reservation. Cross-year policy calculation, cancellation balance release, escalation, and production IdP claims remain open.
+15. ESS Leave submission now uses linked employment identity, manager-identity resolution, a persisted Universal Approval workflow, atomic per-year balance reservation, and auditable pending/approved cancellation reversal. Cross-year segmentation is implemented and runtime-verified; escalation, accrual/adjustment/year-close policy, and production IdP claims remain open.
 16. Attendance clock operations currently reuse the existing day evaluation path. Schedule, holiday, overtime, geofence/device policy, accrual calculation, and manager correction/approval integration remain unsealed HCM behavior.
 17. Documents self-service is intentionally read/download only. Employee upload, document-owner policy per module, malware scanning, retention worker execution, and production object storage are not claimed complete.
 18. Delegation validates the current approver and persists idempotent history, but production target-user membership still depends on the approved IdP/user-directory boundary; the local development context cannot prove directory membership.
@@ -194,7 +215,7 @@ The source of these artwork files is the approved reference directory:
 
 The next allowed gate is **HCM Core Integration Seal**, not Phase 3 or Phase 8 release closure. It requires:
 
-1. Provision PostgreSQL 18 through the repeatable CI/deployment harness and retain the 196/196 full-suite evidence there.
+1. Provision PostgreSQL 18 through the repeatable CI/deployment harness and retain the 197/197 full-suite evidence there.
 2. Run the real API, workforce-web, Worker, and Playwright suite together with no MSW.
 3. Verify employee create, assignment change, document upload/download/versioning, cross-tenant denial, cross-legal-entity denial, sensitive PII reveal audit, and recruitment hire conversion.
 4. Reconcile the three stale module-gate statuses using the resulting evidence.
@@ -223,3 +244,22 @@ Until those gates pass, the correct project status is **HCM Core implementation 
 - Exact PostgreSQL 18 runtime evidence was captured and cleaned for Documents, self-service Documents, delegation, and Reports. OpenAPI sources were synchronized and Orval regenerated after the new paths.
 - Current validation remains green: Architecture.Tests **196/196**, Vitest **19 files / 121 tests**, ESLint, workforce-web TypeScript, workforce-web build, design-system-docs build, Storybook build, and full Chromium Playwright **39/39 in 1.1m**.
 - This remains an implementation checkpoint. Self-service upload, production IdP/user-directory membership, Worker/no-MSW provenance, retention/malware scanning, visual recovery, UAT, and release gates remain open.
+
+## HCM Core Continuation — Leave cancellation and auditable balance history — 2026-08-25
+
+- Added `leave.leave_transactions` as the auditable balance movement trail while retaining mutable counters as query projections. Submission, approval, rejection, pending cancellation, and approved cancellation now record before/after used and pending values with actor and reason metadata.
+- Pending Leave cancellation is coordinated through the linked Universal Approval cancellation boundary. The Leave side effect changes the Leave request to `Cancelled`, releases reserved pending days, writes `LeaveCancelled`, and remains requester/admin scoped at the approval boundary.
+- Approved Leave cancellation is exposed through `ILeaveActionContract` and the Leave API. It locks the request and balance in one transaction, reverses used days, writes `CancelApproved`, emits `LeaveCancelled`, and refuses direct cancellation of pending requests so approval ownership is preserved.
+- OpenAPI sources and Orval output now include the Leave cancellation endpoint and the optional approval-cancellation reason. The AI Leave cancellation action continues to route through the existing application contract and therefore cannot silently bypass authorization or concurrency checks.
+- Real PostgreSQL 18 runtime evidence: pending cancellation returned `200`, Leave moved to `Cancelled`, pending balance returned `2 → 0`, and `CancelPending` was persisted; approved cancellation returned `200`, used balance returned `2 → 0`, and `CancelApproved` was persisted; stale cancellation returned `409`. Exact temporary records were removed and the manager assignment restored.
+- Validation: API build **0 warnings / 0 errors**; Architecture.Tests **196/196**; ESLint passed; workforce-web TypeScript passed; Vitest **19 files / 121 tests**; workforce-web production build passed with initial JS **124.33 KB gzip**, CSS **14.02 KB gzip**, and the documented AG Grid **506.68 KB gzip** exception; full local Chromium Playwright **39/39 in 1.2m**. OpenAPI/Orval generation passed.
+
+## HCM Core Continuation — Cross-year Leave segmentation — 2026-08-25
+
+- Added inclusive `LeaveYearSegment` calculation to the Leave domain so a request spanning calendar years is split into one segment per year.
+- Leave submit, approve, reject/release, pending cancellation, and approved cancellation now lock and update one configured balance per segment year and record one auditable transaction per year with `balance_year`.
+- The transaction migration adds `balance_year` and replaces the request/type uniqueness key with request/type/year so cross-year lifecycles retain one trail row per operation and year without weakening idempotency.
+- Removed the obsolete application-service guard that rejected cross-year requests before the new segmentation path could run. Each segment still requires a tenant/legal-entity-scoped configured balance.
+- Real PostgreSQL 18 runtime evidence passed with temporary linked ESS identity and manager assignment: `2026-12-31` → `2027-01-02` reserved `1`/`2` days, approval used `1`/`2`, approved cancellation returned both used projections to zero, and a second pending cross-year request (`4`/`1`) was cancelled through Universal Approval and returned both pending projections to zero.
+- Per-year transaction evidence contained the expected `ReservePending`, `Approve`, `CancelApproved`, and `CancelPending` rows. Exact temporary requests, approvals, outbox messages, balances, policy, leave type, identity link, and manager assignment cleanup returned `0|0|0|0`.
+- Added the cross-year domain test. Current API build is **0 warnings / 0 errors** and Architecture.Tests pass **197/197**.

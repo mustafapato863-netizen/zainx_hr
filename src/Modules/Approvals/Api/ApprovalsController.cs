@@ -202,6 +202,11 @@ public class ApprovalsController : ControllerBase
 
         var req = await _repository.GetApprovalRequestEntityByIdAsync(_userContext.TenantId, id, _userContext.LegalEntityId.Value);
         if (req == null) return NotFound();
+        if (!hasApprovalCancellationPermission &&
+            (!hasSelfLeaveCancellationPermission || !string.Equals(req.SourceModule, "Leave", StringComparison.OrdinalIgnoreCase)))
+        {
+            return Forbid();
+        }
         if (req.RequesterUserId != _userContext.UserId.Value && !_userContext.HasPermission("admin"))
         {
             return Forbid();

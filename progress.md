@@ -162,4 +162,21 @@ Phase 4: Run relevant validation commands and consolidate evidence.
 - Added approval-to-Leave side effects. Final approval confirms used days; rejection releases pending days; duplicate decision delivery is idempotent; direct Leave approve/reject routes are blocked in favor of Universal Approvals.
 - Temporary PostgreSQL fixtures were used only for runtime evidence and fully removed: three requests, three approval workflows, six Leave outbox events, histories/steps, one Leave Type, one Policy, one Balance, two identity links, and the temporary manager assignment were cleaned/restored.
 - Evidence: approved request duration 2 changed balance used `0 → 2`, pending `0 → 1 → 0`; rejected request released pending `1 → 0`; legacy direct approval returned `409`. Architecture.Tests **196/196**, Vitest **121/121**, ESLint, TypeScript, OpenAPI generation, and workforce-web build passed.
-- Goal remains active: cross-year leave policy, cancellation balance release, escalation, production IdP/user-directory membership, Worker/no-MSW provenance, visual recovery, UAT, and release gates remain open.
+- Goal remains active: cross-year leave policy, escalation, production IdP/user-directory membership, Worker/no-MSW provenance, visual recovery, UAT, and release gates remain open; cancellation balance release is now verified.
+
+## HCM Core Continuation — Leave cancellation and balance history — 2026-08-25
+
+- Added the `leave.leave_transactions` audit trail and corrected its migration order so the Leave request FK is valid on a clean PostgreSQL schema.
+- Added contract-first cancellation handling: pending requests cancel through Universal Approval and release pending days; approved requests cancel through `ILeaveActionContract` and reverse used days. Both paths lock the relevant rows, preserve optimistic concurrency, emit `LeaveCancelled`, and record actor/reason plus before/after balance values.
+- Added the Leave cancellation API contract, optional approval cancellation reason, development self-cancel permission, and regenerated Orval output.
+- Real PostgreSQL 18 evidence passed and was cleaned: pending cancellation `200` / `CancelPending`; approved cancellation `200` / `CancelApproved`; stale cancellation `409`; all temporary requests, approval workflows, outbox events, transactions, balance, policy, type, links, and manager assignment cleaned/restored.
+- API build passed with 0 warnings and 0 errors. Full HCM goal remains active: cross-year segmentation is now implemented; escalation, attendance policy depth, accrual/adjustment/year-close policy, production IdP, Worker/no-MSW provenance, visual recovery, UAT, and release gates remain open.
+
+## HCM Core Continuation — Cross-year Leave policy — 2026-08-25
+
+- Added inclusive `LeaveYearSegment` calculation to the Leave domain so a request spanning calendar years is split into one segment per year.
+- Updated Leave persistence so submit, approve, reject/release, pending cancellation, and approved cancellation lock and project balances independently for each segment year.
+- Added `balance_year` to the auditable Leave transaction trail and made the request/type idempotency key year-aware.
+- Removed the obsolete application-service guard that rejected cross-year requests before the new segmentation path could run.
+- Real PostgreSQL 18 runtime evidence passed and was cleaned: `2026-12-31` → `2027-01-02` reserved `1`/`2`, approved to used `1`/`2`, cancelled back to used `0`/`0`; a pending `4`/`1` request cancelled through Universal Approval back to pending `0`/`0`. Cleanup counts were `0|0|0|0`.
+- Added the cross-year domain test. API build passed with 0 warnings and 0 errors; Architecture.Tests now pass **197/197**.

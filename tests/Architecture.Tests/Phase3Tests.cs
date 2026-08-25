@@ -290,6 +290,34 @@ public class Phase3Tests
     }
 
     [Fact]
+    public void Leave_LeaveRequest_CrossYearRequest_SplitsIntoInclusiveYearSegments()
+    {
+        var req = new LeaveRequest(
+            Guid.NewGuid(),
+            TestTenantId,
+            TestLegalEntityId,
+            TestEmpId,
+            Guid.NewGuid(),
+            new DateOnly(2026, 12, 31),
+            new DateOnly(2027, 1, 2),
+            durationDays: 3.0m,
+            reason: "Cross-year leave"
+        );
+
+        var segments = req.GetYearSegments();
+
+        Assert.Equal(2, segments.Count);
+        Assert.Equal(2026, segments[0].Year);
+        Assert.Equal(new DateOnly(2026, 12, 31), segments[0].StartDate);
+        Assert.Equal(new DateOnly(2026, 12, 31), segments[0].EndDate);
+        Assert.Equal(1.0m, segments[0].Days);
+        Assert.Equal(2027, segments[1].Year);
+        Assert.Equal(new DateOnly(2027, 1, 1), segments[1].StartDate);
+        Assert.Equal(new DateOnly(2027, 1, 2), segments[1].EndDate);
+        Assert.Equal(2.0m, segments[1].Days);
+    }
+
+    [Fact]
     public void Leave_LeaveRequest_Rejection_StoresRejectionReason()
     {
         var req = new LeaveRequest(

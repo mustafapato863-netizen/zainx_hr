@@ -109,6 +109,12 @@ public class LeaveRepository : ILeaveRepository
 {
     private readonly NpgsqlDataSource _dataSource;
 
+    private sealed record LockedLeaveBalance(
+        LeaveBalance Balance,
+        uint ExpectedRowVersion,
+        decimal UsedDaysBefore,
+        decimal PendingDaysBefore);
+
     public LeaveRepository(NpgsqlDataSource dataSource)
     {
         _dataSource = dataSource;
@@ -504,52 +510,23 @@ public class LeaveRepository : ILeaveRepository
 
         try
         {
-            await using var balanceCmd = conn.CreateCommand();
-            balanceCmd.Transaction = tx;
-            balanceCmd.CommandText = """
-                SELECT b.id, b.tenant_id, b.employment_id, b.leave_type_id, b.year,
-                       b.entitled_days, b.accrued_days, b.used_days, b.pending_days,
-                       b.updated_at, b.row_version
-                FROM leave.leave_balances b
-                INNER JOIN leave.leave_types t ON t.id = b.leave_type_id
-                WHERE b.tenant_id = $1
-                  AND b.employment_id = $2
-                  AND b.leave_type_id = $3
-                  AND b.year = $4
-                  AND t.tenant_id = $1
-                  AND t.legal_entity_id = $5
-                  AND t.is_active = TRUE
-                FOR UPDATE OF b;
-            """;
-            balanceCmd.Parameters.AddWithValue(request.TenantId.Value);
-            balanceCmd.Parameters.AddWithValue(request.EmploymentId);
-            balanceCmd.Parameters.AddWithValue(request.LeaveTypeId);
-            balanceCmd.Parameters.AddWithValue(request.StartDate.Year);
-            balanceCmd.Parameters.AddWithValue(request.LegalEntityId.Value);
-
-            await using var balanceReader = await balanceCmd.ExecuteReaderAsync(ct);
-            if (!await balanceReader.ReadAsync(ct))
+            var segments = request.GetYearSegments();
+            var lockedBalances = new List<LockedLeaveBalance>(segments.Count);
+            foreach (var segment in segments)
             {
-                throw new InvalidOperationException("A configured leave balance is required before submitting a leave request.");
+                var locked = await LockLeaveBalanceAsync(
+                    conn,
+                    tx,
+                    request.TenantId,
+                    request.LegalEntityId,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    segment.Year,
+                    requireActiveLeaveType: true,
+                    ct);
+                locked.Balance.ReservePendingDays(segment.Days, locked.ExpectedRowVersion);
+                lockedBalances.Add(locked);
             }
-
-            var balance = LeaveBalance.Rehydrate(
-                balanceReader.GetGuid(0),
-                new TenantId(balanceReader.GetGuid(1)),
-                balanceReader.GetGuid(2),
-                balanceReader.GetGuid(3),
-                balanceReader.GetInt32(4),
-                balanceReader.GetDecimal(5),
-                balanceReader.GetDecimal(6),
-                balanceReader.GetDecimal(7),
-                balanceReader.GetDecimal(8),
-                balanceReader.GetDateTime(9),
-                (uint)balanceReader.GetInt64(10));
-            var expectedBalanceRowVersion = balance.RowVersion;
-            var usedDaysBefore = balance.UsedDays;
-            var pendingDaysBefore = balance.PendingDays;
-            balance.ReservePendingDays(request.DurationDays, expectedBalanceRowVersion);
-            await balanceReader.DisposeAsync();
 
             await using var requestCmd = conn.CreateCommand();
             requestCmd.Transaction = tx;
@@ -579,36 +556,30 @@ public class LeaveRepository : ILeaveRepository
             requestCmd.Parameters.AddWithValue((long)request.RowVersion);
             await requestCmd.ExecuteNonQueryAsync(ct);
 
-            await using var updateBalance = conn.CreateCommand();
-            updateBalance.Transaction = tx;
-            updateBalance.CommandText = """
-                UPDATE leave.leave_balances
-                SET pending_days = $1, updated_at = CURRENT_TIMESTAMP, row_version = row_version + 1
-                WHERE id = $2 AND row_version = $3;
-            """;
-            updateBalance.Parameters.AddWithValue(balance.PendingDays);
-            updateBalance.Parameters.AddWithValue(balance.Id);
-            updateBalance.Parameters.AddWithValue((long)expectedBalanceRowVersion);
-            if (await updateBalance.ExecuteNonQueryAsync(ct) != 1)
-                throw new InvalidOperationException("Optimistic concurrency conflict on leave balance.");
-
-            await InsertBalanceTransactionAsync(
-                conn,
-                tx,
-                request.TenantId.Value,
-                request.LegalEntityId.Value,
-                request.EmploymentId,
-                request.LeaveTypeId,
-                request.Id,
-                "ReservePending",
-                request.DurationDays,
-                usedDaysBefore,
-                balance.UsedDays,
-                pendingDaysBefore,
-                balance.PendingDays,
-                actorUserId,
-                "Leave request submitted for approval.",
-                ct);
+            for (var index = 0; index < segments.Count; index++)
+            {
+                var segment = segments[index];
+                var locked = lockedBalances[index];
+                await UpdateLeaveBalanceProjectionAsync(conn, tx, locked.Balance, locked.ExpectedRowVersion, ct);
+                await InsertBalanceTransactionAsync(
+                    conn,
+                    tx,
+                    request.TenantId.Value,
+                    request.LegalEntityId.Value,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    request.Id,
+                    segment.Year,
+                    "ReservePending",
+                    segment.Days,
+                    locked.UsedDaysBefore,
+                    locked.Balance.UsedDays,
+                    locked.PendingDaysBefore,
+                    locked.Balance.PendingDays,
+                    actorUserId,
+                    "Leave request submitted for approval.",
+                    ct);
+            }
 
             await InsertOutboxMessageAsync(
                 conn,
@@ -690,55 +661,41 @@ public class LeaveRepository : ILeaveRepository
             if (request.Status != LeaveRequestStatus.PendingApproval && request.Status != LeaveRequestStatus.Submitted)
                 throw new InvalidOperationException($"Leave request is not awaiting approval; current status is '{request.Status}'.");
 
-            await using var balanceCmd = conn.CreateCommand();
-            balanceCmd.Transaction = tx;
-            balanceCmd.CommandText = """
-                SELECT id, tenant_id, employment_id, leave_type_id, year,
-                       entitled_days, accrued_days, used_days, pending_days, updated_at, row_version
-                FROM leave.leave_balances
-                WHERE tenant_id = $1 AND employment_id = $2 AND leave_type_id = $3 AND year = $4
-                FOR UPDATE;
-            """;
-            balanceCmd.Parameters.AddWithValue(command.TenantId.Value);
-            balanceCmd.Parameters.AddWithValue(request.EmploymentId);
-            balanceCmd.Parameters.AddWithValue(request.LeaveTypeId);
-            balanceCmd.Parameters.AddWithValue(request.StartDate.Year);
-
-            await using var balanceReader = await balanceCmd.ExecuteReaderAsync(ct);
-            if (!await balanceReader.ReadAsync(ct))
-                throw new InvalidOperationException("The configured leave balance no longer exists.");
-
-            var balance = LeaveBalance.Rehydrate(
-                balanceReader.GetGuid(0),
-                new TenantId(balanceReader.GetGuid(1)),
-                balanceReader.GetGuid(2),
-                balanceReader.GetGuid(3),
-                balanceReader.GetInt32(4),
-                balanceReader.GetDecimal(5),
-                balanceReader.GetDecimal(6),
-                balanceReader.GetDecimal(7),
-                balanceReader.GetDecimal(8),
-                balanceReader.GetDateTime(9),
-                (uint)balanceReader.GetInt64(10));
-            await balanceReader.DisposeAsync();
-
             var requestRowVersion = request.RowVersion;
-            var balanceRowVersion = balance.RowVersion;
-            var usedDaysBefore = balance.UsedDays;
-            var pendingDaysBefore = balance.PendingDays;
+            var segments = request.GetYearSegments();
+            var lockedBalances = new List<LockedLeaveBalance>(segments.Count);
+            foreach (var segment in segments)
+            {
+                var locked = await LockLeaveBalanceAsync(
+                    conn,
+                    tx,
+                    command.TenantId,
+                    command.LegalEntityId,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    segment.Year,
+                    requireActiveLeaveType: false,
+                    ct);
+                lockedBalances.Add(locked);
+            }
+
             var transactionType = command.Decision == LeaveApprovalDecision.Approved
                 ? "Approve"
                 : "RejectRelease";
+            for (var index = 0; index < segments.Count; index++)
+            {
+                var segment = segments[index];
+                var locked = lockedBalances[index];
+                if (command.Decision == LeaveApprovalDecision.Approved)
+                    locked.Balance.ConfirmApprovedDays(segment.Days, locked.ExpectedRowVersion);
+                else
+                    locked.Balance.ReleasePendingDays(segment.Days, locked.ExpectedRowVersion);
+            }
+
             if (command.Decision == LeaveApprovalDecision.Approved)
-            {
                 request.Approve(requestRowVersion);
-                balance.ConfirmApprovedDays(request.DurationDays, balanceRowVersion);
-            }
             else
-            {
                 request.Reject(command.Reason ?? "Rejected by approver.", requestRowVersion);
-                balance.ReleasePendingDays(request.DurationDays, balanceRowVersion);
-            }
 
             await using var updateRequest = conn.CreateCommand();
             updateRequest.Transaction = tx;
@@ -755,39 +712,32 @@ public class LeaveRepository : ILeaveRepository
             if (await updateRequest.ExecuteNonQueryAsync(ct) != 1)
                 throw new InvalidOperationException("Optimistic concurrency conflict on leave request.");
 
-            await using var updateBalance = conn.CreateCommand();
-            updateBalance.Transaction = tx;
-            updateBalance.CommandText = """
-                UPDATE leave.leave_balances
-                SET used_days = $1, pending_days = $2, updated_at = CURRENT_TIMESTAMP, row_version = row_version + 1
-                WHERE id = $3 AND row_version = $4;
-            """;
-            updateBalance.Parameters.AddWithValue(balance.UsedDays);
-            updateBalance.Parameters.AddWithValue(balance.PendingDays);
-            updateBalance.Parameters.AddWithValue(balance.Id);
-            updateBalance.Parameters.AddWithValue((long)balanceRowVersion);
-            if (await updateBalance.ExecuteNonQueryAsync(ct) != 1)
-                throw new InvalidOperationException("Optimistic concurrency conflict on leave balance.");
-
-            await InsertBalanceTransactionAsync(
-                conn,
-                tx,
-                request.TenantId.Value,
-                request.LegalEntityId.Value,
-                request.EmploymentId,
-                request.LeaveTypeId,
-                request.Id,
-                transactionType,
-                request.DurationDays,
-                usedDaysBefore,
-                balance.UsedDays,
-                pendingDaysBefore,
-                balance.PendingDays,
-                command.ActorUserId,
-                command.Reason ?? (command.Decision == LeaveApprovalDecision.Approved
-                    ? "Leave approved."
-                    : "Leave rejected; pending balance released."),
-                ct);
+            for (var index = 0; index < segments.Count; index++)
+            {
+                var segment = segments[index];
+                var locked = lockedBalances[index];
+                await UpdateLeaveBalanceProjectionAsync(conn, tx, locked.Balance, locked.ExpectedRowVersion, ct);
+                await InsertBalanceTransactionAsync(
+                    conn,
+                    tx,
+                    request.TenantId.Value,
+                    request.LegalEntityId.Value,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    request.Id,
+                    segment.Year,
+                    transactionType,
+                    segment.Days,
+                    locked.UsedDaysBefore,
+                    locked.Balance.UsedDays,
+                    locked.PendingDaysBefore,
+                    locked.Balance.PendingDays,
+                    command.ActorUserId,
+                    command.Reason ?? (command.Decision == LeaveApprovalDecision.Approved
+                        ? "Leave approved."
+                        : "Leave rejected; pending balance released."),
+                    ct);
+            }
 
             await InsertOutboxMessageAsync(
                 conn,
@@ -916,43 +866,26 @@ public class LeaveRepository : ILeaveRepository
                     false);
             }
 
-            await using var balanceCmd = conn.CreateCommand();
-            balanceCmd.Transaction = tx;
-            balanceCmd.CommandText = """
-                SELECT id, tenant_id, employment_id, leave_type_id, year,
-                       entitled_days, accrued_days, used_days, pending_days, updated_at, row_version
-                FROM leave.leave_balances
-                WHERE tenant_id = $1 AND employment_id = $2 AND leave_type_id = $3 AND year = $4
-                FOR UPDATE;
-            """;
-            balanceCmd.Parameters.AddWithValue(tenantId.Value);
-            balanceCmd.Parameters.AddWithValue(request.EmploymentId);
-            balanceCmd.Parameters.AddWithValue(request.LeaveTypeId);
-            balanceCmd.Parameters.AddWithValue(request.StartDate.Year);
+            var segments = request.GetYearSegments();
+            var lockedBalances = new List<LockedLeaveBalance>(segments.Count);
+            foreach (var segment in segments)
+            {
+                var locked = await LockLeaveBalanceAsync(
+                    conn,
+                    tx,
+                    tenantId,
+                    request.LegalEntityId,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    segment.Year,
+                    requireActiveLeaveType: false,
+                    ct);
+                locked.Balance.CancelApprovedDays(segment.Days, locked.ExpectedRowVersion);
+                lockedBalances.Add(locked);
+            }
 
-            await using var balanceReader = await balanceCmd.ExecuteReaderAsync(ct);
-            if (!await balanceReader.ReadAsync(ct))
-                throw new InvalidOperationException("The configured leave balance no longer exists.");
-
-            var balance = LeaveBalance.Rehydrate(
-                balanceReader.GetGuid(0),
-                new TenantId(balanceReader.GetGuid(1)),
-                balanceReader.GetGuid(2),
-                balanceReader.GetGuid(3),
-                balanceReader.GetInt32(4),
-                balanceReader.GetDecimal(5),
-                balanceReader.GetDecimal(6),
-                balanceReader.GetDecimal(7),
-                balanceReader.GetDecimal(8),
-                balanceReader.GetDateTime(9),
-                (uint)balanceReader.GetInt64(10));
-            await balanceReader.DisposeAsync();
-
-            var balanceRowVersion = balance.RowVersion;
-            var usedDaysBefore = balance.UsedDays;
-            var pendingDaysBefore = balance.PendingDays;
-            request.Cancel(request.RowVersion);
-            balance.CancelApprovedDays(request.DurationDays, balanceRowVersion);
+            var requestRowVersion = request.RowVersion;
+            request.Cancel(requestRowVersion);
 
             await using var updateRequest = conn.CreateCommand();
             updateRequest.Transaction = tx;
@@ -968,37 +901,30 @@ public class LeaveRepository : ILeaveRepository
             if (await updateRequest.ExecuteNonQueryAsync(ct) != 1)
                 throw new InvalidOperationException("Optimistic concurrency conflict on leave request.");
 
-            await using var updateBalance = conn.CreateCommand();
-            updateBalance.Transaction = tx;
-            updateBalance.CommandText = """
-                UPDATE leave.leave_balances
-                SET used_days = $1, pending_days = $2, updated_at = CURRENT_TIMESTAMP, row_version = row_version + 1
-                WHERE id = $3 AND row_version = $4;
-            """;
-            updateBalance.Parameters.AddWithValue(balance.UsedDays);
-            updateBalance.Parameters.AddWithValue(balance.PendingDays);
-            updateBalance.Parameters.AddWithValue(balance.Id);
-            updateBalance.Parameters.AddWithValue((long)balanceRowVersion);
-            if (await updateBalance.ExecuteNonQueryAsync(ct) != 1)
-                throw new InvalidOperationException("Optimistic concurrency conflict on leave balance.");
-
-            await InsertBalanceTransactionAsync(
-                conn,
-                tx,
-                request.TenantId.Value,
-                request.LegalEntityId.Value,
-                request.EmploymentId,
-                request.LeaveTypeId,
-                request.Id,
-                "CancelApproved",
-                request.DurationDays,
-                usedDaysBefore,
-                balance.UsedDays,
-                pendingDaysBefore,
-                balance.PendingDays,
-                actorUserId,
-                "Approved leave cancelled; used balance reversed.",
-                ct);
+            for (var index = 0; index < segments.Count; index++)
+            {
+                var segment = segments[index];
+                var locked = lockedBalances[index];
+                await UpdateLeaveBalanceProjectionAsync(conn, tx, locked.Balance, locked.ExpectedRowVersion, ct);
+                await InsertBalanceTransactionAsync(
+                    conn,
+                    tx,
+                    request.TenantId.Value,
+                    request.LegalEntityId.Value,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    request.Id,
+                    segment.Year,
+                    "CancelApproved",
+                    segment.Days,
+                    locked.UsedDaysBefore,
+                    locked.Balance.UsedDays,
+                    locked.PendingDaysBefore,
+                    locked.Balance.PendingDays,
+                    actorUserId,
+                    "Approved leave cancelled; used balance reversed.",
+                    ct);
+            }
 
             await InsertOutboxMessageAsync(
                 conn,
@@ -1086,43 +1012,26 @@ public class LeaveRepository : ILeaveRepository
             if (request.Status is not (LeaveRequestStatus.PendingApproval or LeaveRequestStatus.Submitted))
                 throw new InvalidOperationException($"Leave request cannot be cancelled from '{request.Status}'.");
 
-            await using var balanceCmd = conn.CreateCommand();
-            balanceCmd.Transaction = tx;
-            balanceCmd.CommandText = """
-                SELECT id, tenant_id, employment_id, leave_type_id, year,
-                       entitled_days, accrued_days, used_days, pending_days, updated_at, row_version
-                FROM leave.leave_balances
-                WHERE tenant_id = $1 AND employment_id = $2 AND leave_type_id = $3 AND year = $4
-                FOR UPDATE;
-            """;
-            balanceCmd.Parameters.AddWithValue(command.TenantId.Value);
-            balanceCmd.Parameters.AddWithValue(request.EmploymentId);
-            balanceCmd.Parameters.AddWithValue(request.LeaveTypeId);
-            balanceCmd.Parameters.AddWithValue(request.StartDate.Year);
+            var segments = request.GetYearSegments();
+            var lockedBalances = new List<LockedLeaveBalance>(segments.Count);
+            foreach (var segment in segments)
+            {
+                var locked = await LockLeaveBalanceAsync(
+                    conn,
+                    tx,
+                    command.TenantId,
+                    command.LegalEntityId,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    segment.Year,
+                    requireActiveLeaveType: false,
+                    ct);
+                locked.Balance.ReleasePendingDays(segment.Days, locked.ExpectedRowVersion);
+                lockedBalances.Add(locked);
+            }
 
-            await using var balanceReader = await balanceCmd.ExecuteReaderAsync(ct);
-            if (!await balanceReader.ReadAsync(ct))
-                throw new InvalidOperationException("The configured leave balance no longer exists.");
-
-            var balance = LeaveBalance.Rehydrate(
-                balanceReader.GetGuid(0),
-                new TenantId(balanceReader.GetGuid(1)),
-                balanceReader.GetGuid(2),
-                balanceReader.GetGuid(3),
-                balanceReader.GetInt32(4),
-                balanceReader.GetDecimal(5),
-                balanceReader.GetDecimal(6),
-                balanceReader.GetDecimal(7),
-                balanceReader.GetDecimal(8),
-                balanceReader.GetDateTime(9),
-                (uint)balanceReader.GetInt64(10));
-            await balanceReader.DisposeAsync();
-
-            var balanceRowVersion = balance.RowVersion;
-            var usedDaysBefore = balance.UsedDays;
-            var pendingDaysBefore = balance.PendingDays;
-            request.Cancel(request.RowVersion);
-            balance.ReleasePendingDays(request.DurationDays, balanceRowVersion);
+            var requestRowVersion = request.RowVersion;
+            request.Cancel(requestRowVersion);
 
             await using var updateRequest = conn.CreateCommand();
             updateRequest.Transaction = tx;
@@ -1134,42 +1043,34 @@ public class LeaveRepository : ILeaveRepository
             updateRequest.Parameters.AddWithValue((int)request.Status);
             updateRequest.Parameters.AddWithValue(request.Id);
             updateRequest.Parameters.AddWithValue(request.TenantId.Value);
-            updateRequest.Parameters.AddWithValue((long)(request.RowVersion - 1));
+            updateRequest.Parameters.AddWithValue((long)requestRowVersion);
             if (await updateRequest.ExecuteNonQueryAsync(ct) != 1)
                 throw new InvalidOperationException("Optimistic concurrency conflict on leave request.");
 
-            await using var updateBalance = conn.CreateCommand();
-            updateBalance.Transaction = tx;
-            updateBalance.CommandText = """
-                UPDATE leave.leave_balances
-                SET used_days = $1, pending_days = $2, updated_at = CURRENT_TIMESTAMP, row_version = $3
-                WHERE id = $4 AND row_version = $5;
-            """;
-            updateBalance.Parameters.AddWithValue(balance.UsedDays);
-            updateBalance.Parameters.AddWithValue(balance.PendingDays);
-            updateBalance.Parameters.AddWithValue((long)balance.RowVersion);
-            updateBalance.Parameters.AddWithValue(balance.Id);
-            updateBalance.Parameters.AddWithValue((long)balanceRowVersion);
-            if (await updateBalance.ExecuteNonQueryAsync(ct) != 1)
-                throw new InvalidOperationException("Optimistic concurrency conflict on leave balance.");
-
-            await InsertBalanceTransactionAsync(
-                conn,
-                tx,
-                request.TenantId.Value,
-                request.LegalEntityId.Value,
-                request.EmploymentId,
-                request.LeaveTypeId,
-                request.Id,
-                "CancelPending",
-                request.DurationDays,
-                usedDaysBefore,
-                balance.UsedDays,
-                pendingDaysBefore,
-                balance.PendingDays,
-                command.ActorUserId,
-                command.Reason ?? "Pending leave request cancelled by requester.",
-                ct);
+            for (var index = 0; index < segments.Count; index++)
+            {
+                var segment = segments[index];
+                var locked = lockedBalances[index];
+                await UpdateLeaveBalanceProjectionAsync(conn, tx, locked.Balance, locked.ExpectedRowVersion, ct);
+                await InsertBalanceTransactionAsync(
+                    conn,
+                    tx,
+                    request.TenantId.Value,
+                    request.LegalEntityId.Value,
+                    request.EmploymentId,
+                    request.LeaveTypeId,
+                    request.Id,
+                    segment.Year,
+                    "CancelPending",
+                    segment.Days,
+                    locked.UsedDaysBefore,
+                    locked.Balance.UsedDays,
+                    locked.PendingDaysBefore,
+                    locked.Balance.PendingDays,
+                    command.ActorUserId,
+                    command.Reason ?? "Pending leave request cancelled by requester.",
+                    ct);
+            }
 
             await InsertOutboxMessageAsync(
                 conn,
@@ -1190,6 +1091,83 @@ public class LeaveRepository : ILeaveRepository
         }
     }
 
+    private static async Task<LockedLeaveBalance> LockLeaveBalanceAsync(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        TenantId tenantId,
+        LegalEntityId legalEntityId,
+        Guid employmentId,
+        Guid leaveTypeId,
+        int year,
+        bool requireActiveLeaveType,
+        CancellationToken ct)
+    {
+        await using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            SELECT b.id, b.tenant_id, b.employment_id, b.leave_type_id, b.year,
+                   b.entitled_days, b.accrued_days, b.used_days, b.pending_days,
+                   b.updated_at, b.row_version
+            FROM leave.leave_balances b
+            INNER JOIN leave.leave_types t ON t.id = b.leave_type_id
+            WHERE b.tenant_id = $1
+              AND b.employment_id = $2
+              AND b.leave_type_id = $3
+              AND b.year = $4
+              AND t.tenant_id = $1
+              AND t.legal_entity_id = $5
+              AND ($6::boolean = FALSE OR t.is_active = TRUE)
+            FOR UPDATE OF b;
+        """;
+        cmd.Parameters.AddWithValue(tenantId.Value);
+        cmd.Parameters.AddWithValue(employmentId);
+        cmd.Parameters.AddWithValue(leaveTypeId);
+        cmd.Parameters.AddWithValue(year);
+        cmd.Parameters.AddWithValue(legalEntityId.Value);
+        cmd.Parameters.AddWithValue(requireActiveLeaveType);
+
+        await using var reader = await cmd.ExecuteReaderAsync(ct);
+        if (!await reader.ReadAsync(ct))
+            throw new InvalidOperationException($"A configured leave balance is required for leave year {year}.");
+
+        var balance = LeaveBalance.Rehydrate(
+            reader.GetGuid(0),
+            new TenantId(reader.GetGuid(1)),
+            reader.GetGuid(2),
+            reader.GetGuid(3),
+            reader.GetInt32(4),
+            reader.GetDecimal(5),
+            reader.GetDecimal(6),
+            reader.GetDecimal(7),
+            reader.GetDecimal(8),
+            reader.GetDateTime(9),
+            (uint)reader.GetInt64(10));
+
+        return new LockedLeaveBalance(balance, balance.RowVersion, balance.UsedDays, balance.PendingDays);
+    }
+
+    private static async Task UpdateLeaveBalanceProjectionAsync(
+        NpgsqlConnection conn,
+        NpgsqlTransaction tx,
+        LeaveBalance balance,
+        uint expectedRowVersion,
+        CancellationToken ct)
+    {
+        await using var cmd = conn.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = """
+            UPDATE leave.leave_balances
+            SET used_days = $1, pending_days = $2, updated_at = CURRENT_TIMESTAMP, row_version = row_version + 1
+            WHERE id = $3 AND row_version = $4;
+        """;
+        cmd.Parameters.AddWithValue(balance.UsedDays);
+        cmd.Parameters.AddWithValue(balance.PendingDays);
+        cmd.Parameters.AddWithValue(balance.Id);
+        cmd.Parameters.AddWithValue((long)expectedRowVersion);
+        if (await cmd.ExecuteNonQueryAsync(ct) != 1)
+            throw new InvalidOperationException("Optimistic concurrency conflict on leave balance.");
+    }
+
     private static async Task InsertBalanceTransactionAsync(
         NpgsqlConnection conn,
         NpgsqlTransaction tx,
@@ -1198,6 +1176,7 @@ public class LeaveRepository : ILeaveRepository
         Guid employmentId,
         Guid leaveTypeId,
         Guid? leaveRequestId,
+        int balanceYear,
         string transactionType,
         decimal transactionDays,
         decimal usedDaysBefore,
@@ -1213,9 +1192,9 @@ public class LeaveRepository : ILeaveRepository
         cmd.CommandText = """
             INSERT INTO leave.leave_transactions (
                 id, tenant_id, legal_entity_id, employment_id, leave_type_id, leave_request_id,
-                transaction_type, transaction_days, used_days_before, used_days_after,
+                balance_year, transaction_type, transaction_days, used_days_before, used_days_after,
                 pending_days_before, pending_days_after, actor_user_id, reason
-            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14);
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
         """;
         cmd.Parameters.AddWithValue(Guid.NewGuid());
         cmd.Parameters.AddWithValue(tenantId);
@@ -1223,6 +1202,7 @@ public class LeaveRepository : ILeaveRepository
         cmd.Parameters.AddWithValue(employmentId);
         cmd.Parameters.AddWithValue(leaveTypeId);
         cmd.Parameters.AddWithValue((object?)leaveRequestId ?? DBNull.Value);
+        cmd.Parameters.AddWithValue(balanceYear);
         cmd.Parameters.AddWithValue(transactionType);
         cmd.Parameters.AddWithValue(transactionDays);
         cmd.Parameters.AddWithValue(usedDaysBefore);

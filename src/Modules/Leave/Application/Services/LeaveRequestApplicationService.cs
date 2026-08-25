@@ -24,9 +24,6 @@ public sealed class LeaveRequestApplicationService : ILeaveRequestApplicationCon
             throw new ArgumentException("ApprovalRequestId is required.", nameof(command));
         if (command.RequestId == Guid.Empty)
             throw new ArgumentException("RequestId is required.", nameof(command));
-        if (command.StartDate.Year != command.EndDate.Year)
-            throw new InvalidOperationException("Cross-year leave requests require a year-split policy calculation and are not enabled for this workflow.");
-
         var durationDays = command.EndDate.DayNumber - command.StartDate.DayNumber + 1;
         var request = new LeaveRequest(
             command.RequestId,

@@ -89,8 +89,9 @@ public static class LeaveMigrations
                 ON leave.leave_requests (tenant_id, legal_entity_id, employment_id, status);
 
             -- 4b. Auditable balance transactions. Mutable balance projections remain
-            -- query-optimized state; every reservation, approval, release, cancel,
-            -- accrual, or adjustment is recorded here as the authoritative trail.
+            -- query-optimized state; workflow reservations, approvals, releases,
+            -- and cancellations are recorded here as the authoritative trail.
+            -- Future accrual/adjustment writers must use the same transaction contract.
             CREATE TABLE IF NOT EXISTS leave.leave_transactions (
                 id UUID PRIMARY KEY,
                 tenant_id UUID NOT NULL,
@@ -98,6 +99,7 @@ public static class LeaveMigrations
                 employment_id UUID NOT NULL,
                 leave_type_id UUID NOT NULL REFERENCES leave.leave_types(id) ON DELETE RESTRICT,
                 leave_request_id UUID NULL REFERENCES leave.leave_requests(id) ON DELETE SET NULL,
+                balance_year INT NOT NULL DEFAULT 0,
                 transaction_type VARCHAR(60) NOT NULL,
                 transaction_days NUMERIC(6, 2) NOT NULL,
                 used_days_before NUMERIC(6, 2) NOT NULL,
@@ -109,8 +111,12 @@ public static class LeaveMigrations
                 occurred_at_utc TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
             );
 
-            CREATE UNIQUE INDEX IF NOT EXISTS uq_leave_transactions_request_type
-                ON leave.leave_transactions (leave_request_id, transaction_type)
+            ALTER TABLE leave.leave_transactions
+                ADD COLUMN IF NOT EXISTS balance_year INT NOT NULL DEFAULT 0;
+
+            DROP INDEX IF EXISTS leave.uq_leave_transactions_request_type;
+            CREATE UNIQUE INDEX IF NOT EXISTS uq_leave_transactions_request_type_year
+                ON leave.leave_transactions (leave_request_id, transaction_type, balance_year)
                 WHERE leave_request_id IS NOT NULL;
             CREATE INDEX IF NOT EXISTS ix_leave_transactions_scope
                 ON leave.leave_transactions (tenant_id, legal_entity_id, employment_id, occurred_at_utc DESC);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Workforce.SharedKernel.Primitives;
 
 namespace Workforce.Modules.Leave.Domain;
@@ -22,6 +23,28 @@ public class LeaveRequest
     public DateTime CreatedAt { get; private set; }
     public DateTime UpdatedAt { get; private set; }
     public uint RowVersion { get; private set; }
+
+    public IReadOnlyList<LeaveYearSegment> GetYearSegments()
+    {
+        var segments = new List<LeaveYearSegment>();
+        var cursor = StartDate;
+        while (cursor <= EndDate)
+        {
+            var segmentEnd = new DateOnly(cursor.Year, 12, 31);
+            if (segmentEnd > EndDate)
+                segmentEnd = EndDate;
+
+            segments.Add(new LeaveYearSegment(
+                cursor.Year,
+                cursor,
+                segmentEnd,
+                segmentEnd.DayNumber - cursor.DayNumber + 1));
+
+            cursor = segmentEnd.AddDays(1);
+        }
+
+        return segments;
+    }
 
     private LeaveRequest()
     {
@@ -165,3 +188,9 @@ public class LeaveRequest
         }
     }
 }
+
+public sealed record LeaveYearSegment(
+    int Year,
+    DateOnly StartDate,
+    DateOnly EndDate,
+    decimal Days);
